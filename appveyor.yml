@@ -43,7 +43,7 @@ for:
       - master
 
   after_build:
-    - cmd: dotnet publish JobApplicationHelper.csproj
+    - cmd: dotnet publish JobApplicationHelper\JobApplicationHelper.csproj
       
   artifacts:
     - path: 'bin\Release\netcoreapp2.0\publish'
