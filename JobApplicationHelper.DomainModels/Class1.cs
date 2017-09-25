@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JobApplicationHelper.Models
+namespace JobApplicationHelper.DomainModels
 {
     public class Class1
     {
