@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace JobApplicationHelper
+namespace JobApplicationHelper.Web
 {
     public class Program
     {
