@@ -47,6 +47,6 @@ for:
     - cmd: dotnet publish JobApplicationHelper.Web\JobApplicationHelper.Web.csproj
 
   artifacts:
-    - path: 'JobApplicationHelper\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+    - path: 'JobApplicationHelper.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: WebSite
       type: WebDeployPackage
