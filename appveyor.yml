@@ -33,6 +33,7 @@ build:
   verbosity: minimal
   parallel: true
 
+ 
 # here we are going to override common configuration
 for:
 
@@ -42,9 +43,9 @@ for:
     only:
       - master
 
-  build_script:
+  after_build:
     - cmd: dotnet publish JobApplicationHelper\JobApplicationHelper.csproj
-      
+
   artifacts:
     - path: 'JobApplicationHelper\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: WebSite
