@@ -7,7 +7,7 @@ namespace JobApplicationHelper.Web.Controllers
     [Route("api/hello")]
     public class HelloController : Controller
     {
-        [Route("greet/{name}")]
+        [HttpGet("{name}")]
         public IActionResult Greet(string name)
         {
             return Ok($"Hello {name}");
