@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Options;
 
 namespace JobApplicationHelper.Web.Controllers
 {
@@ -16,9 +13,9 @@ namespace JobApplicationHelper.Web.Controllers
         readonly HttpClient _client;
         private readonly string _uri;
 
-        public HelloController()
+        public HelloController(IOptions<ApiOptions> apiOptions)
         {
-            _uri = "http://localhost:4064/api/hello";
+            _uri = $"{apiOptions.Value.BaseUri}hello";
             _client = new HttpClient {BaseAddress = new Uri(_uri)};
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -34,6 +31,7 @@ namespace JobApplicationHelper.Web.Controllers
 
                 return Ok(responseData);
             }
+
             return Ok("error");
         }
     }
