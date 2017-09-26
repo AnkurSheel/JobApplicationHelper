@@ -33,7 +33,6 @@ build:
   verbosity: minimal
   parallel: true
 
- 
 # here we are going to override common configuration
 for:
 
@@ -53,3 +52,6 @@ for:
 
 # "fall back" configuration for all other branches
 -
+  configuration:
+  - Debug
+  - Release
