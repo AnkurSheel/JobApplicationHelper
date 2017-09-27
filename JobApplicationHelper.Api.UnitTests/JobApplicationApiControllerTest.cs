@@ -1,32 +1,39 @@
+using System.Linq;
 using System.Threading.Tasks;
 using JobApplicationHelper.Api.Controllers;
 using JobApplicationHelper.DomainModels;
+using JobApplicationHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute;
 using NUnit.Framework;
 
-namespace JobApplicationHelper.UnitTests
+namespace JobApplicationHelper.Api.UnitTests
 {
     [TestFixture]
     public class JobApplicationApiControllerTest
     {
         private JobApplicationApiController _jobApplicationController;
+        private IJobApplicationService _jobApplicationService;
 
         [SetUp]
         public void Init()
         {
-            _jobApplicationController = new JobApplicationApiController();
+            _jobApplicationService = Substitute.For<IJobApplicationService>();
+            _jobApplicationController = new JobApplicationApiController(_jobApplicationService);
         }
 
         [Test]
-        public async void TestMethod1()
+        public async Task ShouldReturnOkObjectResultWithAListOfJobApplications()
         {
             // Arrange
-            var expectedjobApplications = new[]
-            {
-                new JobApplication { Name = "Company 1" },
-                new JobApplication { Name = "Company 2" },
-                new JobApplication { Name = "Company 3" }
-            };
+            var expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
+                                                                              {
+                                                                                  new JobApplication { Name = "Company 1" },
+                                                                                  new JobApplication { Name = "Company 2" },
+                                                                                  new JobApplication { Name = "Company 3" }
+                                                                              });
+
+            _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
 
             // Act
             var result = await _jobApplicationController.List();
