@@ -7,7 +7,6 @@ using JobApplicationHelper.Data.Interfaces;
 using JobApplicationHelper.DomainModels;
 using JobApplicationHelper.Services.Services;
 using NSubstitute;
-using NSubstitute.Core;
 using NUnit.Framework;
 
 namespace JobApplicationHelper.Api.Services.UnitTests
