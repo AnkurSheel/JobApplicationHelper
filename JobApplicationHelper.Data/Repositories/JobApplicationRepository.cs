@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JobApplicationHelper.Data.Interfaces;
@@ -8,16 +9,20 @@ namespace JobApplicationHelper.Data.Repositories
 {
     public class JobApplicationRepository : IRepository<JobApplication>
     {
-        private readonly DbContext _context;
+        private readonly JobApplicationDbContext _context;
 
-        public JobApplicationRepository(DbContext context)
+        public JobApplicationRepository(JobApplicationDbContext context)
         {
             _context = context;
         }
 
-        public Task<IQueryable<JobApplication>> FindAll()
+        public async Task<IQueryable<JobApplication>> FindAll()
         {
-            throw new System.NotImplementedException();
+            var jobApplications = _context.JobApplications.Select(application => new JobApplication() { Name = application.CompanyName });
+            return await Task.Run(() =>
+                                  {
+                                      return jobApplications;
+                                  });
         }
     }
 }
