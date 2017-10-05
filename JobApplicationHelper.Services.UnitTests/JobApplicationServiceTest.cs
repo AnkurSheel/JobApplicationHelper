@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using JobApplicationHelper.Data.Interfaces;
@@ -9,7 +7,7 @@ using JobApplicationHelper.Services.Services;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace JobApplicationHelper.Api.Services.UnitTests
+namespace JobApplicationHelper.Services.UnitTests
 {
     [TestFixture]
     public class JobApplicationServiceTest

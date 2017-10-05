@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace JobApplicationHelper.Api.Controller.UnitTests
+namespace JobApplicationHelper.Controller.UnitTests
 {
     [TestFixture]
     public class JobApplicationApiControllerTest
