@@ -5,15 +5,14 @@ using JobApplicationHelper.Data.Interfaces;
 using JobApplicationHelper.DomainModels;
 using JobApplicationHelper.Services.Services;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 
 namespace JobApplicationHelper.Services.UnitTests
 {
-    [TestFixture]
     public class JobApplicationServiceTest
     {
         private readonly JobApplicationService _jobApplicationService;
-        private IRepository<JobApplication> _jobApplicationRepository;
+        private readonly IRepository<JobApplication> _jobApplicationRepository;
 
         public JobApplicationServiceTest()
         {
@@ -21,7 +20,7 @@ namespace JobApplicationHelper.Services.UnitTests
             _jobApplicationService = new JobApplicationService(_jobApplicationRepository);
         }
 
-        [Test]
+        [Fact]
         public async Task ShouldReturnAllJobApplications()
         {
             var expectedJobApplications = new EnumerableQuery<JobApplication>(new List<JobApplication>
@@ -36,7 +35,7 @@ namespace JobApplicationHelper.Services.UnitTests
             var result = await _jobApplicationService.ReadAllAsync();
             
             // Assert
-            Assert.AreEqual(expectedJobApplications, result);
+            Assert.Equal(expectedJobApplications, result);
         }
     }
 }

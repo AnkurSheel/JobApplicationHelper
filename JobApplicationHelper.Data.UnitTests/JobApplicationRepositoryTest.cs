@@ -1,17 +1,15 @@
+using JobApplicationHelper.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JobApplicationHelper.Data.Entities;
-using JobApplicationHelper.Data.Interfaces;
-using JobApplicationHelper.Data.Repositories;
 using JobApplicationHelper.DomainModels;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+using Xunit;
 
 namespace JobApplicationHelper.Data.UnitTests
 {
-    [TestFixture()]
     public class JobApplicationRepositoryTest
     {
         private readonly JobApplicationRepository _jobApplicationRepository;
@@ -22,7 +20,7 @@ namespace JobApplicationHelper.Data.UnitTests
             _jobApplicationRepository = new JobApplicationRepository(context);
         }
 
-        [Test]
+        [Fact]
         public async Task ShouldReturnAllJobApplications()
         {
             var expectedJobApplications = new List<JobApplication>
@@ -36,7 +34,7 @@ namespace JobApplicationHelper.Data.UnitTests
             var result = await _jobApplicationRepository.FindAll();
 
             // Assert
-            Assert.AreEqual(expectedJobApplications, result);
+            Assert.Equal(expectedJobApplications, result);
         }
         private JobApplicationDbContext GetContextWithData()
         {

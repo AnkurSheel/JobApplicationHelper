@@ -5,24 +5,22 @@ using JobApplicationHelper.DomainModels;
 using JobApplicationHelper.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 
-namespace JobApplicationHelper.Controller.UnitTests
+namespace JobApplicationHelper.Api.UnitTests
 {
-    [TestFixture]
     public class JobApplicationApiControllerTest
     {
-        private JobApplicationApiController _jobApplicationController;
-        private IJobApplicationService _jobApplicationService;
+        private readonly JobApplicationApiController _jobApplicationController;
+        private readonly IJobApplicationService _jobApplicationService;
 
-        [SetUp]
-        public void Init()
+        public JobApplicationApiControllerTest()
         {
             _jobApplicationService = Substitute.For<IJobApplicationService>();
             _jobApplicationController = new JobApplicationApiController(_jobApplicationService);
         }
 
-        [Test]
+        [Fact]
         public async Task ShouldReturnOkObjectResultWithAListOfJobApplications()
         {
             // Arrange
@@ -39,9 +37,9 @@ namespace JobApplicationHelper.Controller.UnitTests
             var result = await _jobApplicationController.List();
 
             // Assert
-            Assert.IsInstanceOf(typeof(OkObjectResult), result);
+            Assert.IsType(typeof(OkObjectResult), result);
             var okResult = (OkObjectResult)result;
-            Assert.AreEqual(expectedjobApplications, okResult.Value);
+            Assert.Equal(expectedjobApplications, okResult.Value);
         }
     }
 }

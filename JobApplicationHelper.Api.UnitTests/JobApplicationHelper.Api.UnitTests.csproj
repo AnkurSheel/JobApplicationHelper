@@ -8,14 +8,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
-    <PackageReference Include="NSubstitute" Version="2.0.3" />
-    <PackageReference Include="NUnit" Version="3.8.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
+    <PackageReference Include="NSubstitute" Version="3.0.0" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\JobApplicationHelper.Api\JobApplicationHelper.Api.csproj" />
-    <ProjectReference Include="..\JobApplicationHelper.DomainModels\JobApplicationHelper.DomainModels.csproj" />
+    <ProjectReference Include="..\JobApplicationHelper.Services\JobApplicationHelper.Services.csproj" />
   </ItemGroup>
 
 </Project>
