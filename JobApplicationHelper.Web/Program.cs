@@ -1,25 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace JobApplicationHelper.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            var builder = new ContainerBuilder();
+
+            using (var container = builder.Build())
+            {
+                await StartWebServerAsync(container);
+            }
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
+        private static async Task StartWebServerAsync(ILifetimeScope scope)
+        {
+            using (var webHostScope = scope.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+            {
+                await WebHost.CreateDefaultBuilder()
+                             .UseStartup<Startup>()
+                             .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning))
+                             .ConfigureServices(services => services.AddTransient(provider =>
+                             {
+                                 var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+                                 var config = provider.GetRequiredService<IConfiguration>();
+                                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
+                                 return factory(hostingEnv, config);
+                             }))
+
+                             .Build()
+                             .RunAsync();
+            }
+        }
     }
 }

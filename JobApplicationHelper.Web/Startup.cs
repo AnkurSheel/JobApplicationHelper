@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,23 +11,30 @@ namespace JobApplicationHelper.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILifetimeScope _webHostScope;
+        private ILifetimeScope _aspNetScope;
+
+        public Startup(ILifetimeScope webHostScope, IHostingEnvironment hostingEnvironment, IConfiguration configuration)
         {
             Configuration = configuration;
+            _webHostScope = webHostScope ?? throw new ArgumentNullException(nameof(webHostScope));
         }
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
             services.Configure<ApiOptions>(Configuration.GetSection("ApiOptions"));
+
             services.AddMvc();
+
+            _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
+
+            return new AutofacServiceProvider(_aspNetScope);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
         {
             app.UseMvc();
 
@@ -38,6 +44,8 @@ namespace JobApplicationHelper.Web
             }
 
             app.Run(async (context) => { await context.Response.WriteAsync("Hello World!"); });
+
+            appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
         }
     }
 }
