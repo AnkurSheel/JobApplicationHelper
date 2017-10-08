@@ -10,15 +10,13 @@ namespace JobApplicationHelper.Web.Controllers
     [Route("hello")]
     public class HelloController : Controller
     {
-        readonly HttpClient _client;
+        private readonly HttpClient _client;
         private readonly string _uri;
 
-        public HelloController(IOptions<ApiOptions> apiOptions)
+        public HelloController(HttpClient client)
         {
-            _uri = $"{apiOptions.Value.BaseUri}hello";
-            _client = new HttpClient {BaseAddress = new Uri(_uri)};
-            _client.DefaultRequestHeaders.Accept.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _client = client;
+            _uri = $"{client.BaseAddress}hello";
         }
 
         [HttpGet("{name}")]
