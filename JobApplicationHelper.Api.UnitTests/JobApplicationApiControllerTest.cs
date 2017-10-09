@@ -37,7 +37,7 @@ namespace JobApplicationHelper.Api.UnitTests
             var result = await _jobApplicationController.List();
 
             // Assert
-            Assert.IsType(typeof(OkObjectResult), result);
+            Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult)result;
             Assert.Equal(expectedjobApplications, okResult.Value);
         }
