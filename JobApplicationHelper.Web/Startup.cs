@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -26,8 +24,6 @@ namespace JobApplicationHelper.Web
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            AddApiClient(services);
-
             services.AddMvc();
 
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
@@ -47,17 +43,6 @@ namespace JobApplicationHelper.Web
             app.Run(async (context) => { await context.Response.WriteAsync("Hello World!"); });
 
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
-        }
-
-        private void AddApiClient(IServiceCollection services)
-        {
-            var uri = Configuration.GetSection("ApiOptions:BaseUri").Value;
-
-            var client = new HttpClient { BaseAddress = new Uri(uri) };
-
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            services.AddSingleton(client);
         }
     }
 }

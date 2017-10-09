@@ -11,18 +11,16 @@ namespace JobApplicationHelper.Web.Controllers
     public class HelloController : Controller
     {
         private readonly HttpClient _client;
-        private readonly string _uri;
 
         public HelloController(HttpClient client)
         {
             _client = client;
-            _uri = $"{client.BaseAddress}hello";
         }
 
         [HttpGet("{name}")]
         public async Task<IActionResult> Greet(string name)
         {
-            HttpResponseMessage responseMessage = await _client.GetAsync(_uri + $"/{name}");
+            HttpResponseMessage responseMessage = await _client.GetAsync($"api/hello/{name}");
             if (responseMessage.IsSuccessStatusCode)
             {
                 var responseData = responseMessage.Content.ReadAsStringAsync().Result;
