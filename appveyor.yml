@@ -22,16 +22,19 @@ install:
   - cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
   
 before_build:
-# Display .NET Core version
-  - cmd: dotnet --version
-# Display minimal restore text
-  - cmd: dotnet restore --verbosity m
-#restore nuget packages
-  - cmd: nuget restore
+- cmd: >-
+    dotnet --version
+
+    dotnet restore --verbosity m
+
+    nuget restore
 
 build:
   verbosity: minimal
   parallel: true
+
+test_script:
+- cmd: dotnet vstest .\JobApplicationHelper.Data.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Data.UnitTests.dll .\JobApplicationHelper.Services.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Services.UnitTests.dll .\JobApplicationHelper.Api.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Api.UnitTests.dll .\JobApplicationHelper.Web.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Web.UnitTests.dll .\JobApplicationHelper.Web.IntegrationTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Web.IntegrationTests.dll
 
 # here we are going to override common configuration
 for:
