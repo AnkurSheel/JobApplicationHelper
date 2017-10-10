@@ -37,7 +37,7 @@ namespace JobApplicationHelper.Web.UnitTests
             var result = await _helloController.Greet("ankur");
 
             // Assert
-            Assert.IsType(typeof(OkObjectResult), result);
+            Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult)result;
             Assert.Equal("Hello ankur", okResult.Value);
         }
