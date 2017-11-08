@@ -34,7 +34,7 @@ build:
   parallel: true
 
 test_script:
-- cmd: dotnet vstest .\JobApplicationHelper.Data.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Data.UnitTests.dll .\JobApplicationHelper.Services.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Services.UnitTests.dll .\JobApplicationHelper.Api.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Api.UnitTests.dll .\JobApplicationHelper.Web.UnitTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Web.UnitTests.dll .\JobApplicationHelper.Web.IntegrationTests\bin\%configuration%\netcoreapp2.0\JobApplicationHelper.Web.IntegrationTests.dll
+- cmd: dotnet vstest .\JAH.Data.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Data.UnitTests.dll .\JAH.Services.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Services.UnitTests.dll .\JAH.Api.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Api.UnitTests.dll .\JAH.Web.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Web.UnitTests.dll .\JAH.Web.IntegrationTests\bin\%configuration%\netcoreapp2.0\JAH.Web.IntegrationTests.dll
 
 # here we are going to override common configuration
 for:
@@ -46,10 +46,10 @@ for:
       - master
 
   after_build:
-    - cmd: dotnet publish JobApplicationHelper.Web\JobApplicationHelper.Web.csproj
+    - cmd: dotnet publish JAH.Web\JAH.Web.csproj
 
   artifacts:
-    - path: 'JobApplicationHelper.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+    - path: 'JAH.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: WebSite
       type: WebDeployPackage
 
