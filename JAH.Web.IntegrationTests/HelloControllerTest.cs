@@ -30,7 +30,7 @@ namespace JobApplicationHelper.Web.IntegrationTests
                                                                  , ".."
                                                                  , ".."
                                                                  , ".."
-                                                                 , "JobApplicationHelper.Api"));
+                                                                 , "JAH.Api"));
                     var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
                     var builder = new WebHostBuilder().UseKestrel()
                                                       .UseContentRoot(fullPath)
@@ -53,7 +53,7 @@ namespace JobApplicationHelper.Web.IntegrationTests
                                                                  , ".."
                                                                  , ".."
                                                                  , ".."
-                                                                 , "JobApplicationHelper.Web"));
+                                                                 , "JAH.Web"));
                     var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
                     var builder = new WebHostBuilder().UseKestrel()
                                                       .UseContentRoot(fullPath)

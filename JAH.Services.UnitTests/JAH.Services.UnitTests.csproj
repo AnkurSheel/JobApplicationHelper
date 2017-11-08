@@ -14,8 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JobApplicationHelper.DomainModels\JobApplicationHelper.DomainModels.csproj" />
-    <ProjectReference Include="..\JobApplicationHelper.Services\JobApplicationHelper.Services.csproj" />
+    <ProjectReference Include="..\JAH.DomainModels\JAH.DomainModels.csproj" />
+    <ProjectReference Include="..\JAH.Services\JAH.Services.csproj" />
   </ItemGroup>
 
 </Project>

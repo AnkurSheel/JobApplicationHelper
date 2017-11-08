@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JobApplicationHelper.Web\JobApplicationHelper.Web.csproj" />
+    <ProjectReference Include="..\JAH.Web\JAH.Web.csproj" />
   </ItemGroup>
 
 </Project>
