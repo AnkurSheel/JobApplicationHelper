@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JobApplicationHelper.Data.Interfaces;
-using JobApplicationHelper.DomainModels;
-using JobApplicationHelper.Services.Services;
+using JAH.Data.Interfaces;
+using JAH.DomainModels;
+using JAH.Services.Services;
 using NSubstitute;
 using Xunit;
 
-namespace JobApplicationHelper.Services.UnitTests
+namespace JAH.Services.UnitTests
 {
     public class JobApplicationServiceTest
     {

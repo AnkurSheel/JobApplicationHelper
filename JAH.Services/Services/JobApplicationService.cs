@@ -1,11 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
-using JobApplicationHelper.Data.Interfaces;
-using JobApplicationHelper.DomainModels;
-using JobApplicationHelper.Services.Interfaces;
 using System;
+using JAH.Data.Interfaces;
+using JAH.DomainModels;
+using JAH.Services.Interfaces;
 
-namespace JobApplicationHelper.Services.Services
+namespace JAH.Services.Services
 {
     public class JobApplicationService : IJobApplicationService
     {

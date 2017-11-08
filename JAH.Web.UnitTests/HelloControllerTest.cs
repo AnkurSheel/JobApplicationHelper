@@ -2,12 +2,12 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using JobApplicationHelper.Web.Controllers;
+using JAH.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using Xunit;
 
-namespace JobApplicationHelper.Web.UnitTests
+namespace JAH.Web.UnitTests
 {
     public class HelloControllerTest
     {

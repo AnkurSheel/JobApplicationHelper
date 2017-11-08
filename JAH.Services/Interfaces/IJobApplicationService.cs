@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using JAH.DomainModels;
 using System.Linq;
 using System.Threading.Tasks;
-using JobApplicationHelper.DomainModels;
 
-namespace JobApplicationHelper.Services.Interfaces
+namespace JAH.Services.Interfaces
 {
     public interface IJobApplicationService
     {

@@ -1,7 +1,7 @@
-using JobApplicationHelper.Data.Entities;
+using JAH.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace JobApplicationHelper.Data
+namespace JAH.Data
 {
     public class JobApplicationDbContext : DbContext
     {

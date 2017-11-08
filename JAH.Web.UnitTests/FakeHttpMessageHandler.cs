@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace JobApplicationHelper.Web.UnitTests
+namespace JAH.Web.UnitTests
 {
     public class FakeHttpMessageHandler : DelegatingHandler
     {

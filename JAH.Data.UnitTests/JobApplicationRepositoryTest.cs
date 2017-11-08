@@ -1,14 +1,14 @@
-using JobApplicationHelper.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JobApplicationHelper.Data.Entities;
-using JobApplicationHelper.DomainModels;
+using JAH.Data.Entities;
+using JAH.Data.Repositories;
+using JAH.DomainModels;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace JobApplicationHelper.Data.UnitTests
+namespace JAH.Data.UnitTests
 {
     public class JobApplicationRepositoryTest
     {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace JobApplicationHelper.Data.Entities
+namespace JAH.Data.Entities
 {
     public class JobApplicationEntity
     {

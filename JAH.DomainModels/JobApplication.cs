@@ -1,4 +1,4 @@
-namespace JobApplicationHelper.DomainModels
+namespace JAH.DomainModels
 {
     public class JobApplication
     {

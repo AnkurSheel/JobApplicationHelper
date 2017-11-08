@@ -1,4 +1,4 @@
-﻿namespace JobApplicationHelper.Web
+﻿namespace JAH.Web
 {
     public class ApiOptions
     {

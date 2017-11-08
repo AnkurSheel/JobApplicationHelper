@@ -1,11 +1,9 @@
-using System.Collections.Generic;
+using JAH.Data.Interfaces;
 using System.Linq;
 using System.Threading.Tasks;
-using JobApplicationHelper.Data.Interfaces;
-using JobApplicationHelper.DomainModels;
-using Microsoft.EntityFrameworkCore;
+using JAH.DomainModels;
 
-namespace JobApplicationHelper.Data.Repositories
+namespace JAH.Data.Repositories
 {
     public class JobApplicationRepository : IRepository<JobApplication>
     {

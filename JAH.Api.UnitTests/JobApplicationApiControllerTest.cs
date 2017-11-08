@@ -1,13 +1,13 @@
 using System.Linq;
 using System.Threading.Tasks;
-using JobApplicationHelper.Api.Controllers;
-using JobApplicationHelper.DomainModels;
-using JobApplicationHelper.Services.Interfaces;
+using JAH.Api.Controllers;
+using JAH.DomainModels;
+using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using Xunit;
 
-namespace JobApplicationHelper.Api.UnitTests
+namespace JAH.Api.UnitTests
 {
     public class JobApplicationApiControllerTest
     {

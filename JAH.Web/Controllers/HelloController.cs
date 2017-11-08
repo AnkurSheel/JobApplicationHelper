@@ -1,11 +1,8 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
-namespace JobApplicationHelper.Web.Controllers
+namespace JAH.Web.Controllers
 {
     [Route("hello")]
     public class HelloController : Controller

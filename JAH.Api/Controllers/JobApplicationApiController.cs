@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using JobApplicationHelper.Services.Interfaces;
+using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JobApplicationHelper.Api.Controllers
+namespace JAH.Api.Controllers
 {
     [Route("api/JobApplication")]
     public class JobApplicationApiController : Controller

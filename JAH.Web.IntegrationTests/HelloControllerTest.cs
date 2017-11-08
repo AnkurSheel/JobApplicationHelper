@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
 
-namespace JobApplicationHelper.Web.IntegrationTests
+namespace JAH.Web.IntegrationTests
 {
     public class HelloControllerTest
     {
@@ -23,7 +23,7 @@ namespace JobApplicationHelper.Web.IntegrationTests
             var containerBuilder = new ContainerBuilder();
             using (var container = containerBuilder.Build())
             {
-                using (var webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
+                using (var webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<JAH.Api.Startup>().AsSelf()))
                 {
                     var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath
                                                                  , ".."
@@ -31,11 +31,11 @@ namespace JobApplicationHelper.Web.IntegrationTests
                                                                  , ".."
                                                                  , ".."
                                                                  , "JAH.Api"));
-                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
+                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, JAH.Api.Startup>>();
                     var builder = new WebHostBuilder().UseKestrel()
                                                       .UseContentRoot(fullPath)
                                                       .UseEnvironment("Development")
-                                                      .UseStartup<Api.Startup>()
+                                                      .UseStartup<JAH.Api.Startup>()
                                                       .ConfigureServices(services => services.TryAddTransient(provider =>
                                                       {
                                                           var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
