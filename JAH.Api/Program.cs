@@ -26,7 +26,7 @@ namespace JAH.Api
             var options = new DbContextOptionsBuilder<JobApplicationDbContext>()
                 .UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = JobApplicationData; Trusted_Connection = True;")
                 .Options;
-            builder.RegisterType<JobApplicationDbContext>().As<JobApplicationDbContext>().WithParameter(new TypedParameter(typeof(DbContextOptions<JobApplicationDbContext>), options));
+            builder.RegisterType<JobApplicationDbContext>().As<JobApplicationDbContext>().WithParameter(new TypedParameter(typeof(DbContextOptions), options));
 
             using (var container = builder.Build())
             {
