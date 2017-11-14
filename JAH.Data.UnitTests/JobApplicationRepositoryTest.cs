@@ -2,22 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JAH.Data.Entities;
 using JAH.Data.Repositories;
 using JAH.DomainModels;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace JAH.Data.UnitTests
 {
-    public class JobApplicationRepositoryTest
+    public class JobApplicationRepositoryTest : IClassFixture<ContextFixture>
     {
         private readonly JobApplicationRepository _jobApplicationRepository;
 
-        public JobApplicationRepositoryTest()
+        public JobApplicationRepositoryTest(ContextFixture fixture)
         {
-            var context = GetContextWithData();
-            _jobApplicationRepository = new JobApplicationRepository(context);
+            _jobApplicationRepository = new JobApplicationRepository(fixture.Context);
         }
 
         [Fact]
@@ -37,17 +34,6 @@ namespace JAH.Data.UnitTests
             Assert.Equal(expectedJobApplications, result);
         }
 
-        private JobApplicationDbContext GetContextWithData()
-        {
-            var options = new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
-            var context = new JobApplicationDbContext(options);
-
-            context.JobApplications.Add(new JobApplicationEntity {CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13)});
-            context.JobApplications.Add(new JobApplicationEntity {CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14)});
-            context.JobApplications.Add(new JobApplicationEntity {CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14)});
-            context.SaveChanges();
-
-            return context;
-        }
+       
     }
 }
