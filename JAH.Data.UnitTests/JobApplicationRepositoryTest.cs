@@ -42,9 +42,9 @@ namespace JAH.Data.UnitTests
             var options = new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             var context = new JobApplicationDbContext(options);
 
-            context.JobApplications.Add(new JobApplicationEntity {Id = 1, CompanyName = "Company 1"});
-            context.JobApplications.Add(new JobApplicationEntity {Id = 2, CompanyName = "Company 2"});
-            context.JobApplications.Add(new JobApplicationEntity {Id = 3, CompanyName = "Company 3"});
+            context.JobApplications.Add(new JobApplicationEntity {CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13)});
+            context.JobApplications.Add(new JobApplicationEntity {CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14)});
+            context.JobApplications.Add(new JobApplicationEntity {CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14)});
             context.SaveChanges();
 
             return context;
