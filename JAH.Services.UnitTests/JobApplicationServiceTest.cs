@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,16 +25,16 @@ namespace JAH.Services.UnitTests
         public async Task ShouldReturnAllJobApplications()
         {
             var expectedJobApplications = new EnumerableQuery<JobApplication>(new List<JobApplication>
-                                                             {
-                                                                 new JobApplication { Name = "Company 1" },
-                                                                 new JobApplication { Name = "Company 2" },
-                                                                 new JobApplication { Name = "Company 3" }
-                                                             });
+            {
+                new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13)},
+                new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14)},
+                new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14)}
+            });
             _jobApplicationRepository.FindAll().Returns(expectedJobApplications);
 
             // Act
             var result = await _jobApplicationService.ReadAllAsync();
-            
+
             // Assert
             Assert.Equal(expectedJobApplications, result);
         }

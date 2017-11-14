@@ -25,9 +25,9 @@ namespace JAH.Data.UnitTests
         {
             var expectedJobApplications = new List<JobApplication>
             {
-                new JobApplication {Name = "Company 1"},
-                new JobApplication {Name = "Company 2"},
-                new JobApplication {Name = "Company 3"}
+                new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13)},
+                new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14)},
+                new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14)}
             }.AsQueryable();
 
             // Act
@@ -36,20 +36,18 @@ namespace JAH.Data.UnitTests
             // Assert
             Assert.Equal(expectedJobApplications, result);
         }
+
         private JobApplicationDbContext GetContextWithData()
         {
-            var options = new DbContextOptionsBuilder<JobApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var options = new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             var context = new JobApplicationDbContext(options);
 
-            context.JobApplications.Add(new JobApplicationEntity { Id = 1, CompanyName = "Company 1" });
-            context.JobApplications.Add(new JobApplicationEntity { Id = 2, CompanyName = "Company 2" });
-            context.JobApplications.Add(new JobApplicationEntity { Id = 3, CompanyName = "Company 3" });
+            context.JobApplications.Add(new JobApplicationEntity {Id = 1, CompanyName = "Company 1"});
+            context.JobApplications.Add(new JobApplicationEntity {Id = 2, CompanyName = "Company 2"});
+            context.JobApplications.Add(new JobApplicationEntity {Id = 3, CompanyName = "Company 3"});
             context.SaveChanges();
 
             return context;
         }
-
     }
 }

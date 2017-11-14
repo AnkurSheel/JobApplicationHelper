@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace JAH.Data.Entities
 {
@@ -6,7 +6,8 @@ namespace JAH.Data.Entities
     {
         public int Id { get; set; }
 
-        [Required]
         public string CompanyName { get; set; }
+
+        public DateTime ApplicationDate { get; set; }
     }
 }

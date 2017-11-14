@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using JAH.Api.Controllers;
@@ -25,11 +26,11 @@ namespace JAH.Api.UnitTests
         {
             // Arrange
             var expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
-                                                                              {
-                                                                                  new JobApplication { Name = "Company 1" },
-                                                                                  new JobApplication { Name = "Company 2" },
-                                                                                  new JobApplication { Name = "Company 3" }
-                                                                              });
+            {
+                new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13)},
+                new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14)},
+                new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14)}
+            });
 
             _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
 
@@ -38,7 +39,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
+            var okResult = (OkObjectResult) result;
             Assert.Equal(expectedjobApplications, okResult.Value);
         }
     }

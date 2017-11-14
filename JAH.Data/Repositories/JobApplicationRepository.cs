@@ -16,11 +16,12 @@ namespace JAH.Data.Repositories
 
         public async Task<IQueryable<JobApplication>> FindAll()
         {
-            var jobApplications = _context.JobApplications.Select(application => new JobApplication() { Name = application.CompanyName });
-            return await Task.Run(() =>
-                                  {
-                                      return jobApplications;
-                                  });
+            var jobApplications = _context.JobApplications.Select(application => new JobApplication()
+            {
+                Name = application.CompanyName,
+                StartDate = application.ApplicationDate.Date
+            });
+            return await Task.Run(() => jobApplications);
         }
     }
 }

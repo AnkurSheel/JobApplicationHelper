@@ -18,24 +18,38 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.PlatformAbstractions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace JAH.Web.IntegrationTests
 {
     public class JobApplicationControllerTest : IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly HttpClient _webClient;
         private readonly JobApplicationDbContext _jobApplicationDbContext;
 
-        public JobApplicationControllerTest()
+        public JobApplicationControllerTest(ITestOutputHelper output)
         {
-            var options = new DbContextOptionsBuilder<JobApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            _output = output;
+
+            var options = new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             _jobApplicationDbContext = new JobApplicationDbContext(options);
 
-            _jobApplicationDbContext.JobApplications.Add(new JobApplicationEntity { Id = 1, CompanyName = "Company 1" });
-            _jobApplicationDbContext.JobApplications.Add(new JobApplicationEntity { Id = 2, CompanyName = "Company 2" });
-            _jobApplicationDbContext.JobApplications.Add(new JobApplicationEntity { Id = 3, CompanyName = "Company 3" });
+            _jobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13)
+            });
+            _jobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
+            {
+                CompanyName = "Company 2",
+                ApplicationDate = new DateTime(2017, 11, 14)
+            });
+            _jobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
+            {
+                CompanyName = "Company 3",
+                ApplicationDate = new DateTime(2017, 11, 14)
+            });
             _jobApplicationDbContext.SaveChanges();
 
             HttpClient apiClient;
@@ -48,12 +62,12 @@ namespace JAH.Web.IntegrationTests
             {
                 using (var webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
                 {
-                    var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath
-                                                                 , ".."
-                                                                 , ".."
-                                                                 , ".."
-                                                                 , ".."
-                                                                 , "JAH.Api"));
+                    var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath,
+                                                                 "..",
+                                                                 "..",
+                                                                 "..",
+                                                                 "..",
+                                                                 "JAH.Api"));
                     var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
                     var builder = new WebHostBuilder().UseKestrel()
                                                       .UseContentRoot(fullPath)
@@ -71,12 +85,12 @@ namespace JAH.Web.IntegrationTests
 
                 using (var webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
                 {
-                    var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath
-                                                                 , ".."
-                                                                 , ".."
-                                                                 , ".."
-                                                                 , ".."
-                                                                 , "JAH.Web"));
+                    var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath,
+                                                                 "..",
+                                                                 "..",
+                                                                 "..",
+                                                                 "..",
+                                                                 "JAH.Web"));
                     var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
                     var builder = new WebHostBuilder().UseKestrel()
                                                       .UseContentRoot(fullPath)
@@ -106,14 +120,17 @@ namespace JAH.Web.IntegrationTests
         public async Task ShouldReturnCorrectResponseWithAllJobApplications()
         {
             // Arrange
-            const string expectedResponse = "[{\"name\":\"Company 1\"},{\"name\":\"Company 2\"},{\"name\":\"Company 3\"}]";
+            const string expectedResponse = "[{\"name\":\"Company 1\",\"startDate\":\"2017-11-13T00:00:00\"}," +
+                                            "{\"name\":\"Company 2\",\"startDate\":\"2017-11-14T00:00:00\"}," +
+                                            "{\"name\":\"Company 3\",\"startDate\":\"2017-11-14T00:00:00\"}]";
 
             // Act
             var response = await _webClient.GetAsync("/jobApplication");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var responseData = response.Content.ReadAsStringAsync().Result;
+            string responseData = response.Content.ReadAsStringAsync().Result;
+            _output.WriteLine(responseData);
             Assert.Equal(expectedResponse, responseData);
         }
     }
