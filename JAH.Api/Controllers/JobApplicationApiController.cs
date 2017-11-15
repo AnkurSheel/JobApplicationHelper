@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,11 @@ namespace JAH.Api.Controllers
         public async Task<IActionResult> List()
         {
             var jobApplications = await _service.ReadAllAsync();
-            return Ok(jobApplications);
+            if (jobApplications.Any())
+            {
+                return Ok(jobApplications);
+            }
+            return NoContent();
         }
     }
 }

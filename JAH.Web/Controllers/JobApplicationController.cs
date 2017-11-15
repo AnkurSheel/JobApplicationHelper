@@ -20,7 +20,7 @@ namespace JAH.Web.Controllers
             HttpResponseMessage responseMessage = await _client.GetAsync($"api/jobApplication");
             if (responseMessage.IsSuccessStatusCode)
             {
-                var responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                string responseData = responseMessage.Content.ReadAsStringAsync().Result;
 
                 return Ok(responseData);
             }

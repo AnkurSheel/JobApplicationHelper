@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JAH.Api.Controllers;
@@ -41,6 +42,21 @@ namespace JAH.Api.UnitTests
             Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult) result;
             Assert.Equal(expectedjobApplications, okResult.Value);
+        }
+
+        [Fact]
+        public async Task ShouldReturnNoContentObjectResultWhenNoJobApplicationsExist()
+        {
+            // Arrange
+            var expectedjobApplications = new List<JobApplication>().AsQueryable();
+
+            _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
+
+            // Act
+            IActionResult result = await _jobApplicationController.List();
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
         }
     }
 }

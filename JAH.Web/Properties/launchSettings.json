@@ -11,7 +11,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "hello/ankur",
+      "launchUrl": "jobApplication",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

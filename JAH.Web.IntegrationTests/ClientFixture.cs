@@ -36,8 +36,7 @@ namespace JAH.Web.IntegrationTests
             {
                 using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
                 {
-                    string fullPath =
-                        Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Api"));
+                    string fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Api"));
                     var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
                     IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
                                                                   .UseContentRoot(fullPath)
@@ -45,10 +44,8 @@ namespace JAH.Web.IntegrationTests
                                                                   .UseStartup<Api.Startup>()
                                                                   .ConfigureServices(services => services.TryAddTransient(provider =>
                                                                   {
-                                                                      var hostingEnv = ServiceProviderServiceExtensions
-                                                                          .GetRequiredService<IHostingEnvironment>(provider);
-                                                                      var config = ServiceProviderServiceExtensions
-                                                                          .GetRequiredService<IConfiguration>(provider);
+                                                                      var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+                                                                      var config = ServiceProviderServiceExtensions.GetRequiredService<IConfiguration>(provider);
                                                                       return factory(hostingEnv, config);
                                                                   }));
                     var testServer = new TestServer(builder);
@@ -57,8 +54,7 @@ namespace JAH.Web.IntegrationTests
 
                 using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
                 {
-                    string fullPath =
-                        Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Web"));
+                    string fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Web"));
                     var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
                     var builder = new WebHostBuilder().UseKestrel()
                                                       .UseContentRoot(fullPath)
