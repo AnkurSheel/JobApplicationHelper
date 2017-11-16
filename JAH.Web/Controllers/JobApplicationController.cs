@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,15 +18,22 @@ namespace JAH.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            HttpResponseMessage responseMessage = await _client.GetAsync($"api/jobApplication");
-            if (responseMessage.IsSuccessStatusCode)
+            try
             {
-                string responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                HttpResponseMessage responseMessage = await _client.GetAsync($"api/jobApplication");
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    string responseData = responseMessage.Content.ReadAsStringAsync().Result;
 
-                return Ok(responseData);
+                    return Ok(responseData);
+                }
+
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
-
-            return Ok("error");
+            catch (HttpRequestException)
+            {
+                return new StatusCodeResult(501);
+            }
         }
     }
 }

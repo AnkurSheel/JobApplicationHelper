@@ -1,4 +1,5 @@
 using System;
+using JAH.DomainModels;
 
 namespace JAH.Data.Entities
 {
@@ -9,5 +10,7 @@ namespace JAH.Data.Entities
         public string CompanyName { get; set; }
 
         public DateTime ApplicationDate { get; set; }
+
+        public Status CurrentStatus { get; set; }
     }
 }

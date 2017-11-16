@@ -19,7 +19,8 @@ namespace JAH.Data.Repositories
             var jobApplications = _context.JobApplications.Select(application => new JobApplication()
             {
                 Name = application.CompanyName,
-                StartDate = application.ApplicationDate.Date
+                StartDate = application.ApplicationDate.Date,
+                Status = application.CurrentStatus
             });
             return await Task.Run(() => jobApplications);
         }

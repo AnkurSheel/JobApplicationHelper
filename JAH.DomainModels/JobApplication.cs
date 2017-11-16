@@ -8,6 +8,8 @@ namespace JAH.DomainModels
 
         public DateTime StartDate { get; set; }
 
+        public Status Status { get; set; }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -30,13 +32,16 @@ namespace JAH.DomainModels
         {
             unchecked
             {
-                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ StartDate.GetHashCode();
+                int hashCode = Name != null ? Name.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ StartDate.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int) Status;
+                return hashCode;
             }
         }
 
         protected bool Equals(JobApplication other)
         {
-            return string.Equals(Name, other.Name) && StartDate.Equals(other.StartDate);
+            return string.Equals(Name, other.Name) && StartDate.Equals(other.StartDate) && Status == other.Status;
         }
     }
 }

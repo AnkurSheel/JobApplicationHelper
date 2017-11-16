@@ -22,9 +22,9 @@ namespace JAH.Data.UnitTests
         {
             var expectedJobApplications = new List<JobApplication>
             {
-                new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13)},
-                new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14)},
-                new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14)}
+                new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None},
+                new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied},
+                new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Offer}
             }.AsQueryable();
 
             // Act
@@ -33,7 +33,5 @@ namespace JAH.Data.UnitTests
             // Assert
             Assert.Equal(expectedJobApplications, result);
         }
-
-       
     }
 }
