@@ -71,7 +71,6 @@ namespace JAH.Web.IntegrationTests
             // Assert
             response.EnsureSuccessStatusCode();
             string responseData = response.Content.ReadAsStringAsync().Result;
-            _output.WriteLine(responseData);
             Assert.Equal(expectedResponse, responseData);
         }
     }
