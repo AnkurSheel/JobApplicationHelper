@@ -30,7 +30,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task ShouldReturnJsonWithAllJobApplications()
+        public async Task ShouldReturnViewResultModelWithAllJobApplications()
         {
             // Arrange
             var expectedJobApplications = new List<JobApplication>
@@ -40,7 +40,11 @@ namespace JAH.Web.UnitTests
                 new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Offer}
             };
 
-            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(JsonConvert.SerializeObject(expectedJobApplications)) };
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonConvert.SerializeObject(expectedJobApplications))
+            };
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
@@ -48,13 +52,13 @@ namespace JAH.Web.UnitTests
             IActionResult result = await _jobApplicationController.List();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
-            Assert.Equal(expectedJobApplications, okResult.Value);
+            Assert.IsType<ViewResult>(result);
+            var viewResult = (ViewResult)result;
+            Assert.Equal(expectedJobApplications, viewResult.Model);
         }
 
         [Fact]
-        public async Task ShouldReturnEmptyJsonWhenNoJobApplicationsExist()
+        public async Task ShouldReturnNullViewResultWhenNoJobApplicationsExist()
         {
             // Arrange
             const string expectedJson = "";
@@ -68,9 +72,9 @@ namespace JAH.Web.UnitTests
             IActionResult result = await _jobApplicationController.List();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
-            Assert.Null(okResult.Value);
+            Assert.IsType<ViewResult>(result);
+            var viewResult = (ViewResult)result;
+            Assert.Equal(new List<JobApplication>(), viewResult.Model);
         }
     }
 }

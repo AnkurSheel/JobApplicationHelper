@@ -26,8 +26,8 @@ namespace JAH.Web.Controllers
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
-                    var applications = JsonConvert.DeserializeObject<IEnumerable<JobApplication>>(responseData);
-                    return Ok(applications);
+                    var applications = JsonConvert.DeserializeObject<IEnumerable<JobApplication>>(responseData) ?? new List<JobApplication>();
+                    return View(applications);
                 }
 
                 return new StatusCodeResult((int)responseMessage.StatusCode);
