@@ -1,22 +1,10 @@
-﻿@using JAH.DomainModels
-@model IEnumerable<JAH.DomainModels.JobApplication>
+﻿@model IEnumerable<JobApplication>
 
-<html>
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Application Helper</title>
-</head>
-
-<body>
-    @foreach (JobApplication application in Model)
-    {
-        <div>
-            <h2>@application.Name</h2>
-            <h3>@application.StartDate</h3>
-            <h4>@application.Status</h4>
-        </div>
-    }
-</body>
-</html>
+@foreach (JobApplication application in Model)
+{
+    <div>
+        <h2>@application.Name</h2>
+        <h3>@application.StartDate</h3>
+        <h4>@application.Status</h4>
+    </div>
+}
