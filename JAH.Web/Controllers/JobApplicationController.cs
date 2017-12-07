@@ -1,7 +1,9 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using JAH.DomainModels;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace JAH.Web.Controllers
 {
@@ -24,11 +26,11 @@ namespace JAH.Web.Controllers
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
-
-                    return Ok(responseData);
+                    var applications = JsonConvert.DeserializeObject<IEnumerable<JobApplication>>(responseData);
+                    return Ok(applications);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
