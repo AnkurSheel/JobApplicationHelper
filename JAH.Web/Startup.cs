@@ -39,7 +39,7 @@ namespace JAH.Web
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseStaticFiles();
             app.Run(async (context) => { await context.Response.WriteAsync("Hello World!"); });
 
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ namespace JAH.Web
             {
                 await WebHost.CreateDefaultBuilder()
                              .UseStartup<Startup>()
+                             .UseContentRoot(Directory.GetCurrentDirectory())
                              .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning))
                              .ConfigureServices(services => services.TryAddTransient(provider =>
                              {
