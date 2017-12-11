@@ -1,0 +1,17 @@
+﻿@model IEnumerable<JobApplication>
+
+@foreach (JobApplication application in Model)
+{
+    <div class="col-sm-4 col-lg-4 col-md-4">
+        <div class="thumbnail">
+            @*<img src="@pie.ImageThumbnailUrl" alt="">*@
+            <div class="caption">
+                <h3 class="pull-right">@application.Status</h3>
+                <h3>
+                    <a>@application.Name</a>
+                </h3>
+                <p>@application.StartDate.ToString("dddd dd-MMM-yyyy")</p>
+            </div>
+        </div>
+    </div>
+}

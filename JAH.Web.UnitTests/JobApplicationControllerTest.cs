@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using JAH.DomainModels;
 using JAH.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using NSubstitute;
 using Xunit;
 
@@ -14,7 +16,7 @@ namespace JAH.Web.UnitTests
     {
         private readonly JobApplicationController _jobApplicationController;
         private readonly FakeHttpMessageHandler _httpMessageHandler;
-        private HttpRequestMessage _httpRequestMessage;
+        private readonly HttpRequestMessage _httpRequestMessage;
 
         public JobApplicationControllerTest()
         {
@@ -28,11 +30,21 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task ShouldReturnJsonWithAllJobApplications()
+        public async Task ShouldReturnViewResultModelWithAllJobApplications()
         {
             // Arrange
-            const string expectedJson = "[{\"name\":\"Company 1\"},{\"name\":\"Company 2\"},{\"name\":\"Company 3\"}]";
-            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(expectedJson) };
+            var expectedJobApplications = new List<JobApplication>
+            {
+                new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None},
+                new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied},
+                new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Offer}
+            };
+
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonConvert.SerializeObject(expectedJobApplications))
+            };
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
@@ -40,13 +52,13 @@ namespace JAH.Web.UnitTests
             IActionResult result = await _jobApplicationController.List();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
-            Assert.Equal(expectedJson, okResult.Value);
+            Assert.IsType<ViewResult>(result);
+            var viewResult = (ViewResult)result;
+            Assert.Equal(expectedJobApplications, viewResult.Model);
         }
 
         [Fact]
-        public async Task ShouldReturnEmptyJsonWhenNoJobApplicationsExist()
+        public async Task ShouldReturnNullViewResultWhenNoJobApplicationsExist()
         {
             // Arrange
             const string expectedJson = "";
@@ -60,9 +72,9 @@ namespace JAH.Web.UnitTests
             IActionResult result = await _jobApplicationController.List();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
-            Assert.Equal(expectedJson, okResult.Value);
+            Assert.IsType<ViewResult>(result);
+            var viewResult = (ViewResult)result;
+            Assert.Equal(new List<JobApplication>(), viewResult.Model);
         }
     }
 }
