@@ -1,23 +1,21 @@
-using System;
+﻿using System;
+using System.Linq;
 using JAH.Data.Entities;
 using JAH.DomainModels;
-using Microsoft.EntityFrameworkCore;
 
-namespace JAH.Data.UnitTests
+namespace JAH.Data
 {
-    public class ContextFixture : IDisposable
+    public static class DbInitializer
     {
-        public ContextFixture()
+        public static void Initialize(JobApplicationDbContext context)
         {
-            Context = GetContextWithData();
-        }
+            context.Database.EnsureCreated();
 
-        public JobApplicationDbContext Context { get; }
-
-        private JobApplicationDbContext GetContextWithData()
-        {
-            var options = new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
-            var context = new JobApplicationDbContext(options);
+            if (context.JobApplications.Any())
+            {
+                // database has been seeded
+                return;
+            }
 
             var jobApplications = new[]
             {
@@ -27,27 +25,13 @@ namespace JAH.Data.UnitTests
                 new JobApplicationEntity {CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer},
                 new JobApplicationEntity {CompanyName = "Company 5", ApplicationDate = new DateTime(2017, 09, 18), CurrentStatus = Status.Rejected},
             };
+
             foreach (JobApplicationEntity jobApplication in jobApplications)
             {
                 context.JobApplications.Add(jobApplication);
             }
+
             context.SaveChanges();
-
-            return context;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Context.Dispose();
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }
