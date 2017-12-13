@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using JAH.Data.Entities;
@@ -18,8 +19,17 @@ namespace JAH.Data.Repositories
         {
             await Task.Run(() =>
                            {
-                               _context.JobApplications.Add(jobApplication);
-                               _context.SaveChanges();
+                               JobApplicationEntity existingApplication = _context.JobApplications.SingleOrDefault(a => a.CompanyName == jobApplication.CompanyName &&
+                                                                                                                    a.ApplicationDate == jobApplication.ApplicationDate);
+                               if (existingApplication == null)
+                               {
+                                   _context.JobApplications.Add(jobApplication);
+                                   _context.SaveChanges();
+                               }
+                               else
+                               {
+                                   throw new ArgumentException("Trying to add same application", $"{jobApplication.CompanyName} {jobApplication.ApplicationDate}");
+                               }
                            });
         }
 
