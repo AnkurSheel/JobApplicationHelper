@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace JAH.Api.Controllers
 {
@@ -24,7 +26,31 @@ namespace JAH.Api.Controllers
             {
                 return Ok(jobApplications);
             }
+
             return NoContent();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostAsync([FromBody] JobApplication jobApplication)
+        {
+            try
+            {
+                await _service.Add(jobApplication);
+                return CreatedAtAction("", new { id = jobApplication.Name }, jobApplication);
+            }
+            catch (ArgumentException)
+            {
+                var modelState = new ModelStateDictionary();
+                modelState.AddModelError("Duplicate Name", $"Name {jobApplication.Name} already exists.");
+                return BadRequest(modelState);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            ;
         }
     }
 }

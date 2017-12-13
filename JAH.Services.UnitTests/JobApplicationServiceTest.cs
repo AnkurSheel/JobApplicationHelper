@@ -84,7 +84,7 @@ namespace JAH.Services.UnitTests
 
             // Assert
             await _jobApplicationRepository.Received().Add(jobApplicationEntity);
-            Assert.NotNull(ex);
+            Assert.NotNull(ex.Result);
         }
     }
 }

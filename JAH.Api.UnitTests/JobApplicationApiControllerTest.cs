@@ -40,7 +40,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
+            var okResult = (OkObjectResult)result;
             Assert.Equal(expectedjobApplications, okResult.Value);
         }
 
@@ -57,6 +57,39 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async void ShouldReturnCreatedResult()
+        {
+            // Arrange
+            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+
+            // Act
+            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+
+            // Assert
+            await _jobApplicationService.Received().Add(jobApplication);
+
+            Assert.IsType<CreatedAtActionResult>(result);
+            var createdResult = (CreatedAtActionResult)result;
+            Assert.Equal(jobApplication, createdResult.Value);
+        }
+
+        [Fact]
+        public async Task ShouldReturnBadRequestResult()
+        {
+            // Arrange
+            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+
+            _jobApplicationService.Add(jobApplication).Returns(x => throw new ArgumentException());
+
+            // Act
+            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+
+            // Assert
+            await _jobApplicationService.Received().Add(jobApplication);
+            Assert.IsType<BadRequestObjectResult>(result);
         }
     }
 }

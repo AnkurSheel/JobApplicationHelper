@@ -21,12 +21,14 @@ namespace JAH.Services.Services
 
         public async Task<IEnumerable<JobApplication>> ReadAllAsync()
         {
-            var jobApplications = await _repository.FindAll().Select(application => new JobApplication
-            {
-                Name = application.CompanyName,
-                StartDate = application.ApplicationDate.Date,
-                Status = application.CurrentStatus
-            }).ToListAsync();
+            var jobApplications = await _repository.FindAll()
+                                                   .Select(application => new JobApplication
+                                                   {
+                                                       Name = application.CompanyName,
+                                                       StartDate = application.ApplicationDate.Date,
+                                                       Status = application.CurrentStatus
+                                                   })
+                                                   .ToListAsync();
 
             return jobApplications;
         }
