@@ -8,7 +8,7 @@ namespace JAH.Data.Interfaces
     {
         Task Add(T entity);
 
-        Task<IQueryable<T>> FindAll();
+        IQueryable<T> FindAll();
 
     }
 }

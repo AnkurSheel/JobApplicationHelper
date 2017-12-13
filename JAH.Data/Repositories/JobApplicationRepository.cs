@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace JAH.Data.Repositories
 {
@@ -17,25 +18,22 @@ namespace JAH.Data.Repositories
 
         public async Task Add(JobApplicationEntity jobApplication)
         {
-            await Task.Run(() =>
-                           {
-                               JobApplicationEntity existingApplication = _context.JobApplications.SingleOrDefault(a => a.CompanyName == jobApplication.CompanyName &&
-                                                                                                                    a.ApplicationDate == jobApplication.ApplicationDate);
-                               if (existingApplication == null)
-                               {
-                                   _context.JobApplications.Add(jobApplication);
-                                   _context.SaveChanges();
-                               }
-                               else
-                               {
-                                   throw new ArgumentException("Trying to add same application", $"{jobApplication.CompanyName} {jobApplication.ApplicationDate}");
-                               }
-                           });
+            bool existingApplication = await _context.JobApplications.AnyAsync(a => a.CompanyName == jobApplication.CompanyName &&
+                                                                                   a.ApplicationDate == jobApplication.ApplicationDate);
+            if (!existingApplication)
+            {
+                _context.JobApplications.Add(jobApplication);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Trying to add same application", $"{jobApplication.CompanyName} {jobApplication.ApplicationDate}");
+            }
         }
 
-        public async Task<IQueryable<JobApplicationEntity>> FindAll()
+        public IQueryable<JobApplicationEntity> FindAll()
         {
-            return await Task.Run(() => _context.JobApplications);
+            return _context.JobApplications;
         }
     }
 }

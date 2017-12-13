@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
@@ -15,17 +14,13 @@ namespace JAH.Services.UnitTests
     {
         private readonly JobApplicationService _jobApplicationService;
         private readonly IRepository<JobApplicationEntity> _jobApplicationRepository;
+        private readonly JobApplication[] _jobApplications;
 
         public JobApplicationServiceTest()
         {
             _jobApplicationRepository = Substitute.For<IRepository<JobApplicationEntity>>();
             _jobApplicationService = new JobApplicationService(_jobApplicationRepository);
-        }
-
-        [Fact]
-        public async Task ShouldReturnAllJobApplications()
-        {
-            var expectedJobApplications = new []
+            _jobApplications = new[]
             {
                 new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None},
                 new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied},
@@ -33,8 +28,12 @@ namespace JAH.Services.UnitTests
                 new JobApplication {Name = "Company 4", StartDate = new DateTime(2017, 10, 9), Status = Status.Offer},
                 new JobApplication {Name = "Company 5", StartDate = new DateTime(2017, 09, 18), Status = Status.Rejected}
             };
+        }
 
-            var jobApplicationEntities = new EnumerableQuery<JobApplicationEntity>(new List<JobApplicationEntity>
+        [Fact]
+        public async Task ShouldReturnAllJobApplications()
+        {
+            var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>
             {
                 new JobApplicationEntity {CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None},
                 new JobApplicationEntity {CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied},
@@ -49,7 +48,7 @@ namespace JAH.Services.UnitTests
             var result = await _jobApplicationService.ReadAllAsync();
 
             // Assert
-            Assert.Equal(expectedJobApplications, result);
+            Assert.Equal(_jobApplications, result);
         }
     }
 }
