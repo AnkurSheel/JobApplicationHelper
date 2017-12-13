@@ -8,20 +8,22 @@ using Xunit;
 
 namespace JAH.Data.UnitTests
 {
-    public class JobApplicationRepositoryTest : IClassFixture<ContextFixture>
+    public class JobApplicationRepositoryTest
     {
         private readonly JobApplicationRepository _jobApplicationRepository;
         private readonly JobApplicationDbContext _jobApplicationDbContext;
 
-        public JobApplicationRepositoryTest(ContextFixture fixture)
+        public JobApplicationRepositoryTest()
         {
-            _jobApplicationDbContext = fixture.Context;
+            _jobApplicationDbContext = ContextFixture.GetContextWithData();
             _jobApplicationRepository = new JobApplicationRepository(_jobApplicationDbContext);
         }
 
         [Fact]
         public async Task ShouldReturnAllJobApplications()
         {
+
+
             var jobApplications = new[]
             {
                 new JobApplicationEntity {CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None},
