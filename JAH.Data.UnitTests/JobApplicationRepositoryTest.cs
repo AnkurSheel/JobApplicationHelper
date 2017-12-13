@@ -44,6 +44,21 @@ namespace JAH.Data.UnitTests
             // Assert
             Assert.Equal(jobApplications, result.ToArray());
         }
+
+        [Fact]
+        public async Task ShouldInsertJobApplicationsIfItDoesntAlreadyExist()
+        {
+            var jobApplication = new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None };
+
+            // Act
+            await _jobApplicationRepository.Add(jobApplication);
+
+            // Assert
+            Assert.Equal(1, _jobApplicationDbContext.JobApplications.Count());
+
+            JobApplicationEntity entity = _jobApplicationDbContext.JobApplications.FirstOrDefault();
+
+            Assert.Equal(jobApplication, entity);
         }
     }
 }

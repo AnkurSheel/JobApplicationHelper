@@ -14,10 +14,17 @@ namespace JAH.Data.Repositories
             _context = context;
         }
 
+        public async Task Add(JobApplicationEntity jobApplication)
         {
-            var jobApplications = _context.JobApplications.Select(application => new JobApplication()
+            await Task.Run(() =>
+                           {
+                               _context.JobApplications.Add(jobApplication);
+                               _context.SaveChanges();
+                           });
+        }
+
         public async Task<IQueryable<JobApplicationEntity>> FindAll()
-            {
+        {
             return await Task.Run(() => _context.JobApplications);
         }
     }

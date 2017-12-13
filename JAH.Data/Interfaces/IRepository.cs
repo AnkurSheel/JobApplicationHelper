@@ -6,6 +6,9 @@ namespace JAH.Data.Interfaces
     public interface IRepository<T>
         where T : new()
     {
+        Task Add(T entity);
+
         Task<IQueryable<T>> FindAll();
+
     }
 }
