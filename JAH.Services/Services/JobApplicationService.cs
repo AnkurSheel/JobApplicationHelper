@@ -1,6 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
+using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
@@ -9,16 +11,25 @@ namespace JAH.Services.Services
 {
     public class JobApplicationService : IJobApplicationService
     {
-        private readonly IRepository<JobApplication> _repository;
+        private readonly IRepository<JobApplicationEntity> _repository;
 
-        public JobApplicationService(IRepository<JobApplication> repository)
+        public JobApplicationService(IRepository<JobApplicationEntity> repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public Task<IQueryable<JobApplication>> ReadAllAsync()
+        public async Task<IEnumerable<JobApplication>> ReadAllAsync()
         {
-            return _repository.FindAll();
+            var jobApplicationEntities = _repository.FindAll();
+            return await Task.Run(() =>
+                                  {
+                                      return jobApplicationEntities.Result.Select(application => new JobApplication
+                                      {
+                                          Name = application.CompanyName,
+                                          StartDate = application.ApplicationDate.Date,
+                                          Status = application.CurrentStatus
+                                      });
+                                  });
         }
     }
 }

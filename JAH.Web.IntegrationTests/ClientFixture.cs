@@ -3,9 +3,9 @@ using System.IO;
 using System.Net.Http;
 using Autofac;
 using JAH.Data;
+using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.Data.Repositories;
-using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -29,7 +29,7 @@ namespace JAH.Web.IntegrationTests
             HttpClient apiClient;
             Builder = new ContainerBuilder();
             Builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
-            Builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplication>>();
+            Builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
             Builder.RegisterInstance(JobApplicationDbContext).As<JobApplicationDbContext>().ExternallyOwned();
 
             using (IContainer container = Builder.Build())
