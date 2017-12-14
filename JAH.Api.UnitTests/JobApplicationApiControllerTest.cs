@@ -23,7 +23,7 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task ReadAllAsync_MultipleApplications_OkObjectResultWithAListOfJobApplications()
+        public async Task GetAsync_MultipleApplications_OkObjectResultWithAListOfJobApplications()
         {
             // Arrange
             var expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
@@ -36,16 +36,16 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationController.List();
+            IActionResult result = await _jobApplicationController.GetAsync();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
+            var okResult = (OkObjectResult)result;
             Assert.Equal(expectedjobApplications, okResult.Value);
         }
 
         [Fact]
-        public async Task ReadAllAsync_NoApplications_NoContentObjectResult()
+        public async Task GetAsync_NoApplications_NoContentObjectResult()
         {
             // Arrange
             var expectedjobApplications = new List<JobApplication>().AsQueryable();
@@ -53,7 +53,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationController.List();
+            IActionResult result = await _jobApplicationController.GetAsync();
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -72,7 +72,7 @@ namespace JAH.Api.UnitTests
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult) result;
+            var createdResult = (CreatedAtActionResult)result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 

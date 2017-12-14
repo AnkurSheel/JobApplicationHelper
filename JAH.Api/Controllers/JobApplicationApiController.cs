@@ -19,7 +19,7 @@ namespace JAH.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> GetAsync()
         {
             var jobApplications = await _service.ReadAllAsync();
             if (jobApplications.Any())
@@ -36,7 +36,7 @@ namespace JAH.Api.Controllers
             try
             {
                 await _service.AddNewApplication(jobApplication);
-                return CreatedAtAction("", new { id = jobApplication.Name }, jobApplication);
+                return CreatedAtAction("GetAsync", new { id = jobApplication.Name }, jobApplication);
             }
             catch (ArgumentException)
             {

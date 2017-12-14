@@ -53,7 +53,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(expectedJobApplications, viewResult.Model);
         }
 
@@ -73,8 +73,51 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(new List<JobApplication>(), viewResult.Model);
+        }
+
+        [Fact]
+        public async void PostAsync_ApplicationExists_501()
+        {
+            // Arrange
+            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.BadRequest,
+                Content = new StringContent(JsonConvert.SerializeObject("{Duplicate Name\": [\"Name Company 1 already exists.\"]}"))
+            };
+
+            _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+            // Act
+            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+
+            // Assert
+            Assert.IsType<StatusCodeResult>(result);
+            var statusCodeResult = (StatusCodeResult)result;
+            Assert.Equal(400, statusCodeResult.StatusCode);
+        }
+
+        [Fact]
+        public async void PostAsync_ApplicationDoesNotExists_OkObjectResult()
+        {
+            // Arrange
+            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonConvert.SerializeObject(jobApplication))
+            };
+
+            _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            var okObjectResult = (OkObjectResult)result;
+            Assert.Equal(jobApplication, okObjectResult.Value);
         }
     }
 }
