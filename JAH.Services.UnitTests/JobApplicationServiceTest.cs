@@ -33,6 +33,7 @@ namespace JAH.Services.UnitTests
         [Fact]
         public async Task ReadAllAsync_MultipleApplications_AllJobApplications()
         {
+            // Arrange
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>
             {
                 new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None },
@@ -50,15 +51,30 @@ namespace JAH.Services.UnitTests
             _jobApplicationRepository.FindAll().Returns(jobApplicationEntities);
 
             // Act
-            var result = await _jobApplicationService.ReadAllAsync();
+            IEnumerable<JobApplication> result = await _jobApplicationService.ReadAllAsync();
 
             // Assert
             Assert.Equal(_jobApplications, result);
         }
 
         [Fact]
+        public async Task ReadAllAsync_NoApplications_AllJobApplications()
+        {
+            // Arrange
+            var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>());
+            _jobApplicationRepository.FindAll().Returns(jobApplicationEntities);
+
+            // Act
+            IEnumerable<JobApplication> result = await _jobApplicationService.ReadAllAsync();
+
+            // Assert
+            Assert.Equal(new List<JobApplication>(), result);
+        }
+
+        [Fact]
         public async void Add_ApplicationDoesNotExist_InsertJobApplication()
         {
+            // Arrange
             var jobApplicationEntity = new JobApplicationEntity
             {
                 CompanyName = _jobApplications[0].Name,
@@ -76,6 +92,7 @@ namespace JAH.Services.UnitTests
         [Fact]
         public async Task Add_ApplicationExists_ThrowException()
         {
+            // Arrange
             var jobApplicationEntity = new JobApplicationEntity
             {
                 CompanyName = _jobApplications[0].Name,
@@ -85,7 +102,7 @@ namespace JAH.Services.UnitTests
             _jobApplicationRepository.Create(jobApplicationEntity).Returns(x => throw new ArgumentException());
 
             // Act
-            var ex = Record.ExceptionAsync(() => _jobApplicationService.AddNewApplication(_jobApplications[0]));
+            Task<Exception> ex = Record.ExceptionAsync(() => _jobApplicationService.AddNewApplication(_jobApplications[0]));
 
             // Assert
             await _jobApplicationRepository.Received().Create(jobApplicationEntity);
