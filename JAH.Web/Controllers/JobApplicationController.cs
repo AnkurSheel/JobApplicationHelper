@@ -18,7 +18,7 @@ namespace JAH.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> GetAsync()
         {
             try
             {
@@ -30,7 +30,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {

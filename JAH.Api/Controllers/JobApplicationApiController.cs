@@ -35,7 +35,7 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                await _service.Add(jobApplication);
+                await _service.AddNewApplication(jobApplication);
                 return CreatedAtAction("", new { id = jobApplication.Name }, jobApplication);
             }
             catch (ArgumentException)

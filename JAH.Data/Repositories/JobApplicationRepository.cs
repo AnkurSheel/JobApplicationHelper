@@ -16,10 +16,10 @@ namespace JAH.Data.Repositories
             _context = context;
         }
 
-        public async Task Add(JobApplicationEntity jobApplication)
+        public async Task Create(JobApplicationEntity jobApplication)
         {
             bool existingApplication = await _context.JobApplications.AnyAsync(a => a.CompanyName == jobApplication.CompanyName &&
-                                                                                   a.ApplicationDate == jobApplication.ApplicationDate);
+                                                                                    a.ApplicationDate == jobApplication.ApplicationDate);
             if (!existingApplication)
             {
                 _context.JobApplications.Add(jobApplication);

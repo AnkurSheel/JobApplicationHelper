@@ -19,15 +19,21 @@ namespace JAH.Data.UnitTests
         }
 
         [Fact]
-        public void ShouldReturnAllJobApplications()
+        public void FindAll_MultipleApplications_AllJobApplications()
         {
+            // Arrange
             var jobApplications = new[]
             {
-                new JobApplicationEntity {CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None},
-                new JobApplicationEntity {CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied},
-                new JobApplicationEntity {CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Interview},
-                new JobApplicationEntity {CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer},
-                new JobApplicationEntity {CompanyName = "Company 5", ApplicationDate = new DateTime(2017, 09, 18), CurrentStatus = Status.Rejected},
+                new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None },
+                new JobApplicationEntity { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied },
+                new JobApplicationEntity
+                {
+                    CompanyName = "Company 3",
+                    ApplicationDate = new DateTime(2017, 11, 14),
+                    CurrentStatus = Status.Interview
+                },
+                new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer },
+                new JobApplicationEntity { CompanyName = "Company 5", ApplicationDate = new DateTime(2017, 09, 18), CurrentStatus = Status.Rejected }
             };
 
             foreach (JobApplicationEntity jobApplication in jobApplications)
@@ -45,12 +51,30 @@ namespace JAH.Data.UnitTests
         }
 
         [Fact]
-        public async void ShouldInsertJobApplicationsIfItDoesntAlreadyExist()
+        public void FindAll_NoApplications_EmptyCollection()
         {
-            var jobApplication = new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None };
+            // Arrange
 
             // Act
-            await _jobApplicationRepository.Add(jobApplication);
+            var result = _jobApplicationRepository.FindAll();
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async void Create_ApplicationDoesNotExist_InsertJobApplication()
+        {
+            // Arrange
+            var jobApplication = new JobApplicationEntity
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                CurrentStatus = Status.None
+            };
+
+            // Act
+            await _jobApplicationRepository.Create(jobApplication);
 
             // Assert
             Assert.Equal(1, _jobApplicationDbContext.JobApplications.Count());
@@ -61,15 +85,25 @@ namespace JAH.Data.UnitTests
         }
 
         [Fact]
-        public async void ShouldThrowExceptionIfAddingApplicationAndItAlreadyExist()
+        public async void Create_ApplicationExists_ThrowException()
         {
-            var jobApplication = new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None };
-             _jobApplicationDbContext.JobApplications.Add(jobApplication);
+            var jobApplication = new JobApplicationEntity
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                CurrentStatus = Status.None
+            };
+            _jobApplicationDbContext.JobApplications.Add(jobApplication);
             _jobApplicationDbContext.SaveChanges();
 
             // Act
-            var duplicateJobApplication = new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None };
-            var ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Add(duplicateJobApplication));
+            var duplicateJobApplication = new JobApplicationEntity
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                CurrentStatus = Status.None
+            };
+            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(duplicateJobApplication));
 
             // Assert
             Assert.NotNull(ex);

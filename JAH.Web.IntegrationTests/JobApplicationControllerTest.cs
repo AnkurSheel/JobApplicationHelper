@@ -20,7 +20,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task ShouldReturnCorrectResponseWithAllJobApplications()
+        public async Task GetAsync_MultipleApplications_HtmlView()
         {
             // Arrange
             _fixture.JobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
@@ -44,7 +44,7 @@ namespace JAH.Web.IntegrationTests
             _fixture.JobApplicationDbContext.SaveChanges();
 
             // Act
-            var response = await _fixture.WebClient.GetAsync("/jobApplication");
+            HttpResponseMessage response = await _fixture.WebClient.GetAsync("/jobApplication");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -54,7 +54,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task ShouldReturnCorrectResponseWhenNoJobApplications()
+        public async Task GetAsync_NoApplications_HtmlView()
         {
             // Arrange
 

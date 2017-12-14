@@ -33,15 +33,15 @@ namespace JAH.Services.Services
             return jobApplications;
         }
 
-        public async Task Add(JobApplication jobApplication)
+        public async Task AddNewApplication(JobApplication jobApplication)
         {
-            var jobApplicationEntity = new JobApplicationEntity()
+            var jobApplicationEntity = new JobApplicationEntity
             {
                 CompanyName = jobApplication.Name,
                 ApplicationDate = jobApplication.StartDate,
                 CurrentStatus = jobApplication.Status
             };
-            await _repository.Add(jobApplicationEntity);
+            await _repository.Create(jobApplicationEntity);
         }
     }
 }

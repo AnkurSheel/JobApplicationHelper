@@ -6,7 +6,7 @@ namespace JAH.Services.Interfaces
 {
     public interface IJobApplicationService
     {
-        Task Add(JobApplication jobApplication);
+        Task AddNewApplication(JobApplication jobApplication);
 
         Task<IEnumerable<JobApplication>> ReadAllAsync();
     }

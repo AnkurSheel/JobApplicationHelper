@@ -30,14 +30,14 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task ShouldReturnViewResultModelWithAllJobApplications()
+        public async Task GetAsync_MultipleApplications_ViewResultWithAllJobApplications()
         {
             // Arrange
             var expectedJobApplications = new List<JobApplication>
             {
-                new JobApplication {Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None},
-                new JobApplication {Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied},
-                new JobApplication {Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Offer}
+                new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None },
+                new JobApplication { Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             };
 
             var httpResponseMessage = new HttpResponseMessage
@@ -49,16 +49,16 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.List();
+            IActionResult result = await _jobApplicationController.GetAsync();
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult)result;
+            var viewResult = (ViewResult) result;
             Assert.Equal(expectedJobApplications, viewResult.Model);
         }
 
         [Fact]
-        public async Task ShouldReturnNullViewResultWhenNoJobApplicationsExist()
+        public async Task GetAsync_NoApplications_EmptyViewResult()
         {
             // Arrange
             const string expectedJson = "";
@@ -69,11 +69,11 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.List();
+            IActionResult result = await _jobApplicationController.GetAsync();
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult)result;
+            var viewResult = (ViewResult) result;
             Assert.Equal(new List<JobApplication>(), viewResult.Model);
         }
     }
