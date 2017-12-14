@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using JAH.Data.Entities;
 using JAH.DomainModels;
+using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,6 +19,7 @@ namespace JAH.Web.IntegrationTests
         {
             _output = output;
             _fixture = fixture;
+            _fixture.JobApplicationDbContext.Database.EnsureDeleted();
         }
 
         [Fact]
@@ -64,6 +67,47 @@ namespace JAH.Web.IntegrationTests
             // Assert
             response.EnsureSuccessStatusCode();
             string responseData = response.Content.ReadAsStringAsync().Result;
+            Assert.NotEmpty(responseData);
+        }
+
+        [Fact]
+        public async void PostAsync_ApplicationExists_501()
+        {
+            // Arrange
+            _fixture.JobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                CurrentStatus = Status.None
+            });
+            _fixture.JobApplicationDbContext.SaveChanges();
+
+            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+
+            // Act
+            var stringContent = new StringContent(JsonConvert.SerializeObject(jobApplication), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication", stringContent);
+
+            // Assert
+            Assert.False(response.IsSuccessStatusCode);
+            string responseData = response.Content.ReadAsStringAsync().Result;
+            Assert.Empty(responseData);
+        }
+
+        [Fact]
+        public async void PostAsync_ApplicationDoesNotExists_OkObjectResult()
+        {
+            // Arrange
+            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+
+            // Act
+            var stringContent = new StringContent(JsonConvert.SerializeObject(jobApplication), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication", stringContent);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            string responseData = response.Content.ReadAsStringAsync().Result;
+            _output.WriteLine(responseData);
             Assert.NotEmpty(responseData);
         }
     }

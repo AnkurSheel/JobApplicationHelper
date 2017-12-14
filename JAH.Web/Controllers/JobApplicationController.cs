@@ -41,7 +41,7 @@ namespace JAH.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync(JobApplication jobApplication)
+        public async Task<IActionResult> PostAsync([FromBody] JobApplication jobApplication)
         {
             try
             {
