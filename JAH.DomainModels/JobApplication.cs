@@ -4,9 +4,14 @@ namespace JAH.DomainModels
 {
     public class JobApplication
     {
-        public string Name { get; set; }
+        public JobApplication()
+        {
+            Status = Status.Applied;
+        }
 
-        public DateTime StartDate { get; set; }
+        public string CompanyName { get; set; }
+
+        public DateTime ApplicationDate { get; set; }
 
         public Status Status { get; set; }
 
@@ -20,7 +25,7 @@ namespace JAH.DomainModels
             {
                 return true;
             }
-            if (obj.GetType() != this.GetType())
+            if (obj.GetType() != GetType())
             {
                 return false;
             }
@@ -32,16 +37,16 @@ namespace JAH.DomainModels
         {
             unchecked
             {
-                int hashCode = Name != null ? Name.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ StartDate.GetHashCode();
+                int hashCode = CompanyName != null ? CompanyName.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ ApplicationDate.GetHashCode();
                 hashCode = (hashCode * 397) ^ (int) Status;
                 return hashCode;
             }
         }
 
-        protected bool Equals(JobApplication other)
+        private bool Equals(JobApplication other)
         {
-            return string.Equals(Name, other.Name) && StartDate.Equals(other.StartDate) && Status == other.Status;
+            return string.Equals(CompanyName, other.CompanyName) && ApplicationDate.Equals(other.ApplicationDate) && Status == other.Status;
         }
     }
 }

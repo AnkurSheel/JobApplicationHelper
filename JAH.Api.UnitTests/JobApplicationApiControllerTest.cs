@@ -28,9 +28,9 @@ namespace JAH.Api.UnitTests
             // Arrange
             var expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {
-                new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None },
-                new JobApplication { Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             });
 
             _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
@@ -40,7 +40,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
+            var okResult = (OkObjectResult) result;
             Assert.Equal(expectedjobApplications, okResult.Value);
         }
 
@@ -48,7 +48,7 @@ namespace JAH.Api.UnitTests
         public async Task GetAsync_NoApplications_NoContentObjectResult()
         {
             // Arrange
-            var expectedjobApplications = new List<JobApplication>().AsQueryable();
+            IQueryable<JobApplication> expectedjobApplications = new List<JobApplication>().AsQueryable();
 
             _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
 
@@ -63,7 +63,12 @@ namespace JAH.Api.UnitTests
         public async void PostAsync_ApplicationDoesNotExist_CreatedResultWithJobApplication()
         {
             // Arrange
-            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var jobApplication = new JobApplication
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
 
             // Act
             IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
@@ -72,7 +77,7 @@ namespace JAH.Api.UnitTests
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult)result;
+            var createdResult = (CreatedAtActionResult) result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 
@@ -80,7 +85,12 @@ namespace JAH.Api.UnitTests
         public async Task PostAsync_ApplicationExists_BadRequestResult()
         {
             // Arrange
-            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var jobApplication = new JobApplication
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
 
             _jobApplicationService.AddNewApplication(jobApplication).Returns(x => throw new ArgumentException());
 

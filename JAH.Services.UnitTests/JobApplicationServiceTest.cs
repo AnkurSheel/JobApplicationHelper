@@ -22,11 +22,10 @@ namespace JAH.Services.UnitTests
             _jobApplicationService = new JobApplicationService(_jobApplicationRepository);
             _jobApplications = new[]
             {
-                new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None },
-                new JobApplication { Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Interview },
-                new JobApplication { Name = "Company 4", StartDate = new DateTime(2017, 10, 9), Status = Status.Offer },
-                new JobApplication { Name = "Company 5", StartDate = new DateTime(2017, 09, 18), Status = Status.Rejected }
+                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Rejected },
+                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Interview },
+                new JobApplication { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), Status = Status.Offer }
             };
         }
 
@@ -36,7 +35,7 @@ namespace JAH.Services.UnitTests
             // Arrange
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>
             {
-                new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None },
+                new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.Rejected },
                 new JobApplicationEntity { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied },
                 new JobApplicationEntity
                 {
@@ -44,8 +43,7 @@ namespace JAH.Services.UnitTests
                     ApplicationDate = new DateTime(2017, 11, 14),
                     CurrentStatus = Status.Interview
                 },
-                new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer },
-                new JobApplicationEntity { CompanyName = "Company 5", ApplicationDate = new DateTime(2017, 09, 18), CurrentStatus = Status.Rejected }
+                new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer }
             });
 
             _jobApplicationRepository.FindAll().Returns(jobApplicationEntities);
@@ -77,8 +75,8 @@ namespace JAH.Services.UnitTests
             // Arrange
             var jobApplicationEntity = new JobApplicationEntity
             {
-                CompanyName = _jobApplications[0].Name,
-                ApplicationDate = _jobApplications[0].StartDate,
+                CompanyName = _jobApplications[0].CompanyName,
+                ApplicationDate = _jobApplications[0].ApplicationDate,
                 CurrentStatus = _jobApplications[0].Status
             };
 
@@ -95,8 +93,8 @@ namespace JAH.Services.UnitTests
             // Arrange
             var jobApplicationEntity = new JobApplicationEntity
             {
-                CompanyName = _jobApplications[0].Name,
-                ApplicationDate = _jobApplications[0].StartDate,
+                CompanyName = _jobApplications[0].CompanyName,
+                ApplicationDate = _jobApplications[0].ApplicationDate,
                 CurrentStatus = _jobApplications[0].Status
             };
             _jobApplicationRepository.Create(jobApplicationEntity).Returns(x => throw new ArgumentException());

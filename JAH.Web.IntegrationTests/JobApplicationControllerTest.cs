@@ -30,7 +30,7 @@ namespace JAH.Web.IntegrationTests
             {
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.None
+                CurrentStatus = Status.Interview
             });
             _fixture.JobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
             {
@@ -78,11 +78,16 @@ namespace JAH.Web.IntegrationTests
             {
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.None
+                CurrentStatus = Status.Interview
             });
             _fixture.JobApplicationDbContext.SaveChanges();
 
-            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var jobApplication = new JobApplication
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
 
             // Act
             var stringContent = new StringContent(JsonConvert.SerializeObject(jobApplication), Encoding.UTF8, "application/json");
@@ -98,7 +103,12 @@ namespace JAH.Web.IntegrationTests
         public async void PostAsync_ApplicationDoesNotExists_OkObjectResult()
         {
             // Arrange
-            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var jobApplication = new JobApplication
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
 
             // Act
             var stringContent = new StringContent(JsonConvert.SerializeObject(jobApplication), Encoding.UTF8, "application/json");

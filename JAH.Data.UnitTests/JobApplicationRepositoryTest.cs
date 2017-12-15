@@ -24,7 +24,12 @@ namespace JAH.Data.UnitTests
             // Arrange
             var jobApplications = new[]
             {
-                new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.None },
+                new JobApplicationEntity
+                {
+                    CompanyName = "Company 1",
+                    ApplicationDate = new DateTime(2017, 11, 13),
+                    CurrentStatus = Status.Interview
+                },
                 new JobApplicationEntity { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied },
                 new JobApplicationEntity
                 {
@@ -44,7 +49,7 @@ namespace JAH.Data.UnitTests
             _jobApplicationDbContext.SaveChanges();
 
             // Act
-            var result = _jobApplicationRepository.FindAll();
+            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.FindAll();
 
             // Assert
             Assert.Equal(jobApplications, result.ToArray());
@@ -56,7 +61,7 @@ namespace JAH.Data.UnitTests
             // Arrange
 
             // Act
-            var result = _jobApplicationRepository.FindAll();
+            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.FindAll();
 
             // Assert
             Assert.Empty(result);
@@ -70,7 +75,7 @@ namespace JAH.Data.UnitTests
             {
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.None
+                CurrentStatus = Status.Interview
             };
 
             // Act
@@ -91,7 +96,7 @@ namespace JAH.Data.UnitTests
             {
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.None
+                CurrentStatus = Status.Interview
             };
             _jobApplicationDbContext.JobApplications.Add(jobApplication);
             _jobApplicationDbContext.SaveChanges();
@@ -101,7 +106,7 @@ namespace JAH.Data.UnitTests
             {
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.None
+                CurrentStatus = Status.Interview
             };
             Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(duplicateJobApplication));
 

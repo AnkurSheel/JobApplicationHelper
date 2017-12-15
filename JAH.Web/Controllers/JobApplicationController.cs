@@ -32,7 +32,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -61,7 +61,7 @@ namespace JAH.Web.Controllers
                     return new OkObjectResult(application);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {

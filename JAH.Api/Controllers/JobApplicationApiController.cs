@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JAH.DomainModels;
@@ -21,7 +22,7 @@ namespace JAH.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            var jobApplications = await _service.ReadAllAsync();
+            IEnumerable<JobApplication> jobApplications = await _service.ReadAllAsync();
             if (jobApplications.Any())
             {
                 return Ok(jobApplications);
@@ -36,12 +37,12 @@ namespace JAH.Api.Controllers
             try
             {
                 await _service.AddNewApplication(jobApplication);
-                return CreatedAtAction("GetAsync", new { id = jobApplication.Name }, jobApplication);
+                return CreatedAtAction("GetAsync", new { id = jobApplication.CompanyName }, jobApplication);
             }
             catch (ArgumentException)
             {
                 var modelState = new ModelStateDictionary();
-                modelState.AddModelError("Duplicate Name", $"Name {jobApplication.Name} already exists.");
+                modelState.AddModelError("Duplicate Name", $"Name {jobApplication.CompanyName} already exists.");
                 return BadRequest(modelState);
             }
             catch (Exception e)

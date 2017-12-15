@@ -35,9 +35,9 @@ namespace JAH.Web.UnitTests
             // Arrange
             var expectedJobApplications = new List<JobApplication>
             {
-                new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None },
-                new JobApplication { Name = "Company 2", StartDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { Name = "Company 3", StartDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             };
 
             var httpResponseMessage = new HttpResponseMessage
@@ -53,7 +53,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult)result;
+            var viewResult = (ViewResult) result;
             Assert.Equal(expectedJobApplications, viewResult.Model);
         }
 
@@ -73,7 +73,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult)result;
+            var viewResult = (ViewResult) result;
             Assert.Equal(new List<JobApplication>(), viewResult.Model);
         }
 
@@ -81,7 +81,12 @@ namespace JAH.Web.UnitTests
         public async void PostAsync_ApplicationExists_501()
         {
             // Arrange
-            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var jobApplication = new JobApplication
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
             var httpResponseMessage = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.BadRequest,
@@ -94,7 +99,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);
-            var statusCodeResult = (StatusCodeResult)result;
+            var statusCodeResult = (StatusCodeResult) result;
             Assert.Equal(400, statusCodeResult.StatusCode);
         }
 
@@ -102,7 +107,12 @@ namespace JAH.Web.UnitTests
         public async void PostAsync_ApplicationDoesNotExists_OkObjectResult()
         {
             // Arrange
-            var jobApplication = new JobApplication { Name = "Company 1", StartDate = new DateTime(2017, 11, 13), Status = Status.None };
+            var jobApplication = new JobApplication
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
             var httpResponseMessage = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
@@ -116,7 +126,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okObjectResult = (OkObjectResult)result;
+            var okObjectResult = (OkObjectResult) result;
             Assert.Equal(jobApplication, okObjectResult.Value);
         }
     }
