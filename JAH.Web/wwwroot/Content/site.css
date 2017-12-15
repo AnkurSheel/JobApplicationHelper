@@ -89,7 +89,7 @@ footer {
     left: 0;
     min-height: 400px;
 }
-
+/*!
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open .dropdown-toggle.btn-primary {
 
     background-color: #fcaeae !important;
@@ -101,3 +101,4 @@ footer {
     background-color: #fcaeae !important;
     border-color: #fba1a1 !important;
 }
+*/

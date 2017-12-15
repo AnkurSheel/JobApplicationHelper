@@ -40,6 +40,12 @@ namespace JAH.Web.Controllers
             }
         }
 
+        [Route("NewApplication")]
+        public IActionResult NewApplication()
+        {
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([FromBody] JobApplication jobApplication)
         {
