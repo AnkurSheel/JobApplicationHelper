@@ -32,7 +32,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -40,6 +40,7 @@ namespace JAH.Web.Controllers
             }
         }
 
+        [HttpGet]
         [Route("NewApplication")]
         public IActionResult NewApplication()
         {
@@ -47,21 +48,26 @@ namespace JAH.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] JobApplication jobApplication)
+        [Route("")]
+        [Route("NewApplication")]
+        public async Task<IActionResult> NewApplication(JobApplication jobApplication)
         {
             try
             {
-                string json = JsonConvert.SerializeObject(jobApplication);
-                var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage responseMessage = await _client.PostAsync($"api/jobApplication", stringContent);
-                if (responseMessage.IsSuccessStatusCode)
+                if (ModelState.IsValid)
                 {
-                    string responseData = responseMessage.Content.ReadAsStringAsync().Result;
-                    var application = JsonConvert.DeserializeObject<JobApplication>(responseData);
-                    return new OkObjectResult(application);
+                    string json = JsonConvert.SerializeObject(jobApplication);
+                    var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+                    HttpResponseMessage responseMessage = await _client.PostAsync($"api/jobApplication", stringContent);
+                    if (responseMessage.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("GetAsync");
+                    }
+
+                    return new StatusCodeResult((int)responseMessage.StatusCode);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return View(jobApplication);
             }
             catch (HttpRequestException)
             {

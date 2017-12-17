@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using JAH.Data.Entities;
 using JAH.DomainModels;
-using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -90,7 +91,8 @@ namespace JAH.Web.IntegrationTests
             };
 
             // Act
-            var stringContent = new StringContent(JsonConvert.SerializeObject(jobApplication), Encoding.UTF8, "application/json");
+
+            var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
             HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication", stringContent);
 
             // Assert
@@ -111,14 +113,30 @@ namespace JAH.Web.IntegrationTests
             };
 
             // Act
-            var stringContent = new StringContent(JsonConvert.SerializeObject(jobApplication), Encoding.UTF8, "application/json");
+            var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
             HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication", stringContent);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            _output.WriteLine(responseData);
-            Assert.NotEmpty(responseData);
+            Assert.Equal(HttpStatusCode.Found, response.StatusCode);
         }
+    }
+}
+
+public static class UrlHelper
+{
+    public static string ToUrl(this Object instance)
+    {
+        var urlBuilder = new StringBuilder();
+        PropertyInfo[] properties = instance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        for (var i = 0; i < properties.Length; i++)
+        {
+            urlBuilder.AppendFormat("{0}={1}&", properties[i].Name, properties[i].GetValue(instance, null));
+        }
+
+        if (urlBuilder.Length > 1)
+        {
+            urlBuilder.Remove(urlBuilder.Length - 1, 1);
+        }
+        return urlBuilder.ToString();
     }
 }

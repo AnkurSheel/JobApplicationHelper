@@ -53,7 +53,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(expectedJobApplications, viewResult.Model);
         }
 
@@ -73,7 +73,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(new List<JobApplication>(), viewResult.Model);
         }
 
@@ -95,16 +95,16 @@ namespace JAH.Web.UnitTests
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
             // Act
-            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+            IActionResult result = await _jobApplicationController.NewApplication(jobApplication);
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);
-            var statusCodeResult = (StatusCodeResult) result;
+            var statusCodeResult = (StatusCodeResult)result;
             Assert.Equal(400, statusCodeResult.StatusCode);
         }
 
         [Fact]
-        public async void PostAsync_ApplicationDoesNotExists_OkObjectResult()
+        public async void PostAsync_ApplicationDoesNotExists_RedirectToActionObjectResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -122,12 +122,12 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+            IActionResult result = await _jobApplicationController.NewApplication(jobApplication);
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var okObjectResult = (OkObjectResult) result;
-            Assert.Equal(jobApplication, okObjectResult.Value);
+            Assert.IsType<RedirectToActionResult>(result);
+            var redirectToActionResult = (RedirectToActionResult)result;
+            Assert.Equal("GetAsync", redirectToActionResult.ActionName);
         }
     }
 }
