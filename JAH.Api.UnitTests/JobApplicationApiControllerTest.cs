@@ -22,8 +22,6 @@ namespace JAH.Api.UnitTests
             _jobApplicationController = new JobApplicationApiController(_jobApplicationService);
         }
 
-        [Fact]
-        public async Task GetAsync_MultipleApplications_OkObjectResultWithAListOfJobApplications()
         {
             // Arrange
             var expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
@@ -34,9 +32,11 @@ namespace JAH.Api.UnitTests
             });
 
             _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
+        [Fact]
+        public async Task ListAllApplications_MultipleApplications_OkObjectResultWithAListOfJobApplications()
 
             // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
+            IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -45,7 +45,7 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task GetAsync_NoApplications_NoContentObjectResult()
+        public async Task ListAllApplications_NoApplications_NoContentObjectResult()
         {
             // Arrange
             IQueryable<JobApplication> expectedjobApplications = new List<JobApplication>().AsQueryable();
@@ -53,14 +53,14 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
+            IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<NoContentResult>(result);
         }
 
         [Fact]
-        public async void PostAsync_ApplicationDoesNotExist_CreatedResultWithJobApplication()
+        public async void AddNewApplication_ApplicationDoesNotExist_CreatedResultWithJobApplication()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -71,7 +71,7 @@ namespace JAH.Api.UnitTests
             };
 
             // Act
-            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
@@ -82,7 +82,7 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task PostAsync_ApplicationExists_BadRequestResult()
+        public async Task AddNewApplication_ApplicationExists_BadRequestResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -95,7 +95,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.AddNewApplication(jobApplication).Returns(x => throw new ArgumentException());
 
             // Act
-            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);

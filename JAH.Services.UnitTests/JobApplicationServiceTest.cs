@@ -30,7 +30,7 @@ namespace JAH.Services.UnitTests
         }
 
         [Fact]
-        public async Task ReadAllAsync_MultipleApplications_AllJobApplications()
+        public async Task GetAllApplications_MultipleApplications_AllJobApplications()
         {
             // Arrange
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>
@@ -49,28 +49,28 @@ namespace JAH.Services.UnitTests
             _jobApplicationRepository.FindAll().Returns(jobApplicationEntities);
 
             // Act
-            IEnumerable<JobApplication> result = await _jobApplicationService.ReadAllAsync();
+            IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
 
             // Assert
             Assert.Equal(_jobApplications, result);
         }
 
         [Fact]
-        public async Task ReadAllAsync_NoApplications_AllJobApplications()
+        public async Task GetAllApplications_NoApplications_AllJobApplications()
         {
             // Arrange
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>());
             _jobApplicationRepository.FindAll().Returns(jobApplicationEntities);
 
             // Act
-            IEnumerable<JobApplication> result = await _jobApplicationService.ReadAllAsync();
+            IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
 
             // Assert
             Assert.Equal(new List<JobApplication>(), result);
         }
 
         [Fact]
-        public async void Add_ApplicationDoesNotExist_InsertJobApplication()
+        public async void AddNewApplication_ApplicationDoesNotExist_InsertJobApplication()
         {
             // Arrange
             var jobApplicationEntity = new JobApplicationEntity
@@ -88,7 +88,7 @@ namespace JAH.Services.UnitTests
         }
 
         [Fact]
-        public async Task Add_ApplicationExists_ThrowException()
+        public async Task AddNewApplication_ApplicationExists_ThrowException()
         {
             // Arrange
             var jobApplicationEntity = new JobApplicationEntity

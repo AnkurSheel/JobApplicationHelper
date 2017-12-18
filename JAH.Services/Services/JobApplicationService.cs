@@ -19,7 +19,7 @@ namespace JAH.Services.Services
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<IEnumerable<JobApplication>> ReadAllAsync()
+        public async Task<IEnumerable<JobApplication>> GetAllApplications()
         {
             List<JobApplication> jobApplications = await _repository
                                                        .FindAll()

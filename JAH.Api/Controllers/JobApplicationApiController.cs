@@ -20,9 +20,9 @@ namespace JAH.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> ListAllApplications()
         {
-            IEnumerable<JobApplication> jobApplications = await _service.ReadAllAsync();
+            IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications();
             if (jobApplications.Any())
             {
                 return Ok(jobApplications);
@@ -32,12 +32,12 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync([FromBody] JobApplication jobApplication)
+        public async Task<IActionResult> AddNewApplication([FromBody] JobApplication jobApplication)
         {
             try
             {
                 await _service.AddNewApplication(jobApplication);
-                return CreatedAtAction("GetAsync", new { id = jobApplication.CompanyName }, jobApplication);
+                return CreatedAtAction("ListAllApplications", new { id = jobApplication.CompanyName }, jobApplication);
             }
             catch (ArgumentException)
             {
