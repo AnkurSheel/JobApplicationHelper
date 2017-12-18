@@ -40,6 +40,26 @@ namespace JAH.Web.Controllers
             }
         }
 
+        public async Task<IActionResult> GetApplication(string companyName)
+        {
+            try
+            {
+                HttpResponseMessage responseMessage = await _client.GetAsync($"api/jobApplication/{companyName}");
+                if (responseMessage.IsSuccessStatusCode)
+                {
+                    string responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                    JobApplication application = JsonConvert.DeserializeObject<JobApplication>(responseData) ?? new JobApplication();
+                    return View(application);
+                }
+
+                return new StatusCodeResult((int)responseMessage.StatusCode);
+            }
+            catch (HttpRequestException)
+            {
+                return new StatusCodeResult(501);
+            }
+        }
+
         [HttpGet]
         [Route("AddNewApplication")]
         public IActionResult AddNewApplication()
