@@ -9,5 +9,7 @@ namespace JAH.Data.Interfaces
         Task Create(T entity);
 
         IQueryable<T> FindAll();
+
+        T Find(string id);
     }
 }

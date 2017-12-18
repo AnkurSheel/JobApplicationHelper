@@ -34,8 +34,19 @@ namespace JAH.Services.Services
             return jobApplications;
         }
 
-        public Task<JobApplication> GetApplication(string companyName)
+        public async Task<JobApplication> GetApplication(string companyName)
         {
+            JobApplicationEntity jobApplication = _repository.Find(companyName);
+            if (jobApplication != null)
+            {
+                return await Task.Run(() => new JobApplication
+                {
+                    ApplicationDate = jobApplication.ApplicationDate,
+                    CompanyName = jobApplication.CompanyName,
+                    Status = jobApplication.CurrentStatus
+                });
+            }
+
             return null;
         }
 

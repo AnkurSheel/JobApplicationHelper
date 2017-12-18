@@ -35,5 +35,10 @@ namespace JAH.Data.Repositories
         {
             return _context.JobApplications;
         }
+
+        public JobApplicationEntity Find(string id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

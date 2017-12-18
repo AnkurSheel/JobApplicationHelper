@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
@@ -15,6 +16,7 @@ namespace JAH.Services.UnitTests
         private readonly IRepository<JobApplicationEntity> _jobApplicationRepository;
         private readonly JobApplication[] _jobApplications;
         private readonly JobApplicationService _jobApplicationService;
+        private readonly TestAsyncEnumerable<JobApplicationEntity> _jobApplicationEntities;
 
         public JobApplicationServiceTest()
         {
@@ -27,13 +29,8 @@ namespace JAH.Services.UnitTests
                 new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Interview },
                 new JobApplication { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), Status = Status.Offer }
             };
-        }
 
-        [Fact]
-        public async Task GetAllApplications_MultipleApplications_AllJobApplications()
-        {
-            // Arrange
-            var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>
+            _jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>
             {
                 new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.Rejected },
                 new JobApplicationEntity { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied },
@@ -45,8 +42,13 @@ namespace JAH.Services.UnitTests
                 },
                 new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer }
             });
+        }
 
-            _jobApplicationRepository.FindAll().Returns(jobApplicationEntities);
+        [Fact]
+        public async Task GetAllApplications_MultipleApplications_AllJobApplications()
+        {
+            // Arrange
+            _jobApplicationRepository.FindAll().Returns(_jobApplicationEntities);
 
             // Act
             IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
@@ -105,6 +107,35 @@ namespace JAH.Services.UnitTests
             // Assert
             await _jobApplicationRepository.Received().Create(jobApplicationEntity);
             Assert.NotNull(ex.Result);
+        }
+
+        [Fact]
+        public async Task GetApplication_ApplicationExists_JobApplication()
+        {
+            // Arrange
+            const string companyName = "Company 1";
+            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
+            _jobApplicationRepository.Find(companyName).Returns(jobApplicationEntities.First(x => x.CompanyName.Equals(companyName)));
+
+            // Act
+            JobApplication result = await _jobApplicationService.GetApplication(companyName);
+
+            // Assert
+            Assert.Equal(_jobApplications[0], result);
+        }
+
+        [Fact]
+        public async Task GetApplication_NoApplications_Null()
+        {
+            // Arrange
+            const string company = "Company 1";
+            _jobApplicationRepository.Find(company).Returns((JobApplicationEntity)null);
+
+            // Act
+            JobApplication result = await _jobApplicationService.GetApplication(company);
+
+            // Assert
+            Assert.Null(result);
         }
     }
 }
