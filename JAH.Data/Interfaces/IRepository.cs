@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace JAH.Data.Interfaces
 {
     public interface IRepository<TEntity>
-        where TEntity : new()
+        where TEntity : class, new()
     {
         Task Create(TEntity entity);
 

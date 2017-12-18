@@ -34,7 +34,7 @@ namespace JAH.Data.Repositories
 
         public IQueryable<JobApplicationEntity> GetAll(Expression<Func<JobApplicationEntity, bool>> filter = null)
         {
-            IQueryable<JobApplicationEntity> query = _context.Set<JobApplicationEntity>();
+            IQueryable<JobApplicationEntity> query = _context.JobApplications;
             if (filter != null)
             {
                 query = query.Where(filter);
@@ -44,8 +44,7 @@ namespace JAH.Data.Repositories
 
         public JobApplicationEntity GetOne(Expression<Func<JobApplicationEntity, bool>> filter = null)
         {
-            return null;
-            //return GetAll(filter).SingleOrDefault();
+            return GetAll(filter).SingleOrDefault();
         }
     }
 }
