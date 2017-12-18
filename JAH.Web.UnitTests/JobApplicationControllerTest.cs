@@ -30,7 +30,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task GetAsync_MultipleApplications_ViewResultWithAllJobApplications()
+        public async Task ListAllApplications_MultipleApplications_ViewResultWithAllJobApplications()
         {
             // Arrange
             var expectedJobApplications = new List<JobApplication>
@@ -49,7 +49,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
+            IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -58,7 +58,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task GetAsync_NoApplications_EmptyViewResult()
+        public async Task ListAllApplications_NoApplications_EmptyViewResult()
         {
             // Arrange
             const string expectedJson = "";
@@ -69,7 +69,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
+            IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -78,7 +78,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async void PostAsync_ApplicationExists_501()
+        public async void AddNewApplication_ApplicationExists_501()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -95,7 +95,7 @@ namespace JAH.Web.UnitTests
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
             // Act
-            IActionResult result = await _jobApplicationController.NewApplication(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);
@@ -104,7 +104,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async void PostAsync_ApplicationDoesNotExists_RedirectToActionObjectResult()
+        public async void AddNewApplication_ApplicationDoesNotExists_RedirectToActionObjectResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -122,12 +122,12 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.NewApplication(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             Assert.IsType<RedirectToActionResult>(result);
             var redirectToActionResult = (RedirectToActionResult)result;
-            Assert.Equal("GetAsync", redirectToActionResult.ActionName);
+            Assert.Equal("ListAllApplications", redirectToActionResult.ActionName);
         }
     }
 }

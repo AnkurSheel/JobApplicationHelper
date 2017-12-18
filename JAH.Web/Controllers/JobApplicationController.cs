@@ -19,7 +19,7 @@ namespace JAH.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> ListAllApplications()
         {
             try
             {
@@ -41,16 +41,16 @@ namespace JAH.Web.Controllers
         }
 
         [HttpGet]
-        [Route("NewApplication")]
-        public IActionResult NewApplication()
+        [Route("AddNewApplication")]
+        public IActionResult AddNewApplication()
         {
             return View();
         }
 
         [HttpPost]
         [Route("")]
-        [Route("NewApplication")]
-        public async Task<IActionResult> NewApplication(JobApplication jobApplication)
+        [Route("AddNewApplication")]
+        public async Task<IActionResult> AddNewApplication(JobApplication jobApplication)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace JAH.Web.Controllers
                     HttpResponseMessage responseMessage = await _client.PostAsync($"api/jobApplication", stringContent);
                     if (responseMessage.IsSuccessStatusCode)
                     {
-                        return RedirectToAction("GetAsync");
+                        return RedirectToAction("ListAllApplications");
                     }
 
                     return new StatusCodeResult((int)responseMessage.StatusCode);
