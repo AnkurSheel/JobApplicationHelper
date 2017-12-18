@@ -1,13 +1,26 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace JAH.DomainModels
 {
     public class JobApplication
     {
-        public string Name { get; set; }
+        public JobApplication()
+        {
+            Status = Status.Applied;
+        }
 
-        public DateTime StartDate { get; set; }
+        [Display(Name = "Company Name")]
+        [StringLength(100)]
+        [Required(ErrorMessage = "Please enter the company name")]
+        public string CompanyName { get; set; }
 
+        [Display(Name = "Application Date")]
+        [Required(ErrorMessage = "Please enter the application date")]
+        [DataType(DataType.Date)]
+        public DateTime ApplicationDate { get; set; }
+
+        [EnumDataType(typeof(Status))]
         public Status Status { get; set; }
 
         public override bool Equals(object obj)
@@ -20,28 +33,28 @@ namespace JAH.DomainModels
             {
                 return true;
             }
-            if (obj.GetType() != this.GetType())
+            if (obj.GetType() != GetType())
             {
                 return false;
             }
 
-            return Equals((JobApplication) obj);
+            return Equals((JobApplication)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = Name != null ? Name.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ StartDate.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int) Status;
+                int hashCode = CompanyName != null ? CompanyName.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ ApplicationDate.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int)Status;
                 return hashCode;
             }
         }
 
-        protected bool Equals(JobApplication other)
+        private bool Equals(JobApplication other)
         {
-            return string.Equals(Name, other.Name) && StartDate.Equals(other.StartDate) && Status == other.Status;
+            return string.Equals(CompanyName, other.CompanyName) && ApplicationDate.Equals(other.ApplicationDate) && Status == other.Status;
         }
     }
 }

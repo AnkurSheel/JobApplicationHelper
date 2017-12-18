@@ -1,11 +1,13 @@
-using JAH.Data.Interfaces;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using JAH.DomainModels;
+using JAH.Data.Entities;
+using JAH.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace JAH.Data.Repositories
 {
-    public class JobApplicationRepository : IRepository<JobApplication>
+    public class JobApplicationRepository : IRepository<JobApplicationEntity>
     {
         private readonly JobApplicationDbContext _context;
 
@@ -14,15 +16,24 @@ namespace JAH.Data.Repositories
             _context = context;
         }
 
-        public async Task<IQueryable<JobApplication>> FindAll()
+        public async Task Create(JobApplicationEntity jobApplication)
         {
-            var jobApplications = _context.JobApplications.Select(application => new JobApplication()
+            bool existingApplication = await _context.JobApplications.AnyAsync(a => a.CompanyName == jobApplication.CompanyName &&
+                                                                                    a.ApplicationDate == jobApplication.ApplicationDate);
+            if (!existingApplication)
             {
-                Name = application.CompanyName,
-                StartDate = application.ApplicationDate.Date,
-                Status = application.CurrentStatus
-            });
-            return await Task.Run(() => jobApplications);
+                _context.JobApplications.Add(jobApplication);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Trying to add same application", $"{jobApplication.CompanyName} {jobApplication.ApplicationDate}");
+            }
+        }
+
+        public IQueryable<JobApplicationEntity> FindAll()
+        {
+            return _context.JobApplications;
         }
     }
 }

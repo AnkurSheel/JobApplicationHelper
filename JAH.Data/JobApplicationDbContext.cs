@@ -18,7 +18,7 @@ namespace JAH.Data
             modelBuilder.Entity<JobApplicationEntity>().HasKey(s => s.Id);
             modelBuilder.Entity<JobApplicationEntity>().Property(p => p.CompanyName).IsRequired().HasMaxLength(100);
             modelBuilder.Entity<JobApplicationEntity>().Property(p => p.ApplicationDate).HasDefaultValueSql("getdate()");
-            modelBuilder.Entity<JobApplicationEntity>().Property(p => p.CurrentStatus).HasDefaultValue(Status.None);
+            modelBuilder.Entity<JobApplicationEntity>().Property(p => p.CurrentStatus).HasDefaultValue(Status.Applied);
             base.OnModelCreating(modelBuilder);
         }
     }

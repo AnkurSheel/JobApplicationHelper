@@ -1,5 +1,11 @@
 ﻿@model IEnumerable<JobApplication>
 
+<div class="text-center">
+    <a class="btn btn-primary" asp-controller="jobApplication" asp-action="NewApplication">Add new application</a>
+</div>
+
+<br />
+
 @foreach (JobApplication application in Model)
 {
     <div class="col-sm-4 col-lg-4 col-md-4">
@@ -8,10 +14,11 @@
             <div class="caption">
                 <h3 class="pull-right">@application.Status</h3>
                 <h3>
-                    <a>@application.Name</a>
+                    <a>@application.CompanyName</a>
                 </h3>
-                <p>@application.StartDate.ToString("dddd dd-MMM-yyyy")</p>
+                <p>@application.ApplicationDate.ToString("dddd dd-MMM-yyyy")</p>
             </div>
         </div>
     </div>
 }
+

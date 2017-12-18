@@ -1,0 +1,32 @@
+﻿@model JobApplication
+
+<form asp-action="NewApplication" method="post" class="form-horizontal" role="form">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="CompanyName" class="col-md-2 control-label"></label>
+        <div class="col-md-5">
+            <input asp-for="CompanyName" class="form-control" />
+            <span asp-validation-for="CompanyName" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="ApplicationDate" class="col-md-2 control-label"></label>
+        <div class="col-md-5">
+            <input asp-for="ApplicationDate" class="form-control" />
+            <span asp-validation-for="ApplicationDate" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="Status" class="col-md-2 control-label"></label>
+        <div class="col-md-5">
+            <select asp-for="Status" asp-items="Html.GetEnumSelectList<Status>()" class="form-control"></select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-5">
+            <input type="submit" class="btn btn-primary" value="Add Application" />
+        </div>
+    </div>
+</form>

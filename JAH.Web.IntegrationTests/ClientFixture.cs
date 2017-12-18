@@ -3,9 +3,9 @@ using System.IO;
 using System.Net.Http;
 using Autofac;
 using JAH.Data;
+using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.Data.Repositories;
-using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -20,66 +20,31 @@ namespace JAH.Web.IntegrationTests
 {
     public class ClientFixture : IDisposable
     {
+        private readonly ContainerBuilder _builder;
+
         public ClientFixture()
         {
-            var dbContextOptions = new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+            DbContextOptions<JobApplicationDbContext> dbContextOptions =
+                new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             JobApplicationDbContext = new JobApplicationDbContext(dbContextOptions);
 
+            _builder = new ContainerBuilder();
+            _builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
+            _builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
+            _builder.RegisterInstance(JobApplicationDbContext).As<JobApplicationDbContext>().ExternallyOwned();
 
-            HttpClient apiClient;
-            Builder = new ContainerBuilder();
-            Builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
-            Builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplication>>();
-            Builder.RegisterInstance(JobApplicationDbContext).As<JobApplicationDbContext>().ExternallyOwned();
-
-            using (IContainer container = Builder.Build())
-            {
-                using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
-                {
-                    string fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Api"));
-                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
-                    IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
-                                                                  .UseContentRoot(fullPath)
-                                                                  .UseEnvironment("Development")
-                                                                  .UseStartup<Api.Startup>()
-                                                                  .ConfigureServices(services => services.TryAddTransient(provider =>
-                                                                  {
-                                                                      var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-                                                                      var config = ServiceProviderServiceExtensions.GetRequiredService<IConfiguration>(provider);
-                                                                      return factory(hostingEnv, config);
-                                                                  }));
-                    var testServer = new TestServer(builder);
-                    apiClient = testServer.CreateClient();
-                }
-
-                using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
-                {
-                    string fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Web"));
-                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
-                    var builder = new WebHostBuilder().UseKestrel()
-                                                      .UseContentRoot(fullPath)
-                                                      .UseEnvironment("Development")
-                                                      .UseStartup<Startup>()
-                                                      .ConfigureServices(services => services.AddTransient(provider =>
-                                                      {
-                                                          var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-                                                          var config = provider.GetRequiredService<IConfiguration>();
-                                                          return factory(hostingEnv, config);
-                                                      }))
-                                                      .ConfigureServices(services => services.TryAddSingleton(apiClient));
-
-                    var testServer = new TestServer(builder);
-                    WebClient = testServer.CreateClient();
-                }
-            }
+            SetupClients();
         }
 
         public HttpClient WebClient { get; private set; }
 
-        public ContainerBuilder Builder { get; }
-
         public JobApplicationDbContext JobApplicationDbContext { get; }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -89,10 +54,60 @@ namespace JAH.Web.IntegrationTests
             }
         }
 
-        public void Dispose()
+        private void SetupClients()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            HttpClient apiClient;
+
+            using (IContainer container = _builder.Build())
+            {
+                using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
+                {
+                    string fullPath =
+                        Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Api"));
+
+                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
+                    IWebHostBuilder builder = new WebHostBuilder()
+                        .UseKestrel()
+                        .UseContentRoot(fullPath)
+                        .UseEnvironment("Development")
+                        .UseStartup<Api.Startup>()
+                        .ConfigureServices(services => services.TryAddTransient(provider => SetupStartup(provider, factory)));
+                    var testServer = new TestServer(builder);
+                    apiClient = testServer.CreateClient();
+                }
+
+                using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+                {
+                    string fullPath =
+                        Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Web"));
+
+                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
+                    IWebHostBuilder builder = new WebHostBuilder()
+                        .UseKestrel()
+                        .UseContentRoot(fullPath)
+                        .UseEnvironment("Development")
+                        .UseStartup<Startup>()
+                        .ConfigureServices(services => services.AddTransient(provider => SetupStartup(provider, factory)))
+                        .ConfigureServices(services => services.TryAddSingleton(apiClient));
+
+                    var testServer = new TestServer(builder);
+                    WebClient = testServer.CreateClient();
+                }
+            }
+        }
+
+        private Startup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, Startup> factory)
+        {
+            var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+            var config = provider.GetRequiredService<IConfiguration>();
+            return factory(hostingEnv, config);
+        }
+
+        private Api.Startup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, Api.Startup> factory)
+        {
+            var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+            var config = provider.GetRequiredService<IConfiguration>();
+            return factory(hostingEnv, config);
         }
     }
 }

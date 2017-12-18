@@ -23,23 +23,26 @@ namespace JAH.Web.UnitTests
             _helloController = new HelloController(httpClient);
         }
 
-        [Fact]
-        public async Task ShouldReturnOkObjectResultWithAGreeting()
+        [Theory]
+        [InlineData("name 1", "Hello name 1")]
+        [InlineData("name 2", "Hello name 2")]
+        public async Task Greet_Name_Greeting(string name, string expected)
         {
             // Arrange
-            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent("Hello ankur") };
+            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(expected) };
 
             var httpRequestMessage = new HttpRequestMessage();
             _httpMessageHandler.WhenForAnyArgs(x => x.Send(httpRequestMessage)).DoNotCallBase();
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            var result = await _helloController.Greet("ankur");
+            IActionResult result = await _helloController.Greet(name);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
-            Assert.Equal("Hello ankur", okResult.Value);
+            var okResult = (OkObjectResult) result;
+            var actual = okResult.Value as string;
+            Assert.Equal(expected, actual);
         }
     }
 }
