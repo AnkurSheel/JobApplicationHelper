@@ -49,7 +49,7 @@ namespace JAH.Data.UnitTests
             _jobApplicationDbContext.SaveChanges();
 
             // Act
-            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.FindAll();
+            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.GetAll();
 
             // Assert
             Assert.Equal(jobApplications, result.ToArray());
@@ -61,7 +61,7 @@ namespace JAH.Data.UnitTests
             // Arrange
 
             // Act
-            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.FindAll();
+            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.GetAll();
 
             // Assert
             Assert.Empty(result);

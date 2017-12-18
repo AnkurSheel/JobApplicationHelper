@@ -48,7 +48,7 @@ namespace JAH.Services.UnitTests
         public async Task GetAllApplications_MultipleApplications_AllJobApplications()
         {
             // Arrange
-            _jobApplicationRepository.FindAll().Returns(_jobApplicationEntities);
+            _jobApplicationRepository.GetAll().Returns(_jobApplicationEntities);
 
             // Act
             IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
@@ -62,7 +62,7 @@ namespace JAH.Services.UnitTests
         {
             // Arrange
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>());
-            _jobApplicationRepository.FindAll().Returns(jobApplicationEntities);
+            _jobApplicationRepository.GetAll().Returns(jobApplicationEntities);
 
             // Act
             IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
@@ -115,7 +115,7 @@ namespace JAH.Services.UnitTests
             // Arrange
             const string companyName = "Company 1";
             var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
-            _jobApplicationRepository.Find(companyName).Returns(jobApplicationEntities.First(x => x.CompanyName.Equals(companyName)));
+            _jobApplicationRepository.GetOne().ReturnsForAnyArgs(jobApplicationEntities.First(x => x.CompanyName.Equals(companyName)));
 
             // Act
             JobApplication result = await _jobApplicationService.GetApplication(companyName);
@@ -129,7 +129,7 @@ namespace JAH.Services.UnitTests
         {
             // Arrange
             const string company = "Company 1";
-            _jobApplicationRepository.Find(company).Returns((JobApplicationEntity)null);
+            _jobApplicationRepository.GetOne().ReturnsForAnyArgs((JobApplicationEntity)null);
 
             // Act
             JobApplication result = await _jobApplicationService.GetApplication(company);

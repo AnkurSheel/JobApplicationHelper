@@ -22,7 +22,7 @@ namespace JAH.Services.Services
         public async Task<IEnumerable<JobApplication>> GetAllApplications()
         {
             List<JobApplication> jobApplications = await _repository
-                                                       .FindAll()
+                                                       .GetAll()
                                                        .Select(application => new JobApplication
                                                        {
                                                            CompanyName = application.CompanyName,
@@ -36,7 +36,7 @@ namespace JAH.Services.Services
 
         public async Task<JobApplication> GetApplication(string companyName)
         {
-            JobApplicationEntity jobApplication = _repository.Find(companyName);
+            JobApplicationEntity jobApplication = _repository.GetOne(f => f.CompanyName.Equals(companyName));
             if (jobApplication != null)
             {
                 return await Task.Run(() => new JobApplication

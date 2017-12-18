@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
@@ -31,14 +32,20 @@ namespace JAH.Data.Repositories
             }
         }
 
-        public IQueryable<JobApplicationEntity> FindAll()
+        public IQueryable<JobApplicationEntity> GetAll(Expression<Func<JobApplicationEntity, bool>> filter = null)
         {
-            return _context.JobApplications;
+            IQueryable<JobApplicationEntity> query = _context.Set<JobApplicationEntity>();
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return query;
         }
 
-        public JobApplicationEntity Find(string id)
+        public JobApplicationEntity GetOne(Expression<Func<JobApplicationEntity, bool>> filter = null)
         {
-            throw new NotImplementedException();
+            return null;
+            //return GetAll(filter).SingleOrDefault();
         }
     }
 }
