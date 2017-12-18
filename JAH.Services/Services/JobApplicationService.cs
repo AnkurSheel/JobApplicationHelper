@@ -34,6 +34,11 @@ namespace JAH.Services.Services
             return jobApplications;
         }
 
+        public Task<JobApplication> GetApplication(string companyName)
+        {
+            return null;
+        }
+
         public async Task AddNewApplication(JobApplication jobApplication)
         {
             var jobApplicationEntity = new JobApplicationEntity

@@ -15,33 +15,35 @@ namespace JAH.Api.UnitTests
     {
         private readonly JobApplicationApiController _jobApplicationController;
         private readonly IJobApplicationService _jobApplicationService;
+        private readonly EnumerableQuery<JobApplication> _expectedjobApplications;
 
         public JobApplicationApiControllerTest()
         {
             _jobApplicationService = Substitute.For<IJobApplicationService>();
             _jobApplicationController = new JobApplicationApiController(_jobApplicationService);
-        }
 
-        {
-            // Arrange
-            var expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
+            _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {
                 new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
                 new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
                 new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             });
+        }
 
-            _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
         [Fact]
         public async Task ListAllApplications_MultipleApplications_OkObjectResultWithAListOfJobApplications()
+        {
+            // Arrange
+
+            _jobApplicationService.GetAllApplications().Returns(_expectedjobApplications);
 
             // Act
             IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
-            Assert.Equal(expectedjobApplications, okResult.Value);
+            var okResult = (OkObjectResult)result;
+            Assert.Equal(_expectedjobApplications, okResult.Value);
         }
 
         [Fact]
@@ -50,7 +52,7 @@ namespace JAH.Api.UnitTests
             // Arrange
             IQueryable<JobApplication> expectedjobApplications = new List<JobApplication>().AsQueryable();
 
-            _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
+            _jobApplicationService.GetAllApplications().Returns(expectedjobApplications);
 
             // Act
             IActionResult result = await _jobApplicationController.ListAllApplications();
@@ -77,7 +79,7 @@ namespace JAH.Api.UnitTests
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult) result;
+            var createdResult = (CreatedAtActionResult)result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 
@@ -100,6 +102,35 @@ namespace JAH.Api.UnitTests
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
             Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetApplication_ApplicationExists_OkObjectResultWithJobApplications()
+        {
+            // Arrange
+            JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
+            _jobApplicationService.GetApplication("Company 1").Returns(expectedjobApplication);
+
+            // Act
+            IActionResult result = await _jobApplicationController.GetApplication("Company 1");
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.Equal(expectedjobApplication, okResult.Value);
+        }
+
+        [Fact]
+        public async Task GetApplication_ApplicationDoesNotExist__NoContentObjectResult()
+        {
+            // Arrange
+            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication)null);
+
+            // Act
+            IActionResult result = await _jobApplicationController.GetApplication("Company 1");
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
         }
     }
 }

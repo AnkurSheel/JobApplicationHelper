@@ -53,5 +53,16 @@ namespace JAH.Api.Controllers
 
             ;
         }
+
+        public async Task<IActionResult> GetApplication(string companyName)
+        {
+            JobApplication jobApplication = await _service.GetApplication(companyName);
+            if (jobApplication != null)
+            {
+                return Ok(jobApplication);
+            }
+
+            return NoContent();
+        }
     }
 }
