@@ -17,7 +17,7 @@ namespace JAH.Web.UnitTests
         private readonly JobApplicationController _jobApplicationController;
         private readonly FakeHttpMessageHandler _httpMessageHandler;
         private readonly HttpRequestMessage _httpRequestMessage;
-        private List<JobApplication> _expectedJobApplications;
+        private readonly List<JobApplication> _expectedJobApplications;
 
         public JobApplicationControllerTest()
         {
