@@ -24,7 +24,6 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task GetAsync_MultipleApplications_HtmlView()
         {
             // Arrange
             _fixture.JobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
@@ -45,6 +44,7 @@ namespace JAH.Web.IntegrationTests
                 ApplicationDate = new DateTime(2017, 11, 14),
                 CurrentStatus = Status.Offer
             });
+        public async Task GetAllApplications_MultipleApplications_HtmlView()
             _fixture.JobApplicationDbContext.SaveChanges();
 
             // Act
@@ -58,7 +58,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task GetAsync_NoApplications_HtmlView()
+        public async Task GetAllApplications_NoApplications_HtmlView()
         {
             // Arrange
 
@@ -72,7 +72,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async void PostAsync_ApplicationExists_501()
+        public async void CreateNewApplication_ApplicationAlreadyExists_501()
         {
             // Arrange
             _fixture.JobApplicationDbContext.JobApplications.Add(new JobApplicationEntity
@@ -102,7 +102,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async void PostAsync_ApplicationDoesNotExists_OkObjectResult()
+        public async void CreateNewApplication_ApplicationDoesNotExists_OkObjectResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -119,24 +119,12 @@ namespace JAH.Web.IntegrationTests
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
         }
-    }
-}
 
-public static class UrlHelper
-{
-    public static string ToUrl(this Object instance)
     {
-        var urlBuilder = new StringBuilder();
-        PropertyInfo[] properties = instance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-        for (var i = 0; i < properties.Length; i++)
         {
-            urlBuilder.AppendFormat("{0}={1}&", properties[i].Name, properties[i].GetValue(instance, null));
         }
 
-        if (urlBuilder.Length > 1)
         {
-            urlBuilder.Remove(urlBuilder.Length - 1, 1);
         }
-        return urlBuilder.ToString();
     }
 }
