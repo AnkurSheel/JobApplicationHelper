@@ -31,6 +31,19 @@ namespace JAH.Api.Controllers
             return NoContent();
         }
 
+        [HttpGet]
+        [Route("{companyName}")]
+        public async Task<IActionResult> GetApplication(string companyName)
+        {
+            JobApplication jobApplication = await _service.GetApplication(companyName);
+            if (jobApplication != null)
+            {
+                return Ok(jobApplication);
+            }
+
+            return NoContent();
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddNewApplication([FromBody] JobApplication jobApplication)
         {
@@ -50,19 +63,6 @@ namespace JAH.Api.Controllers
                 Console.WriteLine(e);
                 throw;
             }
-
-            ;
-        }
-
-        public async Task<IActionResult> GetApplication(string companyName)
-        {
-            JobApplication jobApplication = await _service.GetApplication(companyName);
-            if (jobApplication != null)
-            {
-                return Ok(jobApplication);
-            }
-
-            return NoContent();
         }
     }
 }

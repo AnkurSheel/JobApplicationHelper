@@ -40,6 +40,8 @@ namespace JAH.Web.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("{companyName}")]
         public async Task<IActionResult> GetApplication(string companyName)
         {
             try
