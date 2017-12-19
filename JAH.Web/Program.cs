@@ -15,13 +15,22 @@ namespace JAH.Web
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            var builder = new ContainerBuilder();
-
-            using (var container = builder.Build())
+            try
             {
-                await StartWebServerAsync(container);
+                var builder = new ContainerBuilder();
+
+                using (var container = builder.Build())
+                {
+                    StartWebServerAsync(container).Wait();
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
 

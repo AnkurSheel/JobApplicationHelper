@@ -12,14 +12,23 @@ namespace JAH.Api
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            using (IContainer container = IOCBuilder.Build())
+            try
             {
-                SeedDatabase(container);
+                using (IContainer container = IOCBuilder.Build())
+                {
+                    SeedDatabase(container);
 
-                await StartWebServerAsync(container);
+                    StartWebServerAsync(container).Wait();
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
         }
 
         private static void SeedDatabase(IContainer container)
