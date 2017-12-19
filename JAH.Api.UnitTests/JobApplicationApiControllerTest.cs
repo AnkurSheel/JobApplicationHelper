@@ -15,52 +15,54 @@ namespace JAH.Api.UnitTests
     {
         private readonly JobApplicationApiController _jobApplicationController;
         private readonly IJobApplicationService _jobApplicationService;
+        private readonly EnumerableQuery<JobApplication> _expectedjobApplications;
 
         public JobApplicationApiControllerTest()
         {
             _jobApplicationService = Substitute.For<IJobApplicationService>();
             _jobApplicationController = new JobApplicationApiController(_jobApplicationService);
-        }
 
-        [Fact]
-        public async Task GetAsync_MultipleApplications_OkObjectResultWithAListOfJobApplications()
-        {
-            // Arrange
-            var expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
+            _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {
                 new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
                 new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
                 new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             });
-
-            _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
-
-            // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
-            Assert.Equal(expectedjobApplications, okResult.Value);
         }
 
         [Fact]
-        public async Task GetAsync_NoApplications_NoContentObjectResult()
+        public async Task ListAllApplications_MultipleApplications_OkObjectResultWithAListOfJobApplications()
+        {
+            // Arrange
+
+            _jobApplicationService.GetAllApplications().Returns(_expectedjobApplications);
+
+            // Act
+            IActionResult result = await _jobApplicationController.ListAllApplications();
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.Equal(_expectedjobApplications, okResult.Value);
+        }
+
+        [Fact]
+        public async Task ListAllApplications_NoApplications_NoContentObjectResult()
         {
             // Arrange
             IQueryable<JobApplication> expectedjobApplications = new List<JobApplication>().AsQueryable();
 
-            _jobApplicationService.ReadAllAsync().Returns(expectedjobApplications);
+            _jobApplicationService.GetAllApplications().Returns(expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
+            IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<NoContentResult>(result);
         }
 
         [Fact]
-        public async void PostAsync_ApplicationDoesNotExist_CreatedResultWithJobApplication()
+        public async void AddNewApplication_ApplicationDoesNotExist_CreatedResultWithJobApplication()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -71,18 +73,18 @@ namespace JAH.Api.UnitTests
             };
 
             // Act
-            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult) result;
+            var createdResult = (CreatedAtActionResult)result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 
         [Fact]
-        public async Task PostAsync_ApplicationExists_BadRequestResult()
+        public async Task AddNewApplication_ApplicationExists_BadRequestResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -95,11 +97,40 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.AddNewApplication(jobApplication).Returns(x => throw new ArgumentException());
 
             // Act
-            IActionResult result = await _jobApplicationController.PostAsync(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
             Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetApplication_ApplicationExists_OkObjectResultWithJobApplications()
+        {
+            // Arrange
+            JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
+            _jobApplicationService.GetApplication("Company 1").Returns(expectedjobApplication);
+
+            // Act
+            IActionResult result = await _jobApplicationController.GetApplication("Company 1");
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.Equal(expectedjobApplication, okResult.Value);
+        }
+
+        [Fact]
+        public async Task GetApplication_ApplicationDoesNotExist__NoContentObjectResult()
+        {
+            // Arrange
+            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication)null);
+
+            // Act
+            IActionResult result = await _jobApplicationController.GetApplication("Company 1");
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
         }
     }
 }

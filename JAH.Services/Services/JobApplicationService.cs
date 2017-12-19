@@ -19,10 +19,10 @@ namespace JAH.Services.Services
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<IEnumerable<JobApplication>> ReadAllAsync()
+        public async Task<IEnumerable<JobApplication>> GetAllApplications()
         {
             List<JobApplication> jobApplications = await _repository
-                                                       .FindAll()
+                                                       .GetAll()
                                                        .Select(application => new JobApplication
                                                        {
                                                            CompanyName = application.CompanyName,
@@ -32,6 +32,22 @@ namespace JAH.Services.Services
                                                        .ToListAsync();
 
             return jobApplications;
+        }
+
+        public async Task<JobApplication> GetApplication(string companyName)
+        {
+            JobApplicationEntity jobApplication = _repository.GetOne(f => f.CompanyName.Equals(companyName));
+            if (jobApplication != null)
+            {
+                return await Task.Run(() => new JobApplication
+                {
+                    ApplicationDate = jobApplication.ApplicationDate,
+                    CompanyName = jobApplication.CompanyName,
+                    Status = jobApplication.CurrentStatus
+                });
+            }
+
+            return null;
         }
 
         public async Task AddNewApplication(JobApplication jobApplication)

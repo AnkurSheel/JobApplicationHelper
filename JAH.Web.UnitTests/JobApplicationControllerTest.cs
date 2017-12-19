@@ -17,6 +17,7 @@ namespace JAH.Web.UnitTests
         private readonly JobApplicationController _jobApplicationController;
         private readonly FakeHttpMessageHandler _httpMessageHandler;
         private readonly HttpRequestMessage _httpRequestMessage;
+        private readonly List<JobApplication> _expectedJobApplications;
 
         public JobApplicationControllerTest()
         {
@@ -27,38 +28,39 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.WhenForAnyArgs(x => x.Send(_httpRequestMessage)).DoNotCallBase();
 
             _jobApplicationController = new JobApplicationController(httpClient);
-        }
 
-        [Fact]
-        public async Task GetAsync_MultipleApplications_ViewResultWithAllJobApplications()
-        {
-            // Arrange
-            var expectedJobApplications = new List<JobApplication>
+            _expectedJobApplications = new List<JobApplication>
             {
                 new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
                 new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
                 new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             };
+        }
+
+        [Fact]
+        public async Task ListAllApplications_MultipleApplications_ViewResultWithAllJobApplications()
+        {
+            // Arrange
 
             var httpResponseMessage = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(JsonConvert.SerializeObject(expectedJobApplications))
+                Content = new StringContent(JsonConvert.SerializeObject(_expectedJobApplications))
             };
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
+            IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<ViewResult>(result);
             var viewResult = (ViewResult)result;
-            Assert.Equal(expectedJobApplications, viewResult.Model);
+            Assert.Equal(_expectedJobApplications, viewResult.Model);
         }
 
         [Fact]
-        public async Task GetAsync_NoApplications_EmptyViewResult()
+        public async Task ListAllApplications_NoApplications_EmptyViewResult()
         {
             // Arrange
             const string expectedJson = "";
@@ -69,7 +71,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetAsync();
+            IActionResult result = await _jobApplicationController.ListAllApplications();
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -78,7 +80,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async void PostAsync_ApplicationExists_501()
+        public async void AddNewApplication_ApplicationExists_501()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -95,7 +97,7 @@ namespace JAH.Web.UnitTests
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
             // Act
-            IActionResult result = await _jobApplicationController.NewApplication(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);
@@ -104,7 +106,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async void PostAsync_ApplicationDoesNotExists_RedirectToActionObjectResult()
+        public async void AddNewApplication_ApplicationDoesNotExists_RedirectToActionObjectResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -122,12 +124,55 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.NewApplication(jobApplication);
+            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
 
             // Assert
             Assert.IsType<RedirectToActionResult>(result);
             var redirectToActionResult = (RedirectToActionResult)result;
-            Assert.Equal("GetAsync", redirectToActionResult.ActionName);
+            Assert.Equal("ListAllApplications", redirectToActionResult.ActionName);
+        }
+
+        [Fact]
+        public async Task GetApplication_ApplicationExists_ViewResultWithJobApplication()
+        {
+            // Arrange
+            const int index = 0;
+
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonConvert.SerializeObject(_expectedJobApplications[index]))
+            };
+
+            _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            IActionResult result = await _jobApplicationController.GetApplication(_expectedJobApplications[index].CompanyName);
+
+            // Assert
+            Assert.IsType<ViewResult>(result);
+            var viewResult = (ViewResult)result;
+            Assert.Equal(_expectedJobApplications[index], viewResult.Model);
+        }
+
+        [Fact]
+        public async Task GetApplication_ApplicationDoesNotExist_EmptyViewResult()
+        {
+            // Arrange
+            const string expectedJson = "";
+            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(expectedJson) };
+
+            var httpRequestMessage = new HttpRequestMessage();
+            _httpMessageHandler.WhenForAnyArgs(x => x.Send(httpRequestMessage)).DoNotCallBase();
+            _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            IActionResult result = await _jobApplicationController.GetApplication("Company");
+
+            // Assert
+            Assert.IsType<ViewResult>(result);
+            var viewResult = (ViewResult)result;
+            Assert.Equal(new JobApplication(), viewResult.Model);
         }
     }
 }

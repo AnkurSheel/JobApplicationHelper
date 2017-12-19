@@ -11,18 +11,13 @@ namespace JAH.Data.UnitTests
     {
         private readonly JobApplicationRepository _jobApplicationRepository;
         private readonly JobApplicationDbContext _jobApplicationDbContext;
+        private readonly JobApplicationEntity[] _jobApplicationEntities;
 
         public JobApplicationRepositoryTest()
         {
             _jobApplicationDbContext = ContextFixture.GetContextWithData();
             _jobApplicationRepository = new JobApplicationRepository(_jobApplicationDbContext);
-        }
-
-        [Fact]
-        public void FindAll_MultipleApplications_AllJobApplications()
-        {
-            // Arrange
-            var jobApplications = new[]
+            _jobApplicationEntities = new[]
             {
                 new JobApplicationEntity
                 {
@@ -40,8 +35,14 @@ namespace JAH.Data.UnitTests
                 new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer },
                 new JobApplicationEntity { CompanyName = "Company 5", ApplicationDate = new DateTime(2017, 09, 18), CurrentStatus = Status.Rejected }
             };
+        }
 
-            foreach (JobApplicationEntity jobApplication in jobApplications)
+        [Fact]
+        public void GetAll_MultipleApplications_AllJobApplications()
+        {
+            // Arrange
+
+            foreach (JobApplicationEntity jobApplication in _jobApplicationEntities)
             {
                 _jobApplicationDbContext.JobApplications.Add(jobApplication);
             }
@@ -49,19 +50,19 @@ namespace JAH.Data.UnitTests
             _jobApplicationDbContext.SaveChanges();
 
             // Act
-            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.FindAll();
+            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.GetAll();
 
             // Assert
-            Assert.Equal(jobApplications, result.ToArray());
+            Assert.Equal(_jobApplicationEntities, result.ToArray());
         }
 
         [Fact]
-        public void FindAll_NoApplications_EmptyCollection()
+        public void GetAll_NoApplications_EmptyCollection()
         {
             // Arrange
 
             // Act
-            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.FindAll();
+            IQueryable<JobApplicationEntity> result = _jobApplicationRepository.GetAll();
 
             // Assert
             Assert.Empty(result);
@@ -111,7 +112,59 @@ namespace JAH.Data.UnitTests
             Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(duplicateJobApplication));
 
             // Assert
+            Assert.IsType<ArgumentException>(ex);
             Assert.NotNull(ex);
+        }
+
+        [Fact]
+        public void GetOne_SingleApplicationExists_Application()
+        {
+            // Arrange
+
+            foreach (JobApplicationEntity jobApplication in _jobApplicationEntities)
+            {
+                _jobApplicationDbContext.JobApplications.Add(jobApplication);
+            }
+
+            _jobApplicationDbContext.SaveChanges();
+
+            // Act
+            JobApplicationEntity result = _jobApplicationRepository.GetOne(x => x.CompanyName.Equals(_jobApplicationEntities[0].CompanyName));
+
+            // Assert
+            Assert.Equal(_jobApplicationEntities[0], result);
+        }
+
+        [Fact]
+        public void GetOne_MultipleApplicationsMatched_ThrowsException()
+        {
+            // Arrange
+
+            foreach (JobApplicationEntity jobApplication in _jobApplicationEntities)
+            {
+                _jobApplicationDbContext.JobApplications.Add(jobApplication);
+            }
+
+            _jobApplicationDbContext.SaveChanges();
+
+            // Act
+            Exception ex = Record.Exception(() => _jobApplicationRepository.GetOne(x => x.ApplicationDate == new DateTime(2017, 11, 14)));
+
+            // Assert
+            Assert.IsType<InvalidOperationException>(ex);
+            Assert.NotNull(ex);
+        }
+
+        [Fact]
+        public void GetOne_ApplicationwithCompanyNameDoesNotExist_NullResult()
+        {
+            // Arrange
+
+            // Act
+            JobApplicationEntity result = _jobApplicationRepository.GetOne(x => x.CompanyName.Equals(_jobApplicationEntities[0].CompanyName));
+
+            // Assert
+            Assert.Null(result);
         }
     }
 }

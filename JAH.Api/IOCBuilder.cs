@@ -19,12 +19,13 @@ public class IOCBuilder
     private static void RegisterTypes(ContainerBuilder builder)
     {
         builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
-        builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
-        var options = new DbContextOptionsBuilder<JobApplicationDbContext>()
+        builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>().InstancePerLifetimeScope();
+        DbContextOptions<JobApplicationDbContext> options = new DbContextOptionsBuilder<JobApplicationDbContext>()
             .UseSqlServer("Server = (localdb)\\mssqllocaldb; Database = JobApplicationData; Trusted_Connection = True;")
             .Options;
         builder.RegisterType<JobApplicationDbContext>()
                .As<JobApplicationDbContext>()
-               .WithParameter(new TypedParameter(typeof(DbContextOptions), options));
+               .WithParameter(new TypedParameter(typeof(DbContextOptions), options))
+               .InstancePerLifetimeScope();
     }
 }

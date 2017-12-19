@@ -1,13 +1,17 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace JAH.Data.Interfaces
 {
-    public interface IRepository<T>
-        where T : new()
+    public interface IRepository<TEntity>
+        where TEntity : class, new()
     {
-        Task Create(T entity);
+        Task Create(TEntity entity);
 
-        IQueryable<T> FindAll();
+        IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> filter = null);
+
+        TEntity GetOne(Expression<Func<TEntity, bool>> filter = null);
     }
 }

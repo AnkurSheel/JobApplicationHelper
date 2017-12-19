@@ -1,5 +1,5 @@
 # common configuration for ALL branches
-version: 0.0.3.{build}
+version: 0.0.4.{build}
 image: Visual Studio 2017
 # branches:
   # only:
@@ -44,12 +44,13 @@ for:
   branches:
     only:
       - master
-
+      - develop
+      
   after_build:
     - cmd: dotnet publish JAH.Web\JAH.Web.csproj
 
   artifacts:
-    - path: 'JAH.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+    - path: 'JAH.Web\bin\%configuration%\netcoreapp2.0\publish'
       name: WebSite
       type: WebDeployPackage
 

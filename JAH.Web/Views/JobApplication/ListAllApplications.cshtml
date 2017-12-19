@@ -1,7 +1,7 @@
-﻿@model IEnumerable<JobApplication>
+@model IEnumerable<JobApplication>
 
 <div class="text-center">
-    <a class="btn btn-primary" asp-controller="jobApplication" asp-action="NewApplication">Add new application</a>
+    <a class="btn btn-primary" asp-controller="jobApplication" asp-action="AddNewApplication">Add new application</a>
 </div>
 
 <br />
@@ -14,7 +14,7 @@
             <div class="caption">
                 <h3 class="pull-right">@application.Status</h3>
                 <h3>
-                    <a>@application.CompanyName</a>
+                    <a asp-controller="jobApplication" asp-action="GetApplication" asp-route-companyName="@application.CompanyName">@application.CompanyName</a>
                 </h3>
                 <p>@application.ApplicationDate.ToString("dddd dd-MMM-yyyy")</p>
             </div>
