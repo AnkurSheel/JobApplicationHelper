@@ -133,7 +133,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationExists_ViewResultWithJobApplication()
+        public async Task ShowApplication_ApplicationExists_ViewResultWithJobApplication()
         {
             // Arrange
             const int index = 0;
@@ -147,7 +147,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetApplication(_expectedJobApplications[index].CompanyName);
+            IActionResult result = await _jobApplicationController.ShowApplication(_expectedJobApplications[index].CompanyName);
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -156,7 +156,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationDoesNotExist_EmptyViewResult()
+        public async Task ShowApplication_ApplicationDoesNotExist_EmptyViewResult()
         {
             // Arrange
             const string expectedJson = "";
@@ -167,7 +167,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetApplication("Company");
+            IActionResult result = await _jobApplicationController.ShowApplication("Company");
 
             // Assert
             Assert.IsType<ViewResult>(result);

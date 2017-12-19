@@ -42,7 +42,7 @@ namespace JAH.Web.Controllers
 
         [HttpGet]
         [Route("{companyName}")]
-        public async Task<IActionResult> GetApplication(string companyName)
+        public async Task<IActionResult> ShowApplication(string companyName)
         {
             try
             {
