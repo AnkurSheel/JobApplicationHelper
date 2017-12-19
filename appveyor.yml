@@ -48,12 +48,15 @@ for:
       
   after_build:
     - cmd: dotnet publish JAH.Web\JAH.Web.csproj
-
+    - cmd: dotnet publish JAH.Api\JAH.Api.csproj
+    
   artifacts:
-    - path: 'JAH.Web\bin\%configuration%\netcoreapp2.0\publish'
+    - path: 'JAH.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: WebSite
       type: WebDeployPackage
-
+    - path: 'JAH.Api\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+      name: Api
+      type: WebDeployPackage
 # "fall back" configuration for all other branches
 -
   configuration:
