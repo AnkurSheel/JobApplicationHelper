@@ -19,12 +19,11 @@ namespace JAH.Data.Repositories
 
         public async Task Create(JobApplicationEntity jobApplication)
         {
-            bool existingApplication = await _context.JobApplications.AnyAsync(a => a.CompanyName == jobApplication.CompanyName &&
-                                                                                    a.ApplicationDate == jobApplication.ApplicationDate);
+            bool existingApplication = await _context.JobApplications.AnyAsync(a => a.CompanyName == jobApplication.CompanyName);
             if (!existingApplication)
             {
                 _context.JobApplications.Add(jobApplication);
-                await _context.SaveChangesAsync();
+                await SaveAsync();
             }
             else
             {
@@ -45,6 +44,35 @@ namespace JAH.Data.Repositories
         public JobApplicationEntity GetOne(Expression<Func<JobApplicationEntity, bool>> filter = null)
         {
             return GetAll(filter).SingleOrDefault();
+        }
+
+        public async Task Update(JobApplicationEntity jobApplication)
+        {
+            _context.JobApplications.Attach(jobApplication);
+            _context.Entry(jobApplication).State = EntityState.Modified;
+            await SaveAsync();
+        }
+
+        protected virtual Task SaveAsync()
+        {
+            try
+            {
+                return _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                ThrowEnhancedValidationException(e);
+            }
+
+            return Task.FromResult(0);
+        }
+        protected virtual void ThrowEnhancedValidationException(DbUpdateException dbu)
+        {
+            var errorMessages = dbu.Entries.SelectMany(x => x.Entity.GetType().Name);
+
+            var fullErrorMessage = string.Join("; ", errorMessages);
+            var exceptionMessage = string.Concat(dbu.Message, " The validation errors are: ", fullErrorMessage);
+            throw new DbUpdateException(exceptionMessage, dbu);
         }
     }
 }
