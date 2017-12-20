@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -19,16 +20,8 @@ namespace JAH.Data.Repositories
 
         public async Task Create(JobApplicationEntity jobApplication)
         {
-            bool existingApplication = await _context.JobApplications.AnyAsync(a => a.CompanyName == jobApplication.CompanyName);
-            if (!existingApplication)
-            {
-                _context.JobApplications.Add(jobApplication);
-                await SaveAsync();
-            }
-            else
-            {
-                throw new ArgumentException("Trying to add same application", $"{jobApplication.CompanyName} {jobApplication.ApplicationDate}");
-            }
+            _context.JobApplications.Add(jobApplication);
+            await SaveAsync();
         }
 
         public IQueryable<JobApplicationEntity> GetAll(Expression<Func<JobApplicationEntity, bool>> filter = null)
@@ -53,7 +46,7 @@ namespace JAH.Data.Repositories
             await SaveAsync();
         }
 
-        protected virtual Task SaveAsync()
+        private Task SaveAsync()
         {
             try
             {
@@ -66,12 +59,13 @@ namespace JAH.Data.Repositories
 
             return Task.FromResult(0);
         }
-        protected virtual void ThrowEnhancedValidationException(DbUpdateException dbu)
-        {
-            var errorMessages = dbu.Entries.SelectMany(x => x.Entity.GetType().Name);
 
-            var fullErrorMessage = string.Join("; ", errorMessages);
-            var exceptionMessage = string.Concat(dbu.Message, " The validation errors are: ", fullErrorMessage);
+        private void ThrowEnhancedValidationException(DbUpdateException dbu)
+        {
+            IEnumerable<char> errorMessages = dbu.Entries.SelectMany(x => x.Entity.GetType().Name);
+
+            string fullErrorMessage = string.Join("; ", errorMessages);
+            string exceptionMessage = string.Concat(dbu.Message, " The validation errors are: ", fullErrorMessage);
             throw new DbUpdateException(exceptionMessage, dbu);
         }
     }

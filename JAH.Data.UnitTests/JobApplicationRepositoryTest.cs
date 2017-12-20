@@ -116,25 +116,26 @@ namespace JAH.Data.UnitTests
         [Fact]
         public async void Create_ApplicationExists_ThrowException()
         {
+            // Arrange
             var jobApplication = new JobApplicationEntity
             {
-                CompanyName = "Company 1",
-                ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.Interview
+                Id = _jobApplicationEntities[0].Id,
+                CompanyName = "New company",
+                ApplicationDate = new DateTime(2017, 12, 20),
+                CurrentStatus = Status.Offer
             };
-            _jobApplicationDbContext.JobApplications.Add(jobApplication);
+            _jobApplicationDbContext.JobApplications.Add(_jobApplicationEntities[0]);
             _jobApplicationDbContext.SaveChanges();
 
+            JobApplicationDbContext context = ContextFixture.GetContext(_guid);
+            _jobApplicationRepository = new JobApplicationRepository(context);
+
             // Act
-            var duplicateJobApplication = new JobApplicationEntity
-            {
-                CompanyName = "Company 1",
-                ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.Interview
-            };
-            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(duplicateJobApplication));
+            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(jobApplication));
 
             // Assert
+            JobApplicationEntity entity = ContextFixture.GetContext(_guid).JobApplications.FirstOrDefault(x => x.Id == jobApplication.Id);
+            Assert.Equal(entity, _jobApplicationEntities[0]);
             Assert.IsType<ArgumentException>(ex);
             Assert.NotNull(ex);
         }
