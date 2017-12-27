@@ -60,5 +60,16 @@ namespace JAH.Services.Services
             };
             await _repository.Create(jobApplicationEntity);
         }
+
+        public async Task UpdateApplication(JobApplication jobApplication)
+        {
+            var jobApplicationEntity = new JobApplicationEntity
+            {
+                CompanyName = jobApplication.CompanyName,
+                ApplicationDate = jobApplication.ApplicationDate,
+                CurrentStatus = jobApplication.Status
+            };
+            await _repository.Update(jobApplicationEntity);
+        }
     }
 }
