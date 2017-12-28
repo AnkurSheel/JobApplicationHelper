@@ -122,7 +122,7 @@ namespace JAH.Web.IntegrationTests
             // Act
 
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/addNewApplication", stringContent);
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
@@ -144,7 +144,7 @@ namespace JAH.Web.IntegrationTests
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/addNewApplication", stringContent);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -209,7 +209,7 @@ namespace JAH.Web.IntegrationTests
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response = await _fixture.WebClient.PutAsync("/jobApplication", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/updateApplication", stringContent);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);

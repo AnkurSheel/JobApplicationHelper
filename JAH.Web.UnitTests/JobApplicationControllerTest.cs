@@ -55,7 +55,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(_expectedJobApplications, viewResult.Model);
         }
 
@@ -75,7 +75,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(new List<JobApplication>(), viewResult.Model);
         }
 
@@ -102,7 +102,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);
-            var statusCodeResult = (StatusCodeResult) result;
+            var statusCodeResult = (StatusCodeResult)result;
             Assert.Equal(400, statusCodeResult.StatusCode);
         }
 
@@ -130,7 +130,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<RedirectToActionResult>(result);
-            var redirectToActionResult = (RedirectToActionResult) result;
+            var redirectToActionResult = (RedirectToActionResult)result;
             Assert.Equal("ListAllApplications", redirectToActionResult.ActionName);
         }
 
@@ -153,7 +153,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(_expectedJobApplications[index], viewResult.Model);
         }
 
@@ -173,7 +173,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<ViewResult>(result);
-            var viewResult = (ViewResult) result;
+            var viewResult = (ViewResult)result;
             Assert.Equal(new JobApplication(), viewResult.Model);
         }
 
@@ -192,11 +192,11 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.UpdateApplication(jobApplication);
+            IActionResult result = await _jobApplicationController.UpdateApplication(jobApplication.Id, jobApplication);
 
             // Assert
             Assert.IsType<RedirectToActionResult>(result);
-            var redirectToActionResult = (RedirectToActionResult) result;
+            var redirectToActionResult = (RedirectToActionResult)result;
             Assert.Equal("ListAllApplications", redirectToActionResult.ActionName);
         }
     }

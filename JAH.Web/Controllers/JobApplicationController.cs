@@ -32,7 +32,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -54,7 +54,7 @@ namespace JAH.Web.Controllers
                     return View(application);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -63,15 +63,14 @@ namespace JAH.Web.Controllers
         }
 
         [HttpGet]
-        [Route("AddNewApplication")]
+        [Route("addNewApplication")]
         public IActionResult AddNewApplication()
         {
             return View();
         }
 
         [HttpPost]
-        [Route("")]
-        [Route("AddNewApplication")]
+        [Route("addNewApplication")]
         public async Task<IActionResult> AddNewApplication(JobApplication jobApplication)
         {
             try
@@ -86,7 +85,7 @@ namespace JAH.Web.Controllers
                         return RedirectToAction("ListAllApplications");
                     }
 
-                    return new StatusCodeResult((int) responseMessage.StatusCode);
+                    return new StatusCodeResult((int)responseMessage.StatusCode);
                 }
 
                 return View(jobApplication);
@@ -97,10 +96,11 @@ namespace JAH.Web.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateApplication(JobApplication jobApplication)
+        [HttpPost]
+        [Route("updateApplication")]
+        public async Task<IActionResult> UpdateApplication(int id, [Bind("Id, CompanyName, ApplicationDate, Status")] JobApplication application)
         {
-            string json = JsonConvert.SerializeObject(jobApplication);
+            string json = JsonConvert.SerializeObject(application);
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
             HttpResponseMessage responseMessage = await _client.PutAsync($"api/jobApplication", stringContent);
             if (responseMessage.IsSuccessStatusCode)
@@ -108,7 +108,7 @@ namespace JAH.Web.Controllers
                 return RedirectToAction("ListAllApplications");
             }
 
-            return new StatusCodeResult((int) responseMessage.StatusCode);
+            return new StatusCodeResult((int)responseMessage.StatusCode);
         }
     }
 }
