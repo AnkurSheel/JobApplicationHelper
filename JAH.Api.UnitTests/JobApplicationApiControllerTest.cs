@@ -42,7 +42,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
+            var okResult = (OkObjectResult) result;
             Assert.Equal(_expectedjobApplications, okResult.Value);
         }
 
@@ -79,7 +79,7 @@ namespace JAH.Api.UnitTests
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult)result;
+            var createdResult = (CreatedAtActionResult) result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 
@@ -116,7 +116,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
+            var okResult = (OkObjectResult) result;
             Assert.Equal(expectedjobApplication, okResult.Value);
         }
 
@@ -124,13 +124,28 @@ namespace JAH.Api.UnitTests
         public async Task GetApplication_ApplicationDoesNotExist__NoContentObjectResult()
         {
             // Arrange
-            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication)null);
+            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication) null);
 
             // Act
             IActionResult result = await _jobApplicationController.GetApplication("Company 1");
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateApplication__CallsServiceUpdateApplication()
+        {
+            // Arrange
+            JobApplication jobApplication = _expectedjobApplications.First();
+
+            // Act
+            IActionResult result = await _jobApplicationController.UpdateApplication(jobApplication);
+
+            // Assert
+            await _jobApplicationService.Received().UpdateApplication(jobApplication);
+
+            Assert.IsType<OkResult>(result);
         }
     }
 }

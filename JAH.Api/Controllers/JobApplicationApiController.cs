@@ -64,5 +64,12 @@ namespace JAH.Api.Controllers
                 throw;
             }
         }
+
+        public async Task<IActionResult> UpdateApplication(JobApplication jobApplication)
+        {
+            await _service.UpdateApplication(jobApplication);
+
+            return Ok();
+        }
     }
 }
