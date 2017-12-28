@@ -116,7 +116,7 @@ namespace JAH.Services.UnitTests
         {
             // Arrange
             const string companyName = "Company 1";
-            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
+            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>) _jobApplicationEntities;
             _jobApplicationRepository.GetOne().ReturnsForAnyArgs(jobApplicationEntities.First(x => x.CompanyName.Equals(companyName)));
 
             // Act
@@ -131,7 +131,7 @@ namespace JAH.Services.UnitTests
         {
             // Arrange
             const string company = "Company 1";
-            _jobApplicationRepository.GetOne().ReturnsForAnyArgs((JobApplicationEntity)null);
+            _jobApplicationRepository.GetOne().ReturnsForAnyArgs((JobApplicationEntity) null);
 
             // Act
             JobApplication result = await _jobApplicationService.GetApplication(company);
@@ -141,7 +141,7 @@ namespace JAH.Services.UnitTests
         }
 
         [Fact]
-        public async void Update_ApplicationExists_UpdatesJobApplication()
+        public async void UpdateApplication_CallRepositoryUpdate()
         {
             // Arrange
 
