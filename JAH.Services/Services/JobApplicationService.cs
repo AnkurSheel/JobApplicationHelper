@@ -25,6 +25,7 @@ namespace JAH.Services.Services
                                                        .GetAll()
                                                        .Select(application => new JobApplication
                                                        {
+                                                           Id = application.Id,
                                                            CompanyName = application.CompanyName,
                                                            ApplicationDate = application.ApplicationDate.Date,
                                                            Status = application.CurrentStatus
@@ -41,6 +42,7 @@ namespace JAH.Services.Services
             {
                 return await Task.Run(() => new JobApplication
                 {
+                    Id = jobApplication.Id,
                     ApplicationDate = jobApplication.ApplicationDate,
                     CompanyName = jobApplication.CompanyName,
                     Status = jobApplication.CurrentStatus
@@ -54,6 +56,7 @@ namespace JAH.Services.Services
         {
             var jobApplicationEntity = new JobApplicationEntity
             {
+                Id = jobApplication.Id,
                 CompanyName = jobApplication.CompanyName,
                 ApplicationDate = jobApplication.ApplicationDate,
                 CurrentStatus = jobApplication.Status
@@ -65,6 +68,7 @@ namespace JAH.Services.Services
         {
             var jobApplicationEntity = new JobApplicationEntity
             {
+                Id = jobApplication.Id,
                 CompanyName = jobApplication.CompanyName,
                 ApplicationDate = jobApplication.ApplicationDate,
                 CurrentStatus = jobApplication.Status

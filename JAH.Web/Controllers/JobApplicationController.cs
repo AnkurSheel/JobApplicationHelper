@@ -32,7 +32,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -54,7 +54,7 @@ namespace JAH.Web.Controllers
                     return View(application);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -86,7 +86,7 @@ namespace JAH.Web.Controllers
                         return RedirectToAction("ListAllApplications");
                     }
 
-                    return new StatusCodeResult((int)responseMessage.StatusCode);
+                    return new StatusCodeResult((int) responseMessage.StatusCode);
                 }
 
                 return View(jobApplication);
@@ -95,6 +95,20 @@ namespace JAH.Web.Controllers
             {
                 return new StatusCodeResult(501);
             }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateApplication(JobApplication jobApplication)
+        {
+            string json = JsonConvert.SerializeObject(jobApplication);
+            var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+            HttpResponseMessage responseMessage = await _client.PutAsync($"api/jobApplication", stringContent);
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                return RedirectToAction("ListAllApplications");
+            }
+
+            return new StatusCodeResult((int) responseMessage.StatusCode);
         }
     }
 }

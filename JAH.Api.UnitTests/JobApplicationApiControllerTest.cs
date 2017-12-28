@@ -24,9 +24,9 @@ namespace JAH.Api.UnitTests
 
             _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {
-                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
-                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+                new JobApplication { Id = 1, CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { Id = 2, CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { Id = 3, CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             });
         }
 
@@ -67,6 +67,7 @@ namespace JAH.Api.UnitTests
             // Arrange
             var jobApplication = new JobApplication
             {
+                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview

@@ -50,7 +50,7 @@ namespace JAH.Api.Controllers
             try
             {
                 await _service.AddNewApplication(jobApplication);
-                return CreatedAtAction("ListAllApplications", new { id = jobApplication.CompanyName }, jobApplication);
+                return CreatedAtAction("ListAllApplications", new { id = jobApplication.Id }, jobApplication);
             }
             catch (ArgumentException)
             {
@@ -65,11 +65,20 @@ namespace JAH.Api.Controllers
             }
         }
 
-        public async Task<IActionResult> UpdateApplication(JobApplication jobApplication)
+        [HttpPut]
+        public async Task<IActionResult> UpdateApplication([FromBody] JobApplication jobApplication)
         {
-            await _service.UpdateApplication(jobApplication);
+            try
+            {
+                await _service.UpdateApplication(jobApplication);
 
-            return Ok();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }

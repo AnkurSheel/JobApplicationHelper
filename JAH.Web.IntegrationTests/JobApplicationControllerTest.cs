@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace JAH.Web.IntegrationTests
 {
-    public class JobApplicationControllerTest : IClassFixture<ClientFixture>
+    public class JobApplicationControllerTest : IClassFixture<ClientFixture>, IDisposable
     {
         private readonly ITestOutputHelper _output;
         private readonly ClientFixture _fixture;
@@ -20,26 +20,51 @@ namespace JAH.Web.IntegrationTests
         {
             _output = output;
             _fixture = fixture;
-            _fixture.JobApplicationDbContext.Database.EnsureDeleted();
 
             _jobApplicationEntities = new[]
             {
                 new JobApplicationEntity
                 {
+                    Id = 1,
                     CompanyName = "Company 1",
                     ApplicationDate = new DateTime(2017, 11, 13),
                     CurrentStatus = Status.Interview
                 },
-                new JobApplicationEntity { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied },
                 new JobApplicationEntity
                 {
+                    Id = 2,
+                    CompanyName = "Company 2",
+                    ApplicationDate = new DateTime(2017, 11, 14),
+                    CurrentStatus = Status.Applied
+                },
+                new JobApplicationEntity
+                {
+                    Id = 3,
                     CompanyName = "Company 3",
                     ApplicationDate = new DateTime(2017, 11, 14),
                     CurrentStatus = Status.Interview
                 },
-                new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer },
-                new JobApplicationEntity { CompanyName = "Company 5", ApplicationDate = new DateTime(2017, 09, 18), CurrentStatus = Status.Rejected }
+                new JobApplicationEntity
+                {
+                    Id = 4,
+                    CompanyName = "Company 4",
+                    ApplicationDate = new DateTime(2017, 10, 9),
+                    CurrentStatus = Status.Offer
+                },
+                new JobApplicationEntity
+                {
+                    Id = 5,
+                    CompanyName = "Company 5",
+                    ApplicationDate = new DateTime(2017, 09, 18),
+                    CurrentStatus = Status.Rejected
+                }
             };
+        }
+
+        public void Dispose()
+        {
+            _fixture.DetachAllEntities();
+            _fixture.JobApplicationDbContext.Database.EnsureDeleted();
         }
 
         [Fact]
@@ -50,7 +75,9 @@ namespace JAH.Web.IntegrationTests
             {
                 _fixture.JobApplicationDbContext.JobApplications.Add(jobApplicationEntity);
             }
+
             _fixture.JobApplicationDbContext.SaveChanges();
+            _fixture.DetachAllEntities();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync("/jobApplication");
@@ -82,9 +109,11 @@ namespace JAH.Web.IntegrationTests
             // Arrange
             _fixture.JobApplicationDbContext.JobApplications.Add(_jobApplicationEntities[0]);
             _fixture.JobApplicationDbContext.SaveChanges();
+            _fixture.DetachAllEntities();
 
             var jobApplication = new JobApplication
             {
+                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -107,6 +136,7 @@ namespace JAH.Web.IntegrationTests
             // Arrange
             var jobApplication = new JobApplication
             {
+                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -128,7 +158,9 @@ namespace JAH.Web.IntegrationTests
             {
                 _fixture.JobApplicationDbContext.JobApplications.Add(jobApplicationEntity);
             }
+
             _fixture.JobApplicationDbContext.SaveChanges();
+            _fixture.DetachAllEntities();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/jobApplication/{_jobApplicationEntities[0].CompanyName}");
@@ -153,6 +185,34 @@ namespace JAH.Web.IntegrationTests
             string responseData = response.Content.ReadAsStringAsync().Result;
             _output.WriteLine(responseData);
             Assert.NotEmpty(responseData);
+        }
+
+        [Fact]
+        public async void UpdateApplication___OkObjectResult()
+        {
+            // Arrange
+            foreach (JobApplicationEntity jobApplicationEntity in _jobApplicationEntities)
+            {
+                _fixture.JobApplicationDbContext.JobApplications.Add(jobApplicationEntity);
+            }
+
+            _fixture.JobApplicationDbContext.SaveChanges();
+            _fixture.DetachAllEntities();
+
+            var jobApplication = new JobApplication
+            {
+                Id = _jobApplicationEntities[0].Id,
+                CompanyName = _jobApplicationEntities[0].CompanyName,
+                ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
+                Status = Status.Offer
+            };
+
+            // Act
+            var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
+            HttpResponseMessage response = await _fixture.WebClient.PutAsync("/jobApplication", stringContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Found, response.StatusCode);
         }
     }
 }

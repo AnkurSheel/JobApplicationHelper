@@ -25,7 +25,7 @@ namespace JAH.Web.IntegrationTests
         public ClientFixture()
         {
             DbContextOptions<JobApplicationDbContext> dbContextOptions =
-                new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+                new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).EnableSensitiveDataLogging().Options;
             JobApplicationDbContext = new JobApplicationDbContext(dbContextOptions);
 
             _builder = new ContainerBuilder();
@@ -44,6 +44,15 @@ namespace JAH.Web.IntegrationTests
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public void DetachAllEntities()
+        {
+            foreach (JobApplicationEntity jobApplicationEntity in JobApplicationDbContext.JobApplications)
+            {
+                JobApplicationDbContext.Entry(jobApplicationEntity).State = EntityState.Detached;
+            }
+            JobApplicationDbContext.SaveChanges();
         }
 
         protected virtual void Dispose(bool disposing)

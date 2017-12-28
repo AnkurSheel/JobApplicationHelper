@@ -10,6 +10,8 @@ namespace JAH.DomainModels
             Status = Status.Applied;
         }
 
+        public int Id { get; set; }
+
         [Display(Name = "Company Name")]
         [StringLength(100)]
         [Required(ErrorMessage = "Please enter the company name")]
