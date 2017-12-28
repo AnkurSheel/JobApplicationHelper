@@ -1,12 +1,28 @@
 ﻿@model JobApplication
 
-<div class="col-sm-4 col-lg-4 col-md-4">
-    <div class="thumbnail">
-
-        <div class="caption">
-            <p>@Model.ApplicationDate.ToString("dddd dd-MMM-yyyy")</p>
-            <h1>@Model.CompanyName</h1>
-            <h3 class="pull-right">Model.Status</h3>
-        </div>
+<form asp-action="AddNewApplication" method="post" class="form-horizontal" role="form">
+  <div class="form-group">
+    <label asp-for="CompanyName" class="col-md-2 control-label"></label>
+    <div class="col-md-5">
+      <input asp-for="CompanyName" class="form-control" value="@Model.CompanyName" disabled/>
     </div>
-</div>
+  </div>
+  <div class="form-group">
+    <label asp-for="ApplicationDate" class="col-md-2 control-label"></label>
+    <div class="col-md-5">
+      <input asp-for="ApplicationDate" class="form-control" value="@Model.ApplicationDate.ToString("yyyy-MM-dd")" disabled/>
+    </div>
+  </div>
+  <div class="form-group">
+    <label asp-for="Status" class="col-md-2 control-label"></label>
+    <div class="col-md-5">
+      <select asp-for="Status" asp-items="Html.GetEnumSelectList<Status>()" class="form-control"></select>
+    </div>
+  </div>
+
+  @*<div class="form-group">
+    <div class="col-md-offset-2 col-md-5">
+      <input type="submit" class="btn btn-primary" value="Add Application" />
+    </div>
+  </div>*@
+</form>
