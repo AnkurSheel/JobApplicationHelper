@@ -1,6 +1,7 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -37,10 +38,11 @@ namespace JAH.Web
 
             if (env.IsDevelopment())
             {
+                TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
             }
             app.UseStaticFiles();
-            app.Run(async (context) => { await context.Response.WriteAsync("Hello World!"); });
+            app.Run(async context => { await context.Response.WriteAsync("Hello World!"); });
 
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
         }

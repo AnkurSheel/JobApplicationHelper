@@ -6,22 +6,26 @@ using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
 
 namespace JAH.Api.Controllers
 {
     [Route("api/JobApplication")]
     public class JobApplicationApiController : Controller
     {
+        private readonly ILogger<JobApplicationApiController> _logger;
         private readonly IJobApplicationService _service;
 
-        public JobApplicationApiController(IJobApplicationService service)
+        public JobApplicationApiController(IJobApplicationService service, ILogger<JobApplicationApiController> logger)
         {
+            _logger = logger;
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpGet]
         public async Task<IActionResult> ListAllApplications()
         {
+            _logger.LogInformation(LoggingEvents.ListAllApplications, "Listing all applications");
             IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications();
             if (jobApplications.Any())
             {

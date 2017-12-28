@@ -28,7 +28,6 @@ namespace JAH.Api
                 Console.WriteLine(e);
                 throw;
             }
-
         }
 
         private static void SeedDatabase(IContainer container)
@@ -51,15 +50,25 @@ namespace JAH.Api
             {
                 await WebHost.CreateDefaultBuilder()
                              .UseStartup<Startup>()
-                             .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning))
+                             .ConfigureAppConfiguration((hostingContext, config) =>
+                             {
+                                 IHostingEnvironment env = hostingContext.HostingEnvironment;
+                                 config.AddJsonFile("appsettings.json", true, true)
+                                       .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
+                             })
                              .ConfigureServices(services => services.AddTransient(provider =>
-                                                                                  {
-                                                                                      var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-                                                                                      var config = provider.GetRequiredService<IConfiguration>();
-                                                                                      var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
-                                                                                      return factory(hostingEnv, config);
-                                                                                  }))
-
+                             {
+                                 var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+                                 var config = provider.GetRequiredService<IConfiguration>();
+                                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
+                                 return factory(hostingEnv, config);
+                             }))
+                             .ConfigureLogging((hostingContext, logging) =>
+                             {
+                                 logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                                 logging.AddConsole();
+                                 logging.AddDebug();
+                             })
                              .Build()
                              .RunAsync();
             }

@@ -6,6 +6,7 @@ using JAH.Api.Controllers;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -19,8 +20,10 @@ namespace JAH.Api.UnitTests
 
         public JobApplicationApiControllerTest()
         {
+            var logger = Substitute.For<ILogger<JobApplicationApiController>>();
+
             _jobApplicationService = Substitute.For<IJobApplicationService>();
-            _jobApplicationController = new JobApplicationApiController(_jobApplicationService);
+            _jobApplicationController = new JobApplicationApiController(_jobApplicationService, logger);
 
             _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {

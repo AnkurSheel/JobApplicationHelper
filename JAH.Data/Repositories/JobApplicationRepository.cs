@@ -31,7 +31,7 @@ namespace JAH.Data.Repositories
             {
                 query = query.Where(filter);
             }
-            return query;
+            return query.AsNoTracking();
         }
 
         public JobApplicationEntity GetOne(Expression<Func<JobApplicationEntity, bool>> filter = null)
