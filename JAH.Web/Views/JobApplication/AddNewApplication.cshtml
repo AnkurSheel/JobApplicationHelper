@@ -13,7 +13,7 @@
     <div class="form-group">
         <label asp-for="ApplicationDate" class="col-md-2 control-label"></label>
         <div class="col-md-5">
-            <input asp-for="ApplicationDate" class="form-control" />
+            <input asp-for="ApplicationDate" class="form-control" value="@DateTime.Today.Date.ToString("yyyy-MM-dd")"/>
             <span asp-validation-for="ApplicationDate" class="text-danger"></span>
         </div>
     </div>
