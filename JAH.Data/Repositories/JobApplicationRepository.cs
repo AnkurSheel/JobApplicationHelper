@@ -48,8 +48,7 @@ namespace JAH.Data.Repositories
 
         public async Task Update(JobApplicationEntity jobApplication)
         {
-            _context.JobApplications.Attach(jobApplication);
-            _context.Entry(jobApplication).State = EntityState.Modified;
+            _context.JobApplications.Update(jobApplication);
             await SaveAsync();
         }
 
