@@ -9,13 +9,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JAH.Data.Repositories
 {
-    public class JobApplicationRepository : IRepository<JobApplicationEntity>
+    public class JobApplicationRepository : IRepository<JobApplicationEntity>, IDisposable
     {
         private readonly JobApplicationDbContext _context;
 
         public JobApplicationRepository(JobApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public async Task Create(JobApplicationEntity jobApplication)
@@ -31,6 +37,7 @@ namespace JAH.Data.Repositories
             {
                 query = query.Where(filter);
             }
+
             return query.AsNoTracking();
         }
 
@@ -44,6 +51,14 @@ namespace JAH.Data.Repositories
             _context.JobApplications.Attach(jobApplication);
             _context.Entry(jobApplication).State = EntityState.Modified;
             await SaveAsync();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+            }
         }
 
         private Task SaveAsync()
