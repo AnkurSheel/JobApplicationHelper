@@ -25,7 +25,6 @@ namespace JAH.Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
 
             return new AutofacServiceProvider(_aspNetScope);

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace JAH.Api
 {
@@ -50,12 +49,6 @@ namespace JAH.Api
             {
                 await WebHost.CreateDefaultBuilder()
                              .UseStartup<Startup>()
-                             .ConfigureAppConfiguration((hostingContext, config) =>
-                             {
-                                 IHostingEnvironment env = hostingContext.HostingEnvironment;
-                                 config.AddJsonFile("appsettings.json", true, true)
-                                       .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
-                             })
                              .ConfigureServices(services => services.AddTransient(provider =>
                              {
                                  var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
@@ -63,12 +56,6 @@ namespace JAH.Api
                                  var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
                                  return factory(hostingEnv, config);
                              }))
-                             .ConfigureLogging((hostingContext, logging) =>
-                             {
-                                 logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                                 logging.AddConsole();
-                                 logging.AddDebug();
-                             })
                              .Build()
                              .RunAsync();
             }
