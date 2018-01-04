@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using JAH.DomainModels;
@@ -77,6 +78,12 @@ namespace JAH.Api.Controllers
                 await _service.UpdateApplication(jobApplication);
 
                 return Ok();
+            }
+            catch (DBConcurrencyException e)
+            {
+                var modelState = new ModelStateDictionary();
+                modelState.AddModelError("Application Does Not Exist", $"Application for {jobApplication.CompanyName} does not exist.");
+                return BadRequest(modelState);
             }
             catch (Exception e)
             {

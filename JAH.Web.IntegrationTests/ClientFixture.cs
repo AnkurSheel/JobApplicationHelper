@@ -60,11 +60,7 @@ namespace JAH.Web.IntegrationTests
 
         public void DetachAllEntities()
         {
-            foreach (JobApplicationEntity jobApplicationEntity in JobApplicationDbContext.JobApplications)
-            {
-                JobApplicationDbContext.Entry(jobApplicationEntity).State = EntityState.Detached;
-            }
-
+            JobApplicationDbContext.JobApplications.RemoveRange(JobApplicationDbContext.JobApplications);
             JobApplicationDbContext.SaveChanges();
         }
 
