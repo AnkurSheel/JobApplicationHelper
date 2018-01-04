@@ -3,37 +3,60 @@ using System.Linq;
 using JAH.Data.Entities;
 using JAH.Data.Repositories;
 using JAH.DomainModels;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace JAH.Data.UnitTests
 {
     public class JobApplicationRepositoryTest
     {
-        private readonly JobApplicationRepository _jobApplicationRepository;
         private readonly JobApplicationDbContext _jobApplicationDbContext;
         private readonly JobApplicationEntity[] _jobApplicationEntities;
+        private readonly Guid _guid;
+        private JobApplicationRepository _jobApplicationRepository;
 
         public JobApplicationRepositoryTest()
         {
-            _jobApplicationDbContext = ContextFixture.GetContextWithData();
+            _guid = Guid.NewGuid();
+            _jobApplicationDbContext = ContextFixture.GetContext(_guid);
             _jobApplicationRepository = new JobApplicationRepository(_jobApplicationDbContext);
             _jobApplicationEntities = new[]
             {
                 new JobApplicationEntity
                 {
+                    Id = 1,
                     CompanyName = "Company 1",
                     ApplicationDate = new DateTime(2017, 11, 13),
                     CurrentStatus = Status.Interview
                 },
-                new JobApplicationEntity { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied },
                 new JobApplicationEntity
                 {
+                    Id = 2,
+                    CompanyName = "Company 2",
+                    ApplicationDate = new DateTime(2017, 11, 14),
+                    CurrentStatus = Status.Applied
+                },
+                new JobApplicationEntity
+                {
+                    Id = 3,
                     CompanyName = "Company 3",
                     ApplicationDate = new DateTime(2017, 11, 14),
                     CurrentStatus = Status.Interview
                 },
-                new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer },
-                new JobApplicationEntity { CompanyName = "Company 5", ApplicationDate = new DateTime(2017, 09, 18), CurrentStatus = Status.Rejected }
+                new JobApplicationEntity
+                {
+                    Id = 4,
+                    CompanyName = "Company 4",
+                    ApplicationDate = new DateTime(2017, 10, 9),
+                    CurrentStatus = Status.Offer
+                },
+                new JobApplicationEntity
+                {
+                    Id = 5,
+                    CompanyName = "Company 5",
+                    ApplicationDate = new DateTime(2017, 09, 18),
+                    CurrentStatus = Status.Rejected
+                }
             };
         }
 
@@ -93,25 +116,26 @@ namespace JAH.Data.UnitTests
         [Fact]
         public async void Create_ApplicationExists_ThrowException()
         {
+            // Arrange
             var jobApplication = new JobApplicationEntity
             {
-                CompanyName = "Company 1",
-                ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.Interview
+                Id = _jobApplicationEntities[0].Id,
+                CompanyName = "New company",
+                ApplicationDate = new DateTime(2017, 12, 20),
+                CurrentStatus = Status.Offer
             };
-            _jobApplicationDbContext.JobApplications.Add(jobApplication);
+            _jobApplicationDbContext.JobApplications.Add(_jobApplicationEntities[0]);
             _jobApplicationDbContext.SaveChanges();
 
+            JobApplicationDbContext context = ContextFixture.GetContext(_guid);
+            _jobApplicationRepository = new JobApplicationRepository(context);
+
             // Act
-            var duplicateJobApplication = new JobApplicationEntity
-            {
-                CompanyName = "Company 1",
-                ApplicationDate = new DateTime(2017, 11, 13),
-                CurrentStatus = Status.Interview
-            };
-            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(duplicateJobApplication));
+            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(jobApplication));
 
             // Assert
+            JobApplicationEntity entity = ContextFixture.GetContext(_guid).JobApplications.FirstOrDefault(x => x.Id == jobApplication.Id);
+            Assert.Equal(entity, _jobApplicationEntities[0]);
             Assert.IsType<ArgumentException>(ex);
             Assert.NotNull(ex);
         }
@@ -165,6 +189,51 @@ namespace JAH.Data.UnitTests
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact]
+        public async void Update_ApplicationExists_UpdatesJobApplication()
+        {
+            // Arrange
+            var jobApplication = new JobApplicationEntity
+            {
+                Id = _jobApplicationEntities[0].Id,
+                CompanyName = "New company",
+                ApplicationDate = new DateTime(2017, 12, 20),
+                CurrentStatus = Status.Offer
+            };
+            _jobApplicationDbContext.JobApplications.Add(_jobApplicationEntities[0]);
+            _jobApplicationDbContext.SaveChanges();
+
+            JobApplicationDbContext context = ContextFixture.GetContext(_guid);
+            _jobApplicationRepository = new JobApplicationRepository(context);
+
+            // Act
+            await _jobApplicationRepository.Update(jobApplication);
+
+            // Assert
+            JobApplicationEntity entity = ContextFixture.GetContext(_guid).JobApplications.FirstOrDefault(x => x.Id == jobApplication.Id);
+
+            Assert.Equal(jobApplication, entity);
+        }
+
+        [Fact]
+        public async void Update_ApplicationDoesNotExist_ThrowException()
+        {
+            var jobApplication = new JobApplicationEntity
+            {
+                Id = _jobApplicationEntities[0].Id,
+                CompanyName = "New company",
+                ApplicationDate = new DateTime(2017, 12, 20),
+                CurrentStatus = Status.Offer
+            };
+
+            // Act
+            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Update(jobApplication));
+
+            // Assert
+            Assert.IsType<DbUpdateConcurrencyException>(ex);
+            Assert.NotNull(ex);
         }
     }
 }

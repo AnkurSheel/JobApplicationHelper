@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JAH.Data.Repositories
 {
-    public class JobApplicationRepository : IRepository<JobApplicationEntity>
+    public class JobApplicationRepository : IRepository<JobApplicationEntity>, IDisposable
     {
         private readonly JobApplicationDbContext _context;
 
@@ -17,19 +18,16 @@ namespace JAH.Data.Repositories
             _context = context;
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         public async Task Create(JobApplicationEntity jobApplication)
         {
-            bool existingApplication = await _context.JobApplications.AnyAsync(a => a.CompanyName == jobApplication.CompanyName &&
-                                                                                    a.ApplicationDate == jobApplication.ApplicationDate);
-            if (!existingApplication)
-            {
-                _context.JobApplications.Add(jobApplication);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                throw new ArgumentException("Trying to add same application", $"{jobApplication.CompanyName} {jobApplication.ApplicationDate}");
-            }
+            _context.JobApplications.Add(jobApplication);
+            await SaveAsync();
         }
 
         public IQueryable<JobApplicationEntity> GetAll(Expression<Func<JobApplicationEntity, bool>> filter = null)
@@ -39,12 +37,50 @@ namespace JAH.Data.Repositories
             {
                 query = query.Where(filter);
             }
-            return query;
+
+            return query.AsNoTracking();
         }
 
         public JobApplicationEntity GetOne(Expression<Func<JobApplicationEntity, bool>> filter = null)
         {
             return GetAll(filter).SingleOrDefault();
+        }
+
+        public async Task Update(JobApplicationEntity jobApplication)
+        {
+            _context.JobApplications.Update(jobApplication);
+            await SaveAsync();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _context?.Dispose();
+            }
+        }
+
+        private Task SaveAsync()
+        {
+            try
+            {
+                return _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                ThrowEnhancedValidationException(e);
+            }
+
+            return Task.FromResult(0);
+        }
+
+        private void ThrowEnhancedValidationException(DbUpdateException dbu)
+        {
+            IEnumerable<char> errorMessages = dbu.Entries.SelectMany(x => x.Entity.GetType().Name);
+
+            string fullErrorMessage = string.Join("; ", errorMessages);
+            string exceptionMessage = string.Concat(dbu.Message, " The validation errors are: ", fullErrorMessage);
+            throw new DbUpdateException(exceptionMessage, dbu);
         }
     }
 }

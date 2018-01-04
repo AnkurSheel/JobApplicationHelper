@@ -13,5 +13,7 @@ namespace JAH.Data.Interfaces
         IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> filter = null);
 
         TEntity GetOne(Expression<Func<TEntity, bool>> filter = null);
+
+        Task Update(TEntity jobApplication);
     }
 }

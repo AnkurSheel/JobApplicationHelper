@@ -16,7 +16,7 @@ namespace JAH.Services.UnitTests
         private readonly IRepository<JobApplicationEntity> _jobApplicationRepository;
         private readonly JobApplication[] _jobApplications;
         private readonly JobApplicationService _jobApplicationService;
-        private readonly TestAsyncEnumerable<JobApplicationEntity> _jobApplicationEntities;
+        private readonly IList<JobApplicationEntity> _jobApplicationEntities;
 
         public JobApplicationServiceTest()
         {
@@ -24,31 +24,33 @@ namespace JAH.Services.UnitTests
             _jobApplicationService = new JobApplicationService(_jobApplicationRepository);
             _jobApplications = new[]
             {
-                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Rejected },
-                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Interview },
-                new JobApplication { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), Status = Status.Offer }
+                new JobApplication { Id = 1, CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Rejected },
+                new JobApplication { Id = 2, CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { Id = 3, CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Interview },
+                new JobApplication { Id = 4, CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), Status = Status.Offer }
             };
 
-            _jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>
+            _jobApplicationEntities = new List<JobApplicationEntity>();
+            foreach (JobApplication jobApplication in _jobApplications)
             {
-                new JobApplicationEntity { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), CurrentStatus = Status.Rejected },
-                new JobApplicationEntity { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), CurrentStatus = Status.Applied },
-                new JobApplicationEntity
+                var jobApplicationEntity = new JobApplicationEntity
                 {
-                    CompanyName = "Company 3",
-                    ApplicationDate = new DateTime(2017, 11, 14),
-                    CurrentStatus = Status.Interview
-                },
-                new JobApplicationEntity { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), CurrentStatus = Status.Offer }
-            });
+                    Id = jobApplication.Id,
+                    CompanyName = jobApplication.CompanyName,
+                    ApplicationDate = jobApplication.ApplicationDate,
+                    CurrentStatus = jobApplication.Status
+                };
+                _jobApplicationEntities.Add(jobApplicationEntity);
+            }
         }
 
         [Fact]
         public async Task GetAllApplications_MultipleApplications_AllJobApplications()
         {
             // Arrange
-            _jobApplicationRepository.GetAll().Returns(_jobApplicationEntities);
+            var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(_jobApplicationEntities);
+
+            _jobApplicationRepository.GetAll().Returns(jobApplicationEntities);
 
             // Act
             IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
@@ -77,6 +79,7 @@ namespace JAH.Services.UnitTests
             // Arrange
             var jobApplicationEntity = new JobApplicationEntity
             {
+                Id = _jobApplications[0].Id,
                 CompanyName = _jobApplications[0].CompanyName,
                 ApplicationDate = _jobApplications[0].ApplicationDate,
                 CurrentStatus = _jobApplications[0].Status
@@ -95,6 +98,7 @@ namespace JAH.Services.UnitTests
             // Arrange
             var jobApplicationEntity = new JobApplicationEntity
             {
+                Id = _jobApplications[0].Id,
                 CompanyName = _jobApplications[0].CompanyName,
                 ApplicationDate = _jobApplications[0].ApplicationDate,
                 CurrentStatus = _jobApplications[0].Status
@@ -114,7 +118,7 @@ namespace JAH.Services.UnitTests
         {
             // Arrange
             const string companyName = "Company 1";
-            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
+            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>) _jobApplicationEntities;
             _jobApplicationRepository.GetOne().ReturnsForAnyArgs(jobApplicationEntities.First(x => x.CompanyName.Equals(companyName)));
 
             // Act
@@ -129,13 +133,25 @@ namespace JAH.Services.UnitTests
         {
             // Arrange
             const string company = "Company 1";
-            _jobApplicationRepository.GetOne().ReturnsForAnyArgs((JobApplicationEntity)null);
+            _jobApplicationRepository.GetOne().ReturnsForAnyArgs((JobApplicationEntity) null);
 
             // Act
             JobApplication result = await _jobApplicationService.GetApplication(company);
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact]
+        public async void UpdateApplication_CallRepositoryUpdate()
+        {
+            // Arrange
+
+            // Act
+            await _jobApplicationService.UpdateApplication(_jobApplications[0]);
+
+            // Assert
+            await _jobApplicationRepository.Received().Update(_jobApplicationEntities[0]);
         }
     }
 }

@@ -6,22 +6,26 @@ using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Logging;
 
 namespace JAH.Api.Controllers
 {
     [Route("api/JobApplication")]
     public class JobApplicationApiController : Controller
     {
+        private readonly ILogger<JobApplicationApiController> _logger;
         private readonly IJobApplicationService _service;
 
-        public JobApplicationApiController(IJobApplicationService service)
+        public JobApplicationApiController(IJobApplicationService service, ILogger<JobApplicationApiController> logger)
         {
+            _logger = logger;
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         [HttpGet]
         public async Task<IActionResult> ListAllApplications()
         {
+            _logger.LogInformation(LoggingEvents.ListAllApplications, "Listing all applications");
             IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications();
             if (jobApplications.Any())
             {
@@ -50,13 +54,29 @@ namespace JAH.Api.Controllers
             try
             {
                 await _service.AddNewApplication(jobApplication);
-                return CreatedAtAction("ListAllApplications", new { id = jobApplication.CompanyName }, jobApplication);
+                return CreatedAtAction("ListAllApplications", new { id = jobApplication.Id }, jobApplication);
             }
             catch (ArgumentException)
             {
                 var modelState = new ModelStateDictionary();
                 modelState.AddModelError("Duplicate Name", $"Name {jobApplication.CompanyName} already exists.");
                 return BadRequest(modelState);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateApplication([FromBody] JobApplication jobApplication)
+        {
+            try
+            {
+                await _service.UpdateApplication(jobApplication);
+
+                return Ok();
             }
             catch (Exception e)
             {

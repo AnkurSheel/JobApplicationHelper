@@ -21,11 +21,10 @@ namespace JAH.Web
             {
                 var builder = new ContainerBuilder();
 
-                using (var container = builder.Build())
+                using (IContainer container = builder.Build())
                 {
                     StartWebServerAsync(container).Wait();
                 }
-
             }
             catch (Exception e)
             {
@@ -36,12 +35,17 @@ namespace JAH.Web
 
         private static async Task StartWebServerAsync(ILifetimeScope scope)
         {
-            using (var webHostScope = scope.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+            using (ILifetimeScope webHostScope = scope.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
             {
                 await WebHost.CreateDefaultBuilder()
                              .UseStartup<Startup>()
                              .UseContentRoot(Directory.GetCurrentDirectory())
-                             .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning))
+                             .ConfigureAppConfiguration((hostingContext, config) =>
+                             {
+                                 IHostingEnvironment env = hostingContext.HostingEnvironment;
+                                 config.AddJsonFile("appsettings.json", true, true)
+                                       .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
+                             })
                              .ConfigureServices(services => services.TryAddTransient(provider =>
                              {
                                  var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
@@ -52,12 +56,18 @@ namespace JAH.Web
                              .ConfigureServices(services => services.TryAddSingleton(provider =>
                              {
                                  var config = provider.GetRequiredService<IConfiguration>();
-                                 var uri = config.GetSection("ApiOptions:BaseUri").Value;
+                                 string uri = config.GetSection("ApiOptions:BaseUri").Value;
                                  var client = new HttpClient { BaseAddress = new Uri(uri) };
                                  client.DefaultRequestHeaders.Accept.Clear();
                                  client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                                  return client;
                              }))
+                             .ConfigureLogging((hostingContext, logging) =>
+                             {
+                                 logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                                 logging.AddConsole();
+                                 logging.AddDebug();
+                             })
                              .Build()
                              .RunAsync();
             }

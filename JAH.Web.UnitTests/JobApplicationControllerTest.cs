@@ -31,9 +31,9 @@ namespace JAH.Web.UnitTests
 
             _expectedJobApplications = new List<JobApplication>
             {
-                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
-                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+                new JobApplication { Id = 1, CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { Id = 2, CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { Id = 3, CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             };
         }
 
@@ -85,6 +85,7 @@ namespace JAH.Web.UnitTests
             // Arrange
             var jobApplication = new JobApplication
             {
+                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -111,6 +112,7 @@ namespace JAH.Web.UnitTests
             // Arrange
             var jobApplication = new JobApplication
             {
+                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -133,7 +135,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationExists_ViewResultWithJobApplication()
+        public async Task ShowApplication_ApplicationExists_ViewResultWithJobApplication()
         {
             // Arrange
             const int index = 0;
@@ -147,7 +149,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetApplication(_expectedJobApplications[index].CompanyName);
+            IActionResult result = await _jobApplicationController.ShowApplication(_expectedJobApplications[index].CompanyName);
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -156,7 +158,7 @@ namespace JAH.Web.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationDoesNotExist_EmptyViewResult()
+        public async Task ShowApplication_ApplicationDoesNotExist_EmptyViewResult()
         {
             // Arrange
             const string expectedJson = "";
@@ -167,12 +169,35 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetApplication("Company");
+            IActionResult result = await _jobApplicationController.ShowApplication("Company");
 
             // Assert
             Assert.IsType<ViewResult>(result);
             var viewResult = (ViewResult)result;
             Assert.Equal(new JobApplication(), viewResult.Model);
+        }
+
+        [Fact]
+        public async Task UpdateApplication_RedirectToActionObjectResult()
+        {
+            var jobApplication = new JobApplication
+            {
+                Id = 1,
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
+            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.OK };
+
+            _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            IActionResult result = await _jobApplicationController.UpdateApplication(jobApplication.Id, jobApplication);
+
+            // Assert
+            Assert.IsType<RedirectToActionResult>(result);
+            var redirectToActionResult = (RedirectToActionResult)result;
+            Assert.Equal("ListAllApplications", redirectToActionResult.ActionName);
         }
     }
 }

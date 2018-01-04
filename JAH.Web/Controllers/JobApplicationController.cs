@@ -42,7 +42,7 @@ namespace JAH.Web.Controllers
 
         [HttpGet]
         [Route("{companyName}")]
-        public async Task<IActionResult> GetApplication(string companyName)
+        public async Task<IActionResult> ShowApplication(string companyName)
         {
             try
             {
@@ -63,15 +63,14 @@ namespace JAH.Web.Controllers
         }
 
         [HttpGet]
-        [Route("AddNewApplication")]
+        [Route("addNewApplication")]
         public IActionResult AddNewApplication()
         {
             return View();
         }
 
         [HttpPost]
-        [Route("")]
-        [Route("AddNewApplication")]
+        [Route("addNewApplication")]
         public async Task<IActionResult> AddNewApplication(JobApplication jobApplication)
         {
             try
@@ -95,6 +94,21 @@ namespace JAH.Web.Controllers
             {
                 return new StatusCodeResult(501);
             }
+        }
+
+        [HttpPost]
+        [Route("updateApplication")]
+        public async Task<IActionResult> UpdateApplication(int id, [Bind("Id, CompanyName, ApplicationDate, Status")] JobApplication application)
+        {
+            string json = JsonConvert.SerializeObject(application);
+            var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+            HttpResponseMessage responseMessage = await _client.PutAsync($"api/jobApplication", stringContent);
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                return RedirectToAction("ListAllApplications");
+            }
+
+            return new StatusCodeResult((int)responseMessage.StatusCode);
         }
     }
 }

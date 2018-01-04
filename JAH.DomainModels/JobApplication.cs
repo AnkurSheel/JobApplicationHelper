@@ -10,13 +10,13 @@ namespace JAH.DomainModels
             Status = Status.Applied;
         }
 
+        public int Id { get; set; }
+
         [Display(Name = "Company Name")]
         [StringLength(100)]
         [Required(ErrorMessage = "Please enter the company name")]
         public string CompanyName { get; set; }
 
-        [Display(Name = "Application Date")]
-        [Required(ErrorMessage = "Please enter the application date")]
         [DataType(DataType.Date)]
         public DateTime ApplicationDate { get; set; }
 
@@ -38,7 +38,7 @@ namespace JAH.DomainModels
                 return false;
             }
 
-            return Equals((JobApplication)obj);
+            return Equals((JobApplication) obj);
         }
 
         public override int GetHashCode()
@@ -47,7 +47,7 @@ namespace JAH.DomainModels
             {
                 int hashCode = CompanyName != null ? CompanyName.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ ApplicationDate.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int)Status;
+                hashCode = (hashCode * 397) ^ (int) Status;
                 return hashCode;
             }
         }

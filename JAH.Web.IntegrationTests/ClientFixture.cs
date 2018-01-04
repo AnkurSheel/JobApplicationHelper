@@ -20,25 +20,37 @@ namespace JAH.Web.IntegrationTests
 {
     public class ClientFixture : IDisposable
     {
-        private readonly ContainerBuilder _builder;
+        private readonly IContainer _container;
+        private readonly ILifetimeScope _defaultScope;
+        private HttpClient _apiClient;
 
         public ClientFixture()
         {
-            DbContextOptions<JobApplicationDbContext> dbContextOptions =
-                new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
-            JobApplicationDbContext = new JobApplicationDbContext(dbContextOptions);
+            var dbContextOptions = new DbContextOptionsBuilder<JobApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .EnableSensitiveDataLogging()
+                .Options;
 
-            _builder = new ContainerBuilder();
-            _builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
-            _builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
-            _builder.RegisterInstance(JobApplicationDbContext).As<JobApplicationDbContext>().ExternallyOwned();
+            var builder = new ContainerBuilder();
+            builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
+            builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
+            builder.RegisterType<JobApplicationDbContext>()
+                   .As<JobApplicationDbContext>()
+                   .WithParameter(new TypedParameter(typeof(DbContextOptions), dbContextOptions))
+                   .InstancePerLifetimeScope();
+
+            _container = builder.Build();
+            _defaultScope = _container.BeginLifetimeScope();
 
             SetupClients();
         }
 
         public HttpClient WebClient { get; private set; }
 
-        public JobApplicationDbContext JobApplicationDbContext { get; }
+        public JobApplicationDbContext JobApplicationDbContext
+        {
+            get { return _defaultScope.Resolve<JobApplicationDbContext>(); }
+        }
 
         public void Dispose()
         {
@@ -46,53 +58,63 @@ namespace JAH.Web.IntegrationTests
             GC.SuppressFinalize(this);
         }
 
+        public void DetachAllEntities()
+        {
+            foreach (JobApplicationEntity jobApplicationEntity in JobApplicationDbContext.JobApplications)
+            {
+                JobApplicationDbContext.Entry(jobApplicationEntity).State = EntityState.Detached;
+            }
+
+            JobApplicationDbContext.SaveChanges();
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
+                _apiClient?.Dispose();
+                _defaultScope?.Dispose();
+                _container?.Dispose();
                 WebClient?.Dispose();
             }
         }
 
         private void SetupClients()
         {
-            HttpClient apiClient;
-
-            using (IContainer container = _builder.Build())
+            using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
             {
-                using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
-                {
-                    string fullPath =
-                        Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Api"));
+                string fullPath =
+                    Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Api"));
 
-                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
-                    IWebHostBuilder builder = new WebHostBuilder()
-                        .UseKestrel()
-                        .UseContentRoot(fullPath)
-                        .UseEnvironment("Development")
-                        .UseStartup<Api.Startup>()
-                        .ConfigureServices(services => services.TryAddTransient(provider => SetupStartup(provider, factory)));
-                    var testServer = new TestServer(builder);
-                    apiClient = testServer.CreateClient();
-                }
+                var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
+                IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
+                                                              .UseContentRoot(fullPath)
+                                                              .UseEnvironment("Development")
+                                                              .UseStartup<Api.Startup>()
+                                                              .ConfigureServices(services =>
+                                                                                     services.TryAddTransient(provider =>
+                                                                                                                  SetupStartup(provider, factory)));
+                var testServer = new TestServer(builder);
+                _apiClient = testServer.CreateClient();
+            }
 
-                using (ILifetimeScope webHostScope = container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
-                {
-                    string fullPath =
-                        Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Web"));
+            using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+            {
+                string fullPath =
+                    Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Web"));
 
-                    var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
-                    IWebHostBuilder builder = new WebHostBuilder()
-                        .UseKestrel()
-                        .UseContentRoot(fullPath)
-                        .UseEnvironment("Development")
-                        .UseStartup<Startup>()
-                        .ConfigureServices(services => services.AddTransient(provider => SetupStartup(provider, factory)))
-                        .ConfigureServices(services => services.TryAddSingleton(apiClient));
+                var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
+                IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
+                                                              .UseContentRoot(fullPath)
+                                                              .UseEnvironment("Development")
+                                                              .UseStartup<Startup>()
+                                                              .ConfigureServices(services =>
+                                                                                     services.AddTransient(provider =>
+                                                                                                               SetupStartup(provider, factory)))
+                                                              .ConfigureServices(services => services.TryAddSingleton(_apiClient));
 
-                    var testServer = new TestServer(builder);
-                    WebClient = testServer.CreateClient();
-                }
+                var testServer = new TestServer(builder);
+                WebClient = testServer.CreateClient();
             }
         }
 

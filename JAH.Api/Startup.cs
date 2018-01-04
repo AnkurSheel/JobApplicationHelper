@@ -1,6 +1,7 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -24,7 +25,6 @@ namespace JAH.Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
 
             return new AutofacServiceProvider(_aspNetScope);
@@ -34,6 +34,7 @@ namespace JAH.Api
         {
             if (env.IsDevelopment())
             {
+                TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
             }
 

@@ -5,9 +5,12 @@ namespace JAH.Data.UnitTests
 {
     public static class ContextFixture
     {
-        public static JobApplicationDbContext GetContextWithData()
+        public static JobApplicationDbContext GetContext(Guid guid)
         {
-            var options = new DbContextOptionsBuilder<JobApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+            DbContextOptions<JobApplicationDbContext> options = new DbContextOptionsBuilder<JobApplicationDbContext>()
+                .UseInMemoryDatabase(guid.ToString())
+                .EnableSensitiveDataLogging()
+                .Options;
             var context = new JobApplicationDbContext(options);
 
             context.SaveChanges();

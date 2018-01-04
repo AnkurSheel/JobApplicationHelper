@@ -6,6 +6,7 @@ using JAH.Api.Controllers;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -19,14 +20,16 @@ namespace JAH.Api.UnitTests
 
         public JobApplicationApiControllerTest()
         {
+            var logger = Substitute.For<ILogger<JobApplicationApiController>>();
+
             _jobApplicationService = Substitute.For<IJobApplicationService>();
-            _jobApplicationController = new JobApplicationApiController(_jobApplicationService);
+            _jobApplicationController = new JobApplicationApiController(_jobApplicationService, logger);
 
             _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {
-                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
-                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+                new JobApplication { Id = 1, CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { Id = 2, CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { Id = 3, CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             });
         }
 
@@ -42,7 +45,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
+            var okResult = (OkObjectResult) result;
             Assert.Equal(_expectedjobApplications, okResult.Value);
         }
 
@@ -67,6 +70,7 @@ namespace JAH.Api.UnitTests
             // Arrange
             var jobApplication = new JobApplication
             {
+                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -79,7 +83,7 @@ namespace JAH.Api.UnitTests
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult)result;
+            var createdResult = (CreatedAtActionResult) result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 
@@ -116,7 +120,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
+            var okResult = (OkObjectResult) result;
             Assert.Equal(expectedjobApplication, okResult.Value);
         }
 
@@ -124,13 +128,28 @@ namespace JAH.Api.UnitTests
         public async Task GetApplication_ApplicationDoesNotExist__NoContentObjectResult()
         {
             // Arrange
-            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication)null);
+            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication) null);
 
             // Act
             IActionResult result = await _jobApplicationController.GetApplication("Company 1");
 
             // Assert
             Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateApplication__CallsServiceUpdateApplication()
+        {
+            // Arrange
+            JobApplication jobApplication = _expectedjobApplications.First();
+
+            // Act
+            IActionResult result = await _jobApplicationController.UpdateApplication(jobApplication);
+
+            // Assert
+            await _jobApplicationService.Received().UpdateApplication(jobApplication);
+
+            Assert.IsType<OkResult>(result);
         }
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace JAH.Api
 {
@@ -28,7 +27,6 @@ namespace JAH.Api
                 Console.WriteLine(e);
                 throw;
             }
-
         }
 
         private static void SeedDatabase(IContainer container)
@@ -51,15 +49,13 @@ namespace JAH.Api
             {
                 await WebHost.CreateDefaultBuilder()
                              .UseStartup<Startup>()
-                             .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning))
                              .ConfigureServices(services => services.AddTransient(provider =>
-                                                                                  {
-                                                                                      var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-                                                                                      var config = provider.GetRequiredService<IConfiguration>();
-                                                                                      var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
-                                                                                      return factory(hostingEnv, config);
-                                                                                  }))
-
+                             {
+                                 var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+                                 var config = provider.GetRequiredService<IConfiguration>();
+                                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
+                                 return factory(hostingEnv, config);
+                             }))
                              .Build()
                              .RunAsync();
             }
