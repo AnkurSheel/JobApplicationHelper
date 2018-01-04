@@ -17,7 +17,7 @@ clone_depth: 1
 
 init:
   - git config --global core.autocrlf input
-  -cmd : echo "APPVEYOR_BUILD_VERSION" {APPVEYOR_BUILD_VERSION}
+  - cmd : echo "APPVEYOR_BUILD_VERSION" {APPVEYOR_BUILD_VERSION}
 
 dotnet_csproj:
   patch: true
