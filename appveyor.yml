@@ -18,6 +18,15 @@ clone_depth: 1
 init:
   - git config --global core.autocrlf input
 
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj;**\*.props'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: 0.0.5.0
+  file_version: '{version}'
+  informational_version: '{version}'
+
 install:
   - cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
   # - ps : .\resetbuildnumber.ps1  
