@@ -4,7 +4,6 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,16 +33,20 @@ namespace JAH.Web
 
         public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
         {
-            app.UseMvc();
-
+            app.UseExceptionHandler("/Error");
             if (env.IsDevelopment())
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
             }
-            app.UseStaticFiles();
-            app.Run(async context => { await context.Response.WriteAsync("Hello World!"); });
 
+            app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+
+            app.UseStaticFiles();
+
+            app.UseMvc();
+
+            app.Run(context => throw new Exception());
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
         }
     }

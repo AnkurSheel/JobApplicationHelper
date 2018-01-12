@@ -39,7 +39,6 @@ namespace JAH.Api
             }
 
             app.UseMvc();
-
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
         }
     }

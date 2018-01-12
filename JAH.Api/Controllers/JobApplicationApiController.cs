@@ -40,13 +40,20 @@ namespace JAH.Api.Controllers
         [Route("{companyName}")]
         public async Task<IActionResult> GetApplication(string companyName)
         {
-            JobApplication jobApplication = await _service.GetApplication(companyName);
-            if (jobApplication != null)
+            try
             {
+                JobApplication jobApplication = await _service.GetApplication(companyName);
                 return Ok(jobApplication);
             }
-
-            return NoContent();
+            catch (InvalidOperationException e)
+            {
+                return NotFound(e);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         [HttpPost]
