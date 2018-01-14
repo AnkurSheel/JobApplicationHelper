@@ -33,20 +33,30 @@ namespace JAH.Web
 
         public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
         {
-            app.UseExceptionHandler("/Error");
             if (env.IsDevelopment())
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+            }
 
             app.UseStaticFiles();
 
             app.UseMvc();
 
-            app.Run(context => throw new Exception());
+            app.Run(context =>
+            {
+                if (env.IsDevelopment())
+                {
+                    throw new Exception();
+                }
+
+                return null;
+            });
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
         }
     }
