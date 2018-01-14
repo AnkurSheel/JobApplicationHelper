@@ -77,7 +77,6 @@ namespace JAH.Web.IntegrationTests
             }
 
             _fixture.JobApplicationDbContext.SaveChanges();
-            _fixture.DetachAllEntities();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync("/jobApplication");
@@ -160,7 +159,6 @@ namespace JAH.Web.IntegrationTests
             }
 
             _fixture.JobApplicationDbContext.SaveChanges();
-            _fixture.DetachAllEntities();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/jobApplication/{_jobApplicationEntities[0].CompanyName}");
@@ -181,10 +179,9 @@ namespace JAH.Web.IntegrationTests
             HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/jobApplication/{_jobApplicationEntities[0].CompanyName}");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             string responseData = response.Content.ReadAsStringAsync().Result;
-            _output.WriteLine(responseData);
-            Assert.NotEmpty(responseData);
+            Assert.Empty(responseData);
         }
 
         [Fact]
@@ -219,12 +216,12 @@ namespace JAH.Web.IntegrationTests
         {
             // Arrange
             var jobApplication = new JobApplication
-                                 {
-                                     Id = _jobApplicationEntities[0].Id,
-                                     CompanyName = _jobApplicationEntities[0].CompanyName,
-                                     ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
-                                     Status = Status.Offer
-                                 };
+            {
+                Id = _jobApplicationEntities[0].Id,
+                CompanyName = _jobApplicationEntities[0].CompanyName,
+                ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
+                Status = Status.Offer
+            };
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");

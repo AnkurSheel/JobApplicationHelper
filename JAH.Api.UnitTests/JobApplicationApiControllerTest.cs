@@ -8,6 +8,7 @@ using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace JAH.Api.UnitTests
@@ -125,16 +126,16 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationDoesNotExist__NoContentObjectResult()
+        public async Task GetApplication_ApplicationDoesNotExist_NotFoundObjectResult()
         {
             // Arrange
-            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication) null);
+            _jobApplicationService.GetApplication("Company 1").Throws(new InvalidOperationException());
 
             // Act
             IActionResult result = await _jobApplicationController.GetApplication("Company 1");
 
             // Assert
-            Assert.IsType<NoContentResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result);
         }
 
         [Fact]
