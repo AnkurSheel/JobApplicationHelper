@@ -1,5 +1,5 @@
 # common configuration for ALL branches
-version: 0.0.5.{build}
+version: 0.0.6.{build}
 image: Visual Studio 2017
 # branches:
   # only:
@@ -17,15 +17,16 @@ clone_depth: 1
 
 init:
   - git config --global core.autocrlf input
+  - cmd : echo "APPVEYOR_BUILD_VERSION" %APPVEYOR_BUILD_VERSION%
 
 dotnet_csproj:
   patch: true
   file: '**\*.csproj;**\*.props'
-  version: '{version}'
-  package_version: '{version}'
+  version: '{APPVEYOR_BUILD_VERSION}'
+  package_version: '{APPVEYOR_BUILD_VERSION}'
   assembly_version: 0.0.5.0
-  file_version: '{version}'
-  informational_version: '{version}'
+  file_version: '{APPVEYOR_BUILD_VERSION}'
+  informational_version: '{APPVEYOR_BUILD_VERSION}'
 
 install:
   - cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe

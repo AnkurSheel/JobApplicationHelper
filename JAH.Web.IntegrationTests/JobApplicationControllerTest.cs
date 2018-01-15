@@ -77,7 +77,6 @@ namespace JAH.Web.IntegrationTests
             }
 
             _fixture.JobApplicationDbContext.SaveChanges();
-            _fixture.DetachAllEntities();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync("/jobApplication");
@@ -160,7 +159,6 @@ namespace JAH.Web.IntegrationTests
             }
 
             _fixture.JobApplicationDbContext.SaveChanges();
-            _fixture.DetachAllEntities();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/jobApplication/{_jobApplicationEntities[0].CompanyName}");
@@ -181,14 +179,13 @@ namespace JAH.Web.IntegrationTests
             HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/jobApplication/{_jobApplicationEntities[0].CompanyName}");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             string responseData = response.Content.ReadAsStringAsync().Result;
-            _output.WriteLine(responseData);
-            Assert.NotEmpty(responseData);
+            Assert.Empty(responseData);
         }
 
         [Fact]
-        public async void UpdateApplication___OkObjectResult()
+        public async void UpdateApplication_ApplicationExists_OkObjectResult()
         {
             // Arrange
             foreach (JobApplicationEntity jobApplicationEntity in _jobApplicationEntities)
@@ -197,7 +194,6 @@ namespace JAH.Web.IntegrationTests
             }
 
             _fixture.JobApplicationDbContext.SaveChanges();
-            _fixture.DetachAllEntities();
 
             var jobApplication = new JobApplication
             {
@@ -213,6 +209,28 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
+        }
+
+        [Fact]
+        public async void UpdateApplication_ApplicationDoesNotExist_OkObjectResult()
+        {
+            // Arrange
+            var jobApplication = new JobApplication
+            {
+                Id = _jobApplicationEntities[0].Id,
+                CompanyName = _jobApplicationEntities[0].CompanyName,
+                ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
+                Status = Status.Offer
+            };
+
+            // Act
+            var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/updateApplication", stringContent);
+
+            // Assert
+            Assert.False(response.IsSuccessStatusCode);
+            string responseData = response.Content.ReadAsStringAsync().Result;
+            Assert.Empty(responseData);
         }
     }
 }

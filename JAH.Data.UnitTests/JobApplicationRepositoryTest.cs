@@ -180,15 +180,17 @@ namespace JAH.Data.UnitTests
         }
 
         [Fact]
-        public void GetOne_ApplicationwithCompanyNameDoesNotExist_NullResult()
+        public void GetOne_ApplicationwithCompanyNameDoesNotExist_ThrowsException()
         {
             // Arrange
 
             // Act
-            JobApplicationEntity result = _jobApplicationRepository.GetOne(x => x.CompanyName.Equals(_jobApplicationEntities[0].CompanyName));
+            Exception ex =
+                Record.Exception(() => _jobApplicationRepository.GetOne(x => x.CompanyName.Equals(_jobApplicationEntities[0].CompanyName)));
 
             // Assert
-            Assert.Null(result);
+            Assert.IsType<InvalidOperationException>(ex);
+            Assert.NotNull(ex);
         }
 
         [Fact]
