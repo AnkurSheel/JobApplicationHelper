@@ -179,8 +179,6 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            Assert.Empty(responseData);
         }
 
         [Fact]
@@ -226,8 +224,6 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            Assert.Empty(responseData);
         }
     }
 }

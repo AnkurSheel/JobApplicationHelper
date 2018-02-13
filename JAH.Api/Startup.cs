@@ -39,7 +39,10 @@ namespace JAH.Api
                     opt.SslPort = 44324;
                 }
 
-                opt.Filters.Add(new RequireHttpsAttribute());
+                if (!_env.IsEnvironment("Testing"))
+                {
+                    opt.Filters.Add(new RequireHttpsAttribute());
+                }
             });
 
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));

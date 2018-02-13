@@ -85,7 +85,7 @@ namespace JAH.Web.IntegrationTests
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
                 IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
                                                               .UseContentRoot(fullPath)
-                                                              .UseEnvironment("Development")
+                                                              .UseEnvironment("Testing")
                                                               .UseStartup<Api.Startup>()
                                                               .ConfigureServices(services =>
                                                                                      services.TryAddTransient(provider =>
@@ -102,7 +102,7 @@ namespace JAH.Web.IntegrationTests
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
                 IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
                                                               .UseContentRoot(fullPath)
-                                                              .UseEnvironment("Development")
+                                                              .UseEnvironment("Testing")
                                                               .UseStartup<Startup>()
                                                               .ConfigureServices(services =>
                                                                                      services.AddTransient(provider =>
