@@ -43,14 +43,14 @@ namespace JAH.Api.Controllers
                 JobApplication jobApplication = await _service.GetApplication(companyName);
                 if (jobApplication == null)
                 {
-                    return NotFound($"Company {companyName} was not found");
+                    return NotFound($"Company with Name \"{companyName}\" was not found");
                 }
 
                 return Ok(jobApplication);
             }
             catch (Exception e)
             {
-                _logger.LogError(LoggingEvents.JobApplications, e, $"Exception when trying to get application for {companyName}");
+                _logger.LogError(LoggingEvents.JobApplications, e, $"Exception when trying to get application for application with Name \"{companyName}\"");
             }
             return BadRequest();
         }
@@ -71,9 +71,10 @@ namespace JAH.Api.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(LoggingEvents.JobApplications, e, $"Exception when trying to create application for application with Name \"{jobApplication.CompanyName}\"");
             }
+
+            return BadRequest();
         }
 
         [HttpPut]

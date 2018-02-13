@@ -139,7 +139,7 @@ namespace JAH.Api.UnitTests
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
             var notFoundResult = (NotFoundObjectResult)result;
-            Assert.Equal($"Company {companyName} was not found", notFoundResult.Value);
+            Assert.Equal($"Company with Name \"{companyName}\" was not found", notFoundResult.Value);
         }
 
         [Fact]
