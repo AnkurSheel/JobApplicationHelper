@@ -118,7 +118,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetApplication("Company 1").Returns(expectedjobApplication);
 
             // Act
-            IActionResult result = await _jobApplicationsController.Get("Company 1");
+            IActionResult result = _jobApplicationsController.Get("Company 1");
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -134,7 +134,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetApplication(companyName).Returns((JobApplication)null);
 
             // Act
-            IActionResult result = await _jobApplicationsController.Get(companyName);
+            IActionResult result = _jobApplicationsController.Get(companyName);
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
@@ -149,7 +149,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetApplication("Company 1").Throws(new InvalidOperationException());
 
             // Act
-            IActionResult result = await _jobApplicationsController.Get("Company 1");
+            IActionResult result = _jobApplicationsController.Get("Company 1");
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

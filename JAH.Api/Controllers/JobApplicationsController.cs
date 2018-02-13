@@ -34,11 +34,11 @@ namespace JAH.Api.Controllers
         }
 
         [HttpGet("{companyName}", Name = "JobApplicationsGet")]
-        public async Task<IActionResult> Get(string companyName)
+        public IActionResult Get(string companyName)
         {
             try
             {
-                JobApplication jobApplication = await _service.GetApplication(companyName);
+                JobApplication jobApplication = _service.GetApplication(companyName);
                 if (jobApplication == null)
                 {
                     return NotFound($"Company with Name \"{companyName}\" was not found");
@@ -77,7 +77,7 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                var oldApplication = await _service.GetApplication(companyName);
+                var oldApplication = _service.GetApplication(companyName);
                 if (oldApplication == null)
                 {
                     return NotFound($"Company with Name \"{companyName}\" was not found");

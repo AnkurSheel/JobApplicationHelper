@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.DomainModels;
@@ -13,40 +13,27 @@ namespace JAH.Services.Services
     public class JobApplicationService : IJobApplicationService
     {
         private readonly IRepository<JobApplicationEntity> _repository;
+        private readonly IMapper _mapper;
 
-        public JobApplicationService(IRepository<JobApplicationEntity> repository)
+        public JobApplicationService(IRepository<JobApplicationEntity> repository, IMapper mapper)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<JobApplication>> GetAllApplications()
         {
-            List<JobApplication> jobApplications = await _repository
-                                                       .GetAll()
-                                                       .Select(application => new JobApplication
-                                                       {
-                                                           Id = application.Id,
-                                                           CompanyName = application.CompanyName,
-                                                           ApplicationDate = application.ApplicationDate.Date,
-                                                           Status = application.CurrentStatus
-                                                       })
-                                                       .ToListAsync();
+            List<JobApplicationEntity> jobApplications = await _repository.GetAll().ToListAsync();
 
-            return jobApplications;
+            return _mapper.Map<IEnumerable<JobApplication>>(jobApplications);
         }
 
-        public async Task<JobApplication> GetApplication(string companyName)
+        public JobApplication GetApplication(string companyName)
         {
             JobApplicationEntity jobApplication = _repository.GetOne(f => f.CompanyName.Equals(companyName));
             if (jobApplication != null)
             {
-                return await Task.Run(() => new JobApplication
-                {
-                    Id = jobApplication.Id,
-                    ApplicationDate = jobApplication.ApplicationDate,
-                    CompanyName = jobApplication.CompanyName,
-                    Status = jobApplication.CurrentStatus
-                });
+                return _mapper.Map<JobApplication>(jobApplication);
             }
 
             return null;
@@ -54,21 +41,9 @@ namespace JAH.Services.Services
 
         public async Task<JobApplication> AddNewApplication(JobApplication jobApplication)
         {
-            var jobApplicationEntity = new JobApplicationEntity
-            {
-                Id = jobApplication.Id,
-                CompanyName = jobApplication.CompanyName,
-                ApplicationDate = jobApplication.ApplicationDate,
-                CurrentStatus = jobApplication.Status
-            };
+            var jobApplicationEntity = _mapper.Map<JobApplicationEntity>(jobApplication);
             await _repository.Create(jobApplicationEntity);
-            return new JobApplication
-            {
-                Id = jobApplicationEntity.Id,
-                CompanyName = jobApplicationEntity.CompanyName,
-                ApplicationDate = jobApplicationEntity.ApplicationDate,
-                Status = jobApplicationEntity.CurrentStatus
-            };
+            return _mapper.Map<JobApplication>(jobApplicationEntity);
         }
 
         public async Task UpdateApplication(JobApplication oldApplication, JobApplication newApplication)
@@ -77,9 +52,8 @@ namespace JAH.Services.Services
             {
                 Id = oldApplication.Id,
                 CompanyName = newApplication.CompanyName ?? oldApplication.CompanyName,
-                ApplicationDate = newApplication.ApplicationDate != DateTime.MinValue
-                                      ? newApplication.ApplicationDate
-                                      : oldApplication.ApplicationDate,
+                ApplicationDate =
+                    newApplication.ApplicationDate != DateTime.MinValue ? newApplication.ApplicationDate : oldApplication.ApplicationDate,
                 CurrentStatus = newApplication.Status
             };
             await _repository.Update(jobApplicationEntity);

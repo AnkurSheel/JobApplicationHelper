@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.DomainModels;
@@ -17,11 +18,14 @@ namespace JAH.Services.UnitTests
         private readonly JobApplication[] _jobApplications;
         private readonly JobApplicationService _jobApplicationService;
         private readonly IList<JobApplicationEntity> _jobApplicationEntities;
+        private IMapper _mapper;
 
         public JobApplicationServiceTest()
         {
             _jobApplicationRepository = Substitute.For<IRepository<JobApplicationEntity>>();
-            _jobApplicationService = new JobApplicationService(_jobApplicationRepository);
+            _mapper = Substitute.For<IMapper>();
+            _jobApplicationService = new JobApplicationService(_jobApplicationRepository, _mapper);
+
             _jobApplications = new[]
             {
                 new JobApplication { Id = 1, CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Rejected },
@@ -51,6 +55,7 @@ namespace JAH.Services.UnitTests
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(_jobApplicationEntities);
 
             _jobApplicationRepository.GetAll().Returns(jobApplicationEntities);
+            _mapper.Map<IEnumerable<JobApplication>>(Arg.Any<IEnumerable<JobApplicationEntity>>()).Returns(_jobApplications);
 
             // Act
             IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
@@ -84,6 +89,7 @@ namespace JAH.Services.UnitTests
                 ApplicationDate = _jobApplications[0].ApplicationDate,
                 CurrentStatus = _jobApplications[0].Status
             };
+            _mapper.Map<JobApplicationEntity>(_jobApplications[0]).Returns(jobApplicationEntity); 
 
             // Act
             await _jobApplicationService.AddNewApplication(_jobApplications[0]);
@@ -104,6 +110,7 @@ namespace JAH.Services.UnitTests
                 CurrentStatus = _jobApplications[0].Status
             };
             _jobApplicationRepository.Create(jobApplicationEntity).Returns(x => throw new ArgumentException());
+            _mapper.Map<JobApplicationEntity>(Arg.Any<JobApplication>()).Returns(jobApplicationEntity);
 
             // Act
             Task<Exception> ex = Record.ExceptionAsync(() => _jobApplicationService.AddNewApplication(_jobApplications[0]));
@@ -114,29 +121,31 @@ namespace JAH.Services.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationExists_JobApplication()
+        public void GetApplication_ApplicationExists_JobApplication()
         {
             // Arrange
             const string companyName = "Company 1";
             var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
-            _jobApplicationRepository.GetOne().ReturnsForAnyArgs(jobApplicationEntities.First(x => x.CompanyName.Equals(companyName)));
+            JobApplicationEntity jobApplicationEntity = jobApplicationEntities.First(x => x.CompanyName.Equals(companyName));
+            _jobApplicationRepository.GetOne().ReturnsForAnyArgs(jobApplicationEntity);
+            _mapper.Map<JobApplication>(jobApplicationEntity).Returns(_jobApplications[0]);
 
             // Act
-            JobApplication result = await _jobApplicationService.GetApplication(companyName);
+            JobApplication result = _jobApplicationService.GetApplication(companyName);
 
             // Assert
             Assert.Equal(_jobApplications[0], result);
         }
 
         [Fact]
-        public async Task GetApplication_NoApplications_Null()
+        public void GetApplication_NoApplications_Null()
         {
             // Arrange
             const string company = "Company 1";
             _jobApplicationRepository.GetOne().ReturnsForAnyArgs((JobApplicationEntity)null);
 
             // Act
-            JobApplication result = await _jobApplicationService.GetApplication(company);
+            JobApplication result = _jobApplicationService.GetApplication(company);
 
             // Assert
             Assert.Null(result);

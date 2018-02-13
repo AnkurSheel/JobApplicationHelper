@@ -10,7 +10,7 @@ namespace JAH.Services.Interfaces
 
         Task<IEnumerable<JobApplication>> GetAllApplications();
 
-        Task<JobApplication> GetApplication(string companyName);
+        JobApplication GetApplication(string companyName);
 
         Task UpdateApplication(JobApplication oldApplication, JobApplication newApplication);
     }
