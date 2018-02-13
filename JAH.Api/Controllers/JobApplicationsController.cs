@@ -60,6 +60,11 @@ namespace JAH.Api.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
                 JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication);
                 return CreatedAtRoute("GetJobApplication", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
             }
@@ -77,7 +82,12 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                var oldApplication = await _service.UpdateApplication(companyName, jobApplication);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                JobApplication oldApplication = await _service.UpdateApplication(companyName, jobApplication);
                 if (oldApplication == null)
                 {
                     return NotFound($"Company with Name \"{companyName}\" was not found");
