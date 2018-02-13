@@ -46,17 +46,21 @@ namespace JAH.Services.Services
             return _mapper.Map<JobApplication>(jobApplicationEntity);
         }
 
-        public async Task UpdateApplication(JobApplication oldApplication, JobApplication newApplication)
+        public async Task<JobApplication> UpdateApplication(string companyName, JobApplication newApplication)
         {
-            var jobApplicationEntity = new JobApplicationEntity
+            JobApplicationEntity oldJobApplication = _repository.GetOne(f => f.CompanyName.Equals(companyName));
+            if (oldJobApplication == null)
             {
-                Id = oldApplication.Id,
-                CompanyName = newApplication.CompanyName ?? oldApplication.CompanyName,
-                ApplicationDate =
-                    newApplication.ApplicationDate != DateTime.MinValue ? newApplication.ApplicationDate : oldApplication.ApplicationDate,
-                CurrentStatus = newApplication.Status
-            };
-            await _repository.Update(jobApplicationEntity);
+                return null;
+            }
+
+            oldJobApplication.CompanyName = newApplication.CompanyName ?? oldJobApplication.CompanyName;
+            oldJobApplication.ApplicationDate = newApplication.ApplicationDate != DateTime.MinValue
+                                                    ? newApplication.ApplicationDate
+                                                    : oldJobApplication.ApplicationDate;
+            oldJobApplication.CurrentStatus = newApplication.Status;
+            await _repository.Update(oldJobApplication);
+            return _mapper.Map<JobApplication>(oldJobApplication);
         }
     }
 }

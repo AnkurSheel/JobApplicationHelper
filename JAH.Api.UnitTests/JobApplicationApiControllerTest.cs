@@ -28,9 +28,9 @@ namespace JAH.Api.UnitTests
 
             _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {
-                new JobApplication { Id = 1, CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
-                new JobApplication { Id = 2, CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { Id = 3, CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             });
         }
 
@@ -71,7 +71,6 @@ namespace JAH.Api.UnitTests
             // Arrange
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -111,7 +110,7 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task Get_ApplicationExists_OkObjectResultWithJobApplications()
+        public void Get_ApplicationExists_OkObjectResultWithJobApplications()
         {
             // Arrange
             JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
@@ -127,7 +126,7 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task Get_ApplicationDoesNotExist_NotFoundObjectResult()
+        public void Get_ApplicationDoesNotExist_NotFoundObjectResult()
         {
             // Arrange
             var companyName = "Company 1";
@@ -143,7 +142,7 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task Get_ServiceThrowsException_BadRequestResult()
+        public void Get_ServiceThrowsException_BadRequestResult()
         {
             // Arrange
             _jobApplicationService.GetApplication("Company 1").Throws(new InvalidOperationException());
@@ -161,13 +160,12 @@ namespace JAH.Api.UnitTests
             // Arrange
             JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
             var companyName = expectedjobApplication.CompanyName;
-            _jobApplicationService.GetApplication(companyName).Returns(expectedjobApplication);
+            _jobApplicationService.UpdateApplication(companyName, expectedjobApplication).Returns(expectedjobApplication);
 
             // Act
             IActionResult result = await _jobApplicationsController.Put(companyName, expectedjobApplication);
 
             // Assert
-            await _jobApplicationService.Received().UpdateApplication(expectedjobApplication, expectedjobApplication);
             Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult)result;
             Assert.Equal(expectedjobApplication, okResult.Value);

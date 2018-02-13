@@ -12,6 +12,6 @@ namespace JAH.Services.Interfaces
 
         JobApplication GetApplication(string companyName);
 
-        Task UpdateApplication(JobApplication oldApplication, JobApplication newApplication);
+        Task<JobApplication> UpdateApplication(string companyName, JobApplication newApplication);
     }
 }

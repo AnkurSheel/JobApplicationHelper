@@ -113,7 +113,6 @@ namespace JAH.Web.IntegrationTests
 
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -136,7 +135,6 @@ namespace JAH.Web.IntegrationTests
             // Arrange
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -198,7 +196,6 @@ namespace JAH.Web.IntegrationTests
 
             var jobApplication = new JobApplication
             {
-                Id = _jobApplicationEntities[0].Id,
                 CompanyName = _jobApplicationEntities[0].CompanyName,
                 ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
                 Status = Status.Offer
@@ -218,7 +215,6 @@ namespace JAH.Web.IntegrationTests
             // Arrange
             var jobApplication = new JobApplication
             {
-                Id = _jobApplicationEntities[0].Id,
                 CompanyName = _jobApplicationEntities[0].CompanyName,
                 ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
                 Status = Status.Offer

@@ -1,19 +1,19 @@
 ﻿@model JobApplication
 
 <form asp-action="updateApplication" class="form-horizontal">
-    <input type="hidden" asp-for="Id"/>
-    <input type="hidden" asp-for="CompanyName"/>
-    <input type="hidden" asp-for="ApplicationDate"/>
+    <input type="hidden" asp-for="Url" />
+    <input type="hidden" asp-for="CompanyName" />
+    <input type="hidden" asp-for="ApplicationDate" />
     <div class="form-group">
         <label asp-for="CompanyName" class="col-md-2 control-label"></label>
         <div class="col-md-5">
-            <input asp-for="CompanyName" class="form-control" value="@Model.CompanyName" disabled/>
+            <input asp-for="CompanyName" class="form-control" value="@Model.CompanyName" disabled />
         </div>
     </div>
     <div class="form-group">
         <label asp-for="ApplicationDate" class="col-md-2 control-label"></label>
         <div class="col-md-5">
-            <input asp-for="ApplicationDate" class="form-control" value="@Model.ApplicationDate.ToString("yyyy-MM-dd")" disabled/>
+            <input asp-for="ApplicationDate" class="form-control" value="@Model.ApplicationDate.ToString("yyyy-MM-dd")" disabled />
         </div>
     </div>
     <div class="form-group">
@@ -25,7 +25,7 @@
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-5">
-            <input type="submit" class="btn btn-primary" value="Update Status"/>
+            <input type="submit" class="btn btn-primary" value="Update Status" />
         </div>
     </div>
 </form>

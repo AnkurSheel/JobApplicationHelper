@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace JAH.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class JobApplicationsController : Controller
+    public class JobApplicationsController : BaseController
     {
         private readonly ILogger<JobApplicationsController> _logger;
         private readonly IJobApplicationService _service;
@@ -33,7 +33,7 @@ namespace JAH.Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("{companyName}", Name = "JobApplicationsGet")]
+        [HttpGet("{companyName}", Name = "GetJobApplication")]
         public IActionResult Get(string companyName)
         {
             try
@@ -61,7 +61,7 @@ namespace JAH.Api.Controllers
             try
             {
                 JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication);
-                return CreatedAtRoute("JobApplicationsGet", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
+                return CreatedAtRoute("GetJobApplication", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
             }
             catch (Exception e)
             {
@@ -77,13 +77,11 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                var oldApplication = _service.GetApplication(companyName);
+                var oldApplication = await _service.UpdateApplication(companyName, jobApplication);
                 if (oldApplication == null)
                 {
                     return NotFound($"Company with Name \"{companyName}\" was not found");
                 }
-
-                await _service.UpdateApplication(oldApplication, jobApplication);
 
                 return Ok(oldApplication);
             }
@@ -94,7 +92,6 @@ namespace JAH.Api.Controllers
                                  $"Exception when trying to create application for application with Name \"{jobApplication.CompanyName}\"");
                 return BadRequest(e);
             }
-
         }
     }
 }

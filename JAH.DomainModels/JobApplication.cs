@@ -10,7 +10,7 @@ namespace JAH.DomainModels
             Status = Status.Applied;
         }
 
-        public int Id { get; set; }
+        public string Url { get; set; }
 
         [Display(Name = "Company Name")]
         [StringLength(100)]
@@ -29,10 +29,12 @@ namespace JAH.DomainModels
             {
                 return false;
             }
+
             if (ReferenceEquals(this, obj))
             {
                 return true;
             }
+
             if (obj.GetType() != GetType())
             {
                 return false;
