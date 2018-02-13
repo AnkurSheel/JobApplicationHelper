@@ -8,12 +8,14 @@ using Newtonsoft.Json;
 
 namespace JAH.Web.Controllers
 {
-    [Route("jobApplication")]
-    public class JobApplicationController : Controller
+    [Route("[controller]")]
+    public class JobApplicationsController : Controller
     {
+        private const string ApiUriBasePath = "api/jobApplications";
+
         private readonly HttpClient _client;
 
-        public JobApplicationController(HttpClient client)
+        public JobApplicationsController(HttpClient client)
         {
             _client = client;
         }
@@ -23,7 +25,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await _client.GetAsync($"api/jobApplication");
+                HttpResponseMessage responseMessage = await _client.GetAsync(ApiUriBasePath);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -32,7 +34,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -46,7 +48,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await _client.GetAsync($"api/jobApplication/{companyName}");
+                HttpResponseMessage responseMessage = await _client.GetAsync($"{ApiUriBasePath}/{companyName}");
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -54,7 +56,7 @@ namespace JAH.Web.Controllers
                     return View(application);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -79,13 +81,13 @@ namespace JAH.Web.Controllers
                 {
                     string json = JsonConvert.SerializeObject(jobApplication);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-                    HttpResponseMessage responseMessage = await _client.PostAsync($"api/jobApplication", stringContent);
+                    HttpResponseMessage responseMessage = await _client.PostAsync(ApiUriBasePath, stringContent);
                     if (responseMessage.IsSuccessStatusCode)
                     {
                         return RedirectToAction("ListAllApplications");
                     }
 
-                    return new StatusCodeResult((int)responseMessage.StatusCode);
+                    return new StatusCodeResult((int) responseMessage.StatusCode);
                 }
 
                 return View(jobApplication);
@@ -98,17 +100,19 @@ namespace JAH.Web.Controllers
 
         [HttpPost]
         [Route("updateApplication")]
-        public async Task<IActionResult> UpdateApplication(int id, [Bind("Id, CompanyName, ApplicationDate, Status")] JobApplication application)
+        public async Task<IActionResult> UpdateApplication(int id,
+                                                           [Bind("Id, CompanyName, ApplicationDate, Status")]
+                                                           JobApplication application)
         {
             string json = JsonConvert.SerializeObject(application);
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage responseMessage = await _client.PutAsync($"api/jobApplication", stringContent);
+            HttpResponseMessage responseMessage = await _client.PutAsync(ApiUriBasePath, stringContent);
             if (responseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction("ListAllApplications");
             }
 
-            return new StatusCodeResult((int)responseMessage.StatusCode);
+            return new StatusCodeResult((int) responseMessage.StatusCode);
         }
     }
 }

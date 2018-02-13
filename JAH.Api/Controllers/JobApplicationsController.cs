@@ -11,13 +11,13 @@ using Microsoft.Extensions.Logging;
 
 namespace JAH.Api.Controllers
 {
-    [Route("api/JobApplication")]
-    public class JobApplicationApiController : Controller
+    [Route("api/[controller]")]
+    public class JobApplicationsController : Controller
     {
-        private readonly ILogger<JobApplicationApiController> _logger;
+        private readonly ILogger<JobApplicationsController> _logger;
         private readonly IJobApplicationService _service;
 
-        public JobApplicationApiController(IJobApplicationService service, ILogger<JobApplicationApiController> logger)
+        public JobApplicationsController(IJobApplicationService service, ILogger<JobApplicationsController> logger)
         {
             _logger = logger;
             _service = service ?? throw new ArgumentNullException(nameof(service));

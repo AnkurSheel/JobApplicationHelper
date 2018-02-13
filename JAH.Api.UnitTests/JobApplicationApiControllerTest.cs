@@ -15,16 +15,16 @@ namespace JAH.Api.UnitTests
 {
     public class JobApplicationApiControllerTest
     {
-        private readonly JobApplicationApiController _jobApplicationController;
+        private readonly JobApplicationsController _jobApplicationsController;
         private readonly IJobApplicationService _jobApplicationService;
         private readonly EnumerableQuery<JobApplication> _expectedjobApplications;
 
         public JobApplicationApiControllerTest()
         {
-            var logger = Substitute.For<ILogger<JobApplicationApiController>>();
+            var logger = Substitute.For<ILogger<JobApplicationsController>>();
 
             _jobApplicationService = Substitute.For<IJobApplicationService>();
-            _jobApplicationController = new JobApplicationApiController(_jobApplicationService, logger);
+            _jobApplicationsController = new JobApplicationsController(_jobApplicationService, logger);
 
             _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
             {
@@ -42,7 +42,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetAllApplications().Returns(_expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationController.ListAllApplications();
+            IActionResult result = await _jobApplicationsController.ListAllApplications();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -59,7 +59,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetAllApplications().Returns(expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationController.ListAllApplications();
+            IActionResult result = await _jobApplicationsController.ListAllApplications();
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -78,7 +78,7 @@ namespace JAH.Api.UnitTests
             };
 
             // Act
-            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.AddNewApplication(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
@@ -102,7 +102,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.AddNewApplication(jobApplication).Returns(x => throw new ArgumentException());
 
             // Act
-            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.AddNewApplication(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
@@ -117,7 +117,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetApplication("Company 1").Returns(expectedjobApplication);
 
             // Act
-            IActionResult result = await _jobApplicationController.GetApplication("Company 1");
+            IActionResult result = await _jobApplicationsController.GetApplication("Company 1");
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -132,7 +132,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetApplication("Company 1").Throws(new InvalidOperationException());
 
             // Act
-            IActionResult result = await _jobApplicationController.GetApplication("Company 1");
+            IActionResult result = await _jobApplicationsController.GetApplication("Company 1");
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
@@ -145,7 +145,7 @@ namespace JAH.Api.UnitTests
             JobApplication jobApplication = _expectedjobApplications.First();
 
             // Act
-            IActionResult result = await _jobApplicationController.UpdateApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.UpdateApplication(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().UpdateApplication(jobApplication);
