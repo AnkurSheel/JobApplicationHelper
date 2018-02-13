@@ -26,7 +26,6 @@ namespace JAH.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ListAllApplications()
         {
-            _logger.LogInformation(LoggingEvents.ListAllApplications, "Listing all applications");
             IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications();
             if (jobApplications.Any())
             {
@@ -43,16 +42,17 @@ namespace JAH.Api.Controllers
             try
             {
                 JobApplication jobApplication = await _service.GetApplication(companyName);
+                if (jobApplication == null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(jobApplication);
-            }
-            catch (InvalidOperationException e)
-            {
-                return NotFound(e);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(LoggingEvents.JobApplications, e, $"Exception when trying to get application for {companyName}");
+                return BadRequest();
             }
         }
 

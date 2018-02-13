@@ -2,6 +2,6 @@
 {
     public class LoggingEvents
     {
-        public const int ListAllApplications = 1000;
+        public const int JobApplications = 1000;
     }
 }

@@ -46,7 +46,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
+            var okResult = (OkObjectResult)result;
             Assert.Equal(_expectedjobApplications, okResult.Value);
         }
 
@@ -84,7 +84,7 @@ namespace JAH.Api.UnitTests
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
             Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult) result;
+            var createdResult = (CreatedAtActionResult)result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 
@@ -121,12 +121,25 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
+            var okResult = (OkObjectResult)result;
             Assert.Equal(expectedjobApplication, okResult.Value);
         }
 
         [Fact]
         public async Task GetApplication_ApplicationDoesNotExist_NotFoundObjectResult()
+        {
+            // Arrange
+            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication)null);
+
+            // Act
+            IActionResult result = await _jobApplicationsController.GetApplication("Company 1");
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task GetApplication_ServiceThrowsException_BadRequestResult()
         {
             // Arrange
             _jobApplicationService.GetApplication("Company 1").Throws(new InvalidOperationException());
@@ -135,8 +148,9 @@ namespace JAH.Api.UnitTests
             IActionResult result = await _jobApplicationsController.GetApplication("Company 1");
 
             // Assert
-            Assert.IsType<NotFoundObjectResult>(result);
+            Assert.IsType<BadRequestResult>(result);
         }
+
 
         [Fact]
         public async Task UpdateApplication__CallsServiceUpdateApplication()
