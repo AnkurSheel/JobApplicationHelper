@@ -52,7 +52,7 @@ namespace JAH.Services.Services
             return null;
         }
 
-        public async Task AddNewApplication(JobApplication jobApplication)
+        public async Task<JobApplication> AddNewApplication(JobApplication jobApplication)
         {
             var jobApplicationEntity = new JobApplicationEntity
             {
@@ -62,6 +62,13 @@ namespace JAH.Services.Services
                 CurrentStatus = jobApplication.Status
             };
             await _repository.Create(jobApplicationEntity);
+            return new JobApplication
+            {
+                Id = jobApplicationEntity.Id,
+                CompanyName = jobApplicationEntity.CompanyName,
+                ApplicationDate = jobApplicationEntity.ApplicationDate,
+                Status = jobApplicationEntity.CurrentStatus
+            };
         }
 
         public async Task UpdateApplication(JobApplication jobApplication)

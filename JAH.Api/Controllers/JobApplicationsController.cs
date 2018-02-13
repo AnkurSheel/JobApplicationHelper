@@ -23,8 +23,8 @@ namespace JAH.Api.Controllers
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListAllApplications()
+        [HttpGet("")]
+        public async Task<IActionResult> Get()
         {
             IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications();
             if (jobApplications.Any())
@@ -35,9 +35,8 @@ namespace JAH.Api.Controllers
             return NoContent();
         }
 
-        [HttpGet]
-        [Route("{companyName}")]
-        public async Task<IActionResult> GetApplication(string companyName)
+        [HttpGet("{companyName}", Name = "JobApplicationsGet")]
+        public async Task<IActionResult> Get(string companyName)
         {
             try
             {
@@ -57,12 +56,12 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewApplication([FromBody] JobApplication jobApplication)
+        public async Task<IActionResult> Post([FromBody] JobApplication jobApplication)
         {
             try
             {
-                await _service.AddNewApplication(jobApplication);
-                return CreatedAtAction("ListAllApplications", new { id = jobApplication.Id }, jobApplication);
+                JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication);
+                return CreatedAtRoute("JobApplicationsGet", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
             }
             catch (ArgumentException)
             {
@@ -78,7 +77,7 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateApplication([FromBody] JobApplication jobApplication)
+        public async Task<IActionResult> Put([FromBody] JobApplication jobApplication)
         {
             try
             {

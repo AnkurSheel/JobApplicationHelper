@@ -35,14 +35,14 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task ListAllApplications_MultipleApplications_OkObjectResultWithAListOfJobApplications()
+        public async Task Get_MultipleApplications_OkObjectResultWithAListOfJobApplications()
         {
             // Arrange
 
             _jobApplicationService.GetAllApplications().Returns(_expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationsController.ListAllApplications();
+            IActionResult result = await _jobApplicationsController.Get();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -51,7 +51,7 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task ListAllApplications_NoApplications_NoContentObjectResult()
+        public async Task Get_NoApplications_NoContentObjectResult()
         {
             // Arrange
             IQueryable<JobApplication> expectedjobApplications = new List<JobApplication>().AsQueryable();
@@ -59,14 +59,14 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetAllApplications().Returns(expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationsController.ListAllApplications();
+            IActionResult result = await _jobApplicationsController.Get();
 
             // Assert
             Assert.IsType<NoContentResult>(result);
         }
 
         [Fact]
-        public async void AddNewApplication_ApplicationDoesNotExist_CreatedResultWithJobApplication()
+        public async void Post_ApplicationDoesNotExist_CreatedResultWithJobApplication()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -76,20 +76,21 @@ namespace JAH.Api.UnitTests
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
             };
+            _jobApplicationService.AddNewApplication(jobApplication).Returns(jobApplication);
 
             // Act
-            IActionResult result = await _jobApplicationsController.AddNewApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.Post(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
 
-            Assert.IsType<CreatedAtActionResult>(result);
-            var createdResult = (CreatedAtActionResult)result;
+            Assert.IsType<CreatedAtRouteResult>(result);
+            var createdResult = (CreatedAtRouteResult)result;
             Assert.Equal(jobApplication, createdResult.Value);
         }
 
         [Fact]
-        public async Task AddNewApplication_ApplicationExists_BadRequestResult()
+        public async Task Post_ApplicationExists_BadRequestResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -99,10 +100,10 @@ namespace JAH.Api.UnitTests
                 Status = Status.Interview
             };
 
-            _jobApplicationService.AddNewApplication(jobApplication).Returns(x => throw new ArgumentException());
+            _jobApplicationService.AddNewApplication(jobApplication).Throws<ArgumentException>();
 
             // Act
-            IActionResult result = await _jobApplicationsController.AddNewApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.Post(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication);
@@ -110,14 +111,14 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationExists_OkObjectResultWithJobApplications()
+        public async Task Get_ApplicationExists_OkObjectResultWithJobApplications()
         {
             // Arrange
             JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
             _jobApplicationService.GetApplication("Company 1").Returns(expectedjobApplication);
 
             // Act
-            IActionResult result = await _jobApplicationsController.GetApplication("Company 1");
+            IActionResult result = await _jobApplicationsController.Get("Company 1");
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -126,14 +127,14 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ApplicationDoesNotExist_NotFoundObjectResult()
+        public async Task Get_ApplicationDoesNotExist_NotFoundObjectResult()
         {
             // Arrange
             var companyName = "Company 1";
             _jobApplicationService.GetApplication(companyName).Returns((JobApplication)null);
 
             // Act
-            IActionResult result = await _jobApplicationsController.GetApplication(companyName);
+            IActionResult result = await _jobApplicationsController.Get(companyName);
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
@@ -142,13 +143,13 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task GetApplication_ServiceThrowsException_BadRequestResult()
+        public async Task Get_ServiceThrowsException_BadRequestResult()
         {
             // Arrange
             _jobApplicationService.GetApplication("Company 1").Throws(new InvalidOperationException());
 
             // Act
-            IActionResult result = await _jobApplicationsController.GetApplication("Company 1");
+            IActionResult result = await _jobApplicationsController.Get("Company 1");
 
             // Assert
             Assert.IsType<BadRequestResult>(result);
@@ -156,13 +157,13 @@ namespace JAH.Api.UnitTests
 
 
         [Fact]
-        public async Task UpdateApplication__CallsServiceUpdateApplication()
+        public async Task Put__CallsServiceUpdateApplication()
         {
             // Arrange
             JobApplication jobApplication = _expectedjobApplications.First();
 
             // Act
-            IActionResult result = await _jobApplicationsController.UpdateApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.Put(jobApplication);
 
             // Assert
             await _jobApplicationService.Received().UpdateApplication(jobApplication);
