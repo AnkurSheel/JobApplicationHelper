@@ -52,8 +52,8 @@ namespace JAH.Api.Controllers
             catch (Exception e)
             {
                 _logger.LogError(LoggingEvents.JobApplications, e, $"Exception when trying to get application for {companyName}");
-                return BadRequest();
             }
+            return BadRequest();
         }
 
         [HttpPost]
