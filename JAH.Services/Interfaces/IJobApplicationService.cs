@@ -6,12 +6,12 @@ namespace JAH.Services.Interfaces
 {
     public interface IJobApplicationService
     {
-        Task AddNewApplication(JobApplication jobApplication);
+        Task<JobApplication> AddNewApplication(JobApplication jobApplication);
 
         Task<IEnumerable<JobApplication>> GetAllApplications();
 
-        Task<JobApplication> GetApplication(string companyName);
+        JobApplication GetApplication(string companyName);
 
-        Task UpdateApplication(JobApplication jobApplication);
+        Task<JobApplication> UpdateApplication(string companyName, JobApplication newApplication);
     }
 }

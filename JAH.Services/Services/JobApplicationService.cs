@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.DomainModels;
@@ -13,67 +13,54 @@ namespace JAH.Services.Services
     public class JobApplicationService : IJobApplicationService
     {
         private readonly IRepository<JobApplicationEntity> _repository;
+        private readonly IMapper _mapper;
 
-        public JobApplicationService(IRepository<JobApplicationEntity> repository)
+        public JobApplicationService(IRepository<JobApplicationEntity> repository, IMapper mapper)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<JobApplication>> GetAllApplications()
         {
-            List<JobApplication> jobApplications = await _repository
-                                                       .GetAll()
-                                                       .Select(application => new JobApplication
-                                                       {
-                                                           Id = application.Id,
-                                                           CompanyName = application.CompanyName,
-                                                           ApplicationDate = application.ApplicationDate.Date,
-                                                           Status = application.CurrentStatus
-                                                       })
-                                                       .ToListAsync();
+            List<JobApplicationEntity> jobApplications = await _repository.GetAll().ToListAsync();
 
-            return jobApplications;
+            return _mapper.Map<IEnumerable<JobApplication>>(jobApplications);
         }
 
-        public async Task<JobApplication> GetApplication(string companyName)
+        public JobApplication GetApplication(string companyName)
         {
             JobApplicationEntity jobApplication = _repository.GetOne(f => f.CompanyName.Equals(companyName));
             if (jobApplication != null)
             {
-                return await Task.Run(() => new JobApplication
-                {
-                    Id = jobApplication.Id,
-                    ApplicationDate = jobApplication.ApplicationDate,
-                    CompanyName = jobApplication.CompanyName,
-                    Status = jobApplication.CurrentStatus
-                });
+                return _mapper.Map<JobApplication>(jobApplication);
             }
 
             return null;
         }
 
-        public async Task AddNewApplication(JobApplication jobApplication)
+        public async Task<JobApplication> AddNewApplication(JobApplication jobApplication)
         {
-            var jobApplicationEntity = new JobApplicationEntity
-            {
-                Id = jobApplication.Id,
-                CompanyName = jobApplication.CompanyName,
-                ApplicationDate = jobApplication.ApplicationDate,
-                CurrentStatus = jobApplication.Status
-            };
+            var jobApplicationEntity = _mapper.Map<JobApplicationEntity>(jobApplication);
             await _repository.Create(jobApplicationEntity);
+            return _mapper.Map<JobApplication>(jobApplicationEntity);
         }
 
-        public async Task UpdateApplication(JobApplication jobApplication)
+        public async Task<JobApplication> UpdateApplication(string companyName, JobApplication newApplication)
         {
-            var jobApplicationEntity = new JobApplicationEntity
+            JobApplicationEntity oldJobApplication = _repository.GetOne(f => f.CompanyName.Equals(companyName));
+            if (oldJobApplication == null)
             {
-                Id = jobApplication.Id,
-                CompanyName = jobApplication.CompanyName,
-                ApplicationDate = jobApplication.ApplicationDate,
-                CurrentStatus = jobApplication.Status
-            };
-            await _repository.Update(jobApplicationEntity);
+                return null;
+            }
+
+            oldJobApplication.CompanyName = newApplication.CompanyName ?? oldJobApplication.CompanyName;
+            oldJobApplication.ApplicationDate = newApplication.ApplicationDate != DateTime.MinValue
+                                                    ? newApplication.ApplicationDate
+                                                    : oldJobApplication.ApplicationDate;
+            oldJobApplication.CurrentStatus = newApplication.Status;
+            await _repository.Update(oldJobApplication);
+            return _mapper.Map<JobApplication>(oldJobApplication);
         }
     }
 }

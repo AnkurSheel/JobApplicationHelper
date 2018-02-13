@@ -14,7 +14,7 @@ namespace JAH.Web.UnitTests
 {
     public class JobApplicationControllerTest
     {
-        private readonly JobApplicationController _jobApplicationController;
+        private readonly JobApplicationsController _jobApplicationsController;
         private readonly FakeHttpMessageHandler _httpMessageHandler;
         private readonly HttpRequestMessage _httpRequestMessage;
         private readonly List<JobApplication> _expectedJobApplications;
@@ -27,13 +27,13 @@ namespace JAH.Web.UnitTests
             _httpRequestMessage = new HttpRequestMessage();
             _httpMessageHandler.WhenForAnyArgs(x => x.Send(_httpRequestMessage)).DoNotCallBase();
 
-            _jobApplicationController = new JobApplicationController(httpClient);
+            _jobApplicationsController = new JobApplicationsController(httpClient);
 
             _expectedJobApplications = new List<JobApplication>
             {
-                new JobApplication { Id = 1, CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
-                new JobApplication { Id = 2, CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { Id = 3, CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
             };
         }
 
@@ -51,7 +51,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.ListAllApplications();
+            IActionResult result = await _jobApplicationsController.ListAllApplications();
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -71,7 +71,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.ListAllApplications();
+            IActionResult result = await _jobApplicationsController.ListAllApplications();
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -85,7 +85,6 @@ namespace JAH.Web.UnitTests
             // Arrange
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -98,7 +97,7 @@ namespace JAH.Web.UnitTests
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
             // Act
-            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.AddNewApplication(jobApplication);
 
             // Assert
             Assert.IsType<StatusCodeResult>(result);
@@ -112,7 +111,6 @@ namespace JAH.Web.UnitTests
             // Arrange
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -126,7 +124,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.AddNewApplication(jobApplication);
+            IActionResult result = await _jobApplicationsController.AddNewApplication(jobApplication);
 
             // Assert
             Assert.IsType<RedirectToActionResult>(result);
@@ -149,7 +147,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.ShowApplication(_expectedJobApplications[index].CompanyName);
+            IActionResult result = await _jobApplicationsController.ShowApplication(_expectedJobApplications[index].CompanyName);
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -169,7 +167,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.ShowApplication("Company");
+            IActionResult result = await _jobApplicationsController.ShowApplication("Company");
 
             // Assert
             Assert.IsType<ViewResult>(result);
@@ -182,7 +180,6 @@ namespace JAH.Web.UnitTests
         {
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -192,7 +189,7 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _jobApplicationController.UpdateApplication(jobApplication.Id, jobApplication);
+            IActionResult result = await _jobApplicationsController.UpdateApplication(1, jobApplication);
 
             // Assert
             Assert.IsType<RedirectToActionResult>(result);

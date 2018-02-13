@@ -43,7 +43,7 @@ namespace JAH.Data.Repositories
 
         public JobApplicationEntity GetOne(Expression<Func<JobApplicationEntity, bool>> filter = null)
         {
-            return GetAll(filter).Single();
+            return GetAll(filter).SingleOrDefault();
         }
 
         public async Task Update(JobApplicationEntity jobApplication)

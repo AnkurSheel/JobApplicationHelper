@@ -12,6 +12,7 @@ namespace JAH.Web.IntegrationTests
 {
     public class JobApplicationControllerTest : IClassFixture<ClientFixture>, IDisposable
     {
+        private const string UriBasePath = "/jobApplications";
         private readonly ITestOutputHelper _output;
         private readonly ClientFixture _fixture;
         private readonly JobApplicationEntity[] _jobApplicationEntities;
@@ -79,7 +80,7 @@ namespace JAH.Web.IntegrationTests
             _fixture.JobApplicationDbContext.SaveChanges();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync("/jobApplication");
+            HttpResponseMessage response = await _fixture.WebClient.GetAsync(UriBasePath);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -94,7 +95,7 @@ namespace JAH.Web.IntegrationTests
             // Arrange
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync("/jobApplication");
+            HttpResponseMessage response = await _fixture.WebClient.GetAsync(UriBasePath);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -112,7 +113,6 @@ namespace JAH.Web.IntegrationTests
 
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -121,7 +121,7 @@ namespace JAH.Web.IntegrationTests
             // Act
 
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/addNewApplication", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/addNewApplication", stringContent);
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
@@ -135,7 +135,6 @@ namespace JAH.Web.IntegrationTests
             // Arrange
             var jobApplication = new JobApplication
             {
-                Id = 1,
                 CompanyName = "Company 1",
                 ApplicationDate = new DateTime(2017, 11, 13),
                 Status = Status.Interview
@@ -143,7 +142,7 @@ namespace JAH.Web.IntegrationTests
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/addNewApplication", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/addNewApplication", stringContent);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -161,7 +160,7 @@ namespace JAH.Web.IntegrationTests
             _fixture.JobApplicationDbContext.SaveChanges();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/jobApplication/{_jobApplicationEntities[0].CompanyName}");
+            HttpResponseMessage response = await _fixture.WebClient.GetAsync($"{UriBasePath}/{_jobApplicationEntities[0].CompanyName}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -176,7 +175,7 @@ namespace JAH.Web.IntegrationTests
             // Arrange
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/jobApplication/{_jobApplicationEntities[0].CompanyName}");
+            HttpResponseMessage response = await _fixture.WebClient.GetAsync($"{UriBasePath}/{_jobApplicationEntities[0].CompanyName}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -197,7 +196,6 @@ namespace JAH.Web.IntegrationTests
 
             var jobApplication = new JobApplication
             {
-                Id = _jobApplicationEntities[0].Id,
                 CompanyName = _jobApplicationEntities[0].CompanyName,
                 ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
                 Status = Status.Offer
@@ -205,7 +203,7 @@ namespace JAH.Web.IntegrationTests
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/updateApplication", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/updateApplication", stringContent);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -217,7 +215,6 @@ namespace JAH.Web.IntegrationTests
             // Arrange
             var jobApplication = new JobApplication
             {
-                Id = _jobApplicationEntities[0].Id,
                 CompanyName = _jobApplicationEntities[0].CompanyName,
                 ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
                 Status = Status.Offer
@@ -225,7 +222,7 @@ namespace JAH.Web.IntegrationTests
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync("/jobApplication/updateApplication", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/updateApplication", stringContent);
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
