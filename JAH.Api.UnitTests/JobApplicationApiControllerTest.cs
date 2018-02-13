@@ -152,23 +152,41 @@ namespace JAH.Api.UnitTests
             IActionResult result = await _jobApplicationsController.Get("Company 1");
 
             // Assert
-            Assert.IsType<BadRequestResult>(result);
+            Assert.IsType<BadRequestObjectResult>(result);
         }
 
+        [Fact]
+        public async Task Put_ApplicationExists_OkObjectResultWithJobApplication()
+        {
+            // Arrange
+            JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
+            var companyName = expectedjobApplication.CompanyName;
+            _jobApplicationService.GetApplication(companyName).Returns(expectedjobApplication);
+
+            // Act
+            IActionResult result = await _jobApplicationsController.Put(companyName, expectedjobApplication);
+
+            // Assert
+            await _jobApplicationService.Received().UpdateApplication(expectedjobApplication, expectedjobApplication);
+            Assert.IsType<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.Equal(expectedjobApplication, okResult.Value);
+        }
 
         [Fact]
-        public async Task Put__CallsServiceUpdateApplication()
+        public async Task Put_ApplicationDoesNotExist_NotFoundObjectResult()
         {
             // Arrange
             JobApplication jobApplication = _expectedjobApplications.First();
+            string companyName = jobApplication.CompanyName;
 
             // Act
-            IActionResult result = await _jobApplicationsController.Put(jobApplication);
+            IActionResult result = await _jobApplicationsController.Put(companyName, jobApplication);
 
             // Assert
-            await _jobApplicationService.Received().UpdateApplication(jobApplication);
-
-            Assert.IsType<OkResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result);
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.Equal($"Company with Name \"{companyName}\" was not found", notFoundResult.Value);
         }
     }
 }

@@ -71,14 +71,20 @@ namespace JAH.Services.Services
             };
         }
 
-        public async Task UpdateApplication(JobApplication jobApplication)
+        public async Task UpdateApplication(JobApplication oldApplication, JobApplication newApplication)
         {
+            oldApplication.CompanyName = newApplication.CompanyName ?? oldApplication.CompanyName;
+            oldApplication.ApplicationDate = newApplication.ApplicationDate != DateTime.MinValue
+                                                 ? newApplication.ApplicationDate
+                                                 : oldApplication.ApplicationDate;
+            oldApplication.Status = newApplication.Status;
+
             var jobApplicationEntity = new JobApplicationEntity
             {
-                Id = jobApplication.Id,
-                CompanyName = jobApplication.CompanyName,
-                ApplicationDate = jobApplication.ApplicationDate,
-                CurrentStatus = jobApplication.Status
+                Id = oldApplication.Id,
+                CompanyName = oldApplication.CompanyName,
+                ApplicationDate = oldApplication.ApplicationDate,
+                CurrentStatus = oldApplication.Status
             };
             await _repository.Update(jobApplicationEntity);
         }

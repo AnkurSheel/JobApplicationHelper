@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 
 namespace JAH.Api.Controllers
@@ -50,9 +48,11 @@ namespace JAH.Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(LoggingEvents.JobApplications, e, $"Exception when trying to get application for application with Name \"{companyName}\"");
+                _logger.LogError(LoggingEvents.JobApplications,
+                                 e,
+                                 $"Exception when trying to get application for application with Name \"{companyName}\"");
+                return BadRequest(e);
             }
-            return BadRequest();
         }
 
         [HttpPost]
@@ -63,40 +63,38 @@ namespace JAH.Api.Controllers
                 JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication);
                 return CreatedAtRoute("JobApplicationsGet", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
             }
-            catch (ArgumentException)
-            {
-                var modelState = new ModelStateDictionary();
-                modelState.AddModelError("Duplicate Name", $"Name {jobApplication.CompanyName} already exists.");
-                return BadRequest(modelState);
-            }
             catch (Exception e)
             {
-                _logger.LogError(LoggingEvents.JobApplications, e, $"Exception when trying to create application for application with Name \"{jobApplication.CompanyName}\"");
+                _logger.LogError(LoggingEvents.JobApplications,
+                                 e,
+                                 $"Exception when trying to create application for application with Name \"{jobApplication.CompanyName}\"");
+                return BadRequest(e);
             }
-
-            return BadRequest();
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put([FromBody] JobApplication jobApplication)
+        [HttpPut("{companyName}")]
+        public async Task<IActionResult> Put(string companyName, [FromBody] JobApplication jobApplication)
         {
             try
             {
-                await _service.UpdateApplication(jobApplication);
+                var oldApplication = await _service.GetApplication(companyName);
+                if (oldApplication == null)
+                {
+                    return NotFound($"Company with Name \"{companyName}\" was not found");
+                }
 
-                return Ok();
-            }
-            catch (DBConcurrencyException e)
-            {
-                var modelState = new ModelStateDictionary();
-                modelState.AddModelError("Application Does Not Exist", $"Application for {jobApplication.CompanyName} does not exist.");
-                return BadRequest(modelState);
+                await _service.UpdateApplication(oldApplication, jobApplication);
+
+                return Ok(oldApplication);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(LoggingEvents.JobApplications,
+                                 e,
+                                 $"Exception when trying to create application for application with Name \"{jobApplication.CompanyName}\"");
+                return BadRequest(e);
             }
+
         }
     }
 }
