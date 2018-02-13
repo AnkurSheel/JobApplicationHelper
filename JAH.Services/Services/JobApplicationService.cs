@@ -73,18 +73,14 @@ namespace JAH.Services.Services
 
         public async Task UpdateApplication(JobApplication oldApplication, JobApplication newApplication)
         {
-            oldApplication.CompanyName = newApplication.CompanyName ?? oldApplication.CompanyName;
-            oldApplication.ApplicationDate = newApplication.ApplicationDate != DateTime.MinValue
-                                                 ? newApplication.ApplicationDate
-                                                 : oldApplication.ApplicationDate;
-            oldApplication.Status = newApplication.Status;
-
             var jobApplicationEntity = new JobApplicationEntity
             {
                 Id = oldApplication.Id,
-                CompanyName = oldApplication.CompanyName,
-                ApplicationDate = oldApplication.ApplicationDate,
-                CurrentStatus = oldApplication.Status
+                CompanyName = newApplication.CompanyName ?? oldApplication.CompanyName,
+                ApplicationDate = newApplication.ApplicationDate != DateTime.MinValue
+                                      ? newApplication.ApplicationDate
+                                      : oldApplication.ApplicationDate,
+                CurrentStatus = newApplication.Status
             };
             await _repository.Update(jobApplicationEntity);
         }
