@@ -9,7 +9,8 @@ namespace JAH.Api.Mappings
         public JobApplicationMappingProfile()
         {
             CreateMap<JobApplicationEntity, JobApplication>()
-                .ForMember(c => c.Url, opt => opt.ResolveUsing<JobApplicationUrlResolver>())
+                .ForMember(a => a.Status, opt => opt.MapFrom(e => e.CurrentStatus))
+                .ForMember(a => a.Url, opt => opt.ResolveUsing<JobApplicationUrlResolver>())
                 .ReverseMap();
         }
     }
