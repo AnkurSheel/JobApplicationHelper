@@ -44,7 +44,7 @@ namespace JAH.Api.Controllers
                 JobApplication jobApplication = await _service.GetApplication(companyName);
                 if (jobApplication == null)
                 {
-                    return NotFound();
+                    return NotFound($"Company {companyName} was not found");
                 }
 
                 return Ok(jobApplication);

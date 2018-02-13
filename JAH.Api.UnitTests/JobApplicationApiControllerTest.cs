@@ -129,13 +129,16 @@ namespace JAH.Api.UnitTests
         public async Task GetApplication_ApplicationDoesNotExist_NotFoundObjectResult()
         {
             // Arrange
-            _jobApplicationService.GetApplication("Company 1").Returns((JobApplication)null);
+            var companyName = "Company 1";
+            _jobApplicationService.GetApplication(companyName).Returns((JobApplication)null);
 
             // Act
-            IActionResult result = await _jobApplicationsController.GetApplication("Company 1");
+            IActionResult result = await _jobApplicationsController.GetApplication(companyName);
 
             // Assert
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result);
+            var notFoundResult = (NotFoundObjectResult)result;
+            Assert.Equal($"Company {companyName} was not found", notFoundResult.Value);
         }
 
         [Fact]
