@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
+using JAH.Data;
+using JAH.Data.Entities;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +37,36 @@ namespace JAH.Api
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddAutoMapper();
 
+            services.AddIdentity<JobApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireDigit = false;
+            }).AddEntityFrameworkStores<JobApplicationDbContext>();
+            services.ConfigureApplicationCookie(options => options.Events = new CookieAuthenticationEvents
+            {
+                OnRedirectToLogin = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                    {
+                        ctx.Response.StatusCode = 401;
+                    }
+
+                    return Task.CompletedTask;
+                },
+                OnRedirectToAccessDenied = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+                    {
+                        ctx.Response.StatusCode = 403;
+                    }
+
+                    return Task.CompletedTask;
+                }
+            });
             services.AddMvc(opt =>
             {
                 if (!_env.IsProduction())
@@ -57,6 +92,8 @@ namespace JAH.Api
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseAuthentication();
 
             app.UseMvc();
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
