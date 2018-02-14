@@ -54,11 +54,8 @@ namespace JAH.Services.Services
                 return null;
             }
 
-            oldJobApplication.CompanyName = newApplication.CompanyName ?? oldJobApplication.CompanyName;
-            oldJobApplication.ApplicationDate = newApplication.ApplicationDate != DateTime.MinValue
-                                                    ? newApplication.ApplicationDate
-                                                    : oldJobApplication.ApplicationDate;
-            oldJobApplication.CurrentStatus = newApplication.Status;
+            _mapper.Map(newApplication, oldJobApplication);
+
             await _repository.Update(oldJobApplication);
             return _mapper.Map<JobApplication>(oldJobApplication);
         }
