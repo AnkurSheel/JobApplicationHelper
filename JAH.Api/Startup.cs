@@ -93,10 +93,16 @@ namespace JAH.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseAuthentication();
+            ConfigureAdditionalMiddleware(app);
 
+            app.UseAuthentication();
             app.UseMvc();
+
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
+        }
+
+        protected virtual void ConfigureAdditionalMiddleware(IApplicationBuilder app)
+        {
         }
     }
 }

@@ -60,6 +60,8 @@ namespace JAH.Web.IntegrationTests
                     CurrentStatus = Status.Rejected
                 }
             };
+
+            _fixture.SetupAuthentication();
         }
 
         public void Dispose()
