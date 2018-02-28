@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using JAH.Api.Filters;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -13,7 +12,6 @@ namespace JAH.Api.Controllers
 {
     [Route("api/[controller]")]
     [ValidateModel]
-    [Authorize]
     public class JobApplicationsController : BaseController
     {
         private readonly ILogger<JobApplicationsController> _logger;

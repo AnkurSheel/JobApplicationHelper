@@ -7,11 +7,13 @@ using JAH.Data;
 using JAH.Data.Entities;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,14 +40,15 @@ namespace JAH.Api
             services.AddAutoMapper();
 
             services.AddIdentity<JobApplicationUser, IdentityRole>(options =>
-            {
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 5;
-                options.Password.RequiredUniqueChars = 0;
-                options.Password.RequireDigit = false;
-            }).AddEntityFrameworkStores<JobApplicationDbContext>();
+                    {
+                        options.Password.RequireLowercase = false;
+                        options.Password.RequireNonAlphanumeric = false;
+                        options.Password.RequireUppercase = false;
+                        options.Password.RequiredLength = 5;
+                        options.Password.RequiredUniqueChars = 0;
+                        options.Password.RequireDigit = false;
+                    })
+                    .AddEntityFrameworkStores<JobApplicationDbContext>();
             services.ConfigureApplicationCookie(options => options.Events = new CookieAuthenticationEvents
             {
                 OnRedirectToLogin = ctx =>
@@ -78,6 +81,9 @@ namespace JAH.Api
                 {
                     opt.Filters.Add(new RequireHttpsAttribute());
                 }
+
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                opt.Filters.Add(new AuthorizeFilter(policy));
             });
 
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));

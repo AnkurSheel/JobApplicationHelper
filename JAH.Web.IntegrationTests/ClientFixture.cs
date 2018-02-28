@@ -73,6 +73,11 @@ namespace JAH.Web.IntegrationTests
             _apiClient.DefaultRequestHeaders.Add("my-id", "12345");
         }
 
+        public void ClearAuthentication()
+        {
+            _apiClient.DefaultRequestHeaders.Clear();
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
