@@ -210,7 +210,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async void UpdateApplication_ApplicationDoesNotExist_OkObjectResult()
+        public async void UpdateApplication_ApplicationDoesNotExist_NotFoundResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -226,6 +226,7 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }
