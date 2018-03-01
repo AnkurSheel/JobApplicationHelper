@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using JAH.Api.Filters;
 using JAH.Data.Entities;
 using JAH.DomainModels;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace JAH.Api.Controllers
 {
+    [ValidateModel]
     public class AuthController : Controller
     {
         private readonly SignInManager<JobApplicationUser> _signInManager;
