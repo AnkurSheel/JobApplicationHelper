@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using JAH.Api.Filters;
 using JAH.Data.Entities;
 using JAH.DomainModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,7 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPost("api/auth/register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] CredentialModel model)
         {
             try
@@ -49,6 +51,7 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPost("api/auth/login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] CredentialModel model)
         {
             try
@@ -66,6 +69,21 @@ namespace JAH.Api.Controllers
             }
 
             return BadRequest("Failed to Login");
+        }
+
+        [HttpPost("api/auth/logout")]
+        public async Task<IActionResult> Logout()
+        {
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(LoggingEvents.Auth, e, $"Exception when trying to logout");
+                return BadRequest(e);
+            }
         }
     }
 }
