@@ -2,12 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using AutoMapper;
+
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.DomainModels;
+using JAH.Services.Interfaces;
 using JAH.Services.Services;
+
 using NSubstitute;
+
 using Xunit;
 
 namespace JAH.Services.UnitTests
@@ -18,13 +23,15 @@ namespace JAH.Services.UnitTests
         private readonly JobApplication[] _jobApplications;
         private readonly JobApplicationService _jobApplicationService;
         private readonly IList<JobApplicationEntity> _jobApplicationEntities;
-        private IMapper _mapper;
+        private readonly IMapper _mapper;
 
         public JobApplicationServiceTest()
         {
             _jobApplicationRepository = Substitute.For<IRepository<JobApplicationEntity>>();
             _mapper = Substitute.For<IMapper>();
-            _jobApplicationService = new JobApplicationService(_jobApplicationRepository, _mapper);
+            IUserResolverService userResolver = Substitute.For<IUserResolverService>();
+
+            _jobApplicationService = new JobApplicationService(_jobApplicationRepository, _mapper, userResolver);
 
             _jobApplications = new[]
             {
