@@ -9,15 +9,13 @@ using Newtonsoft.Json;
 namespace JAH.Web.Controllers
 {
     [Route("[controller]")]
-    public class JobApplicationsController : Controller
+    public class JobApplicationsController : BaseController
     {
         private const string ApiUriBasePath = "api/jobApplications";
 
-        private readonly HttpClient _client;
-
         public JobApplicationsController(HttpClient client)
+            : base(client)
         {
-            _client = client;
         }
 
         [HttpGet]
@@ -25,7 +23,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await _client.GetAsync(ApiUriBasePath);
+                HttpResponseMessage responseMessage = await Client.GetAsync(ApiUriBasePath);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -34,7 +32,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -48,7 +46,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await _client.GetAsync($"{ApiUriBasePath}/{companyName}");
+                HttpResponseMessage responseMessage = await Client.GetAsync($"{ApiUriBasePath}/{companyName}");
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -56,7 +54,7 @@ namespace JAH.Web.Controllers
                     return View(application);
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -81,13 +79,13 @@ namespace JAH.Web.Controllers
                 {
                     string json = JsonConvert.SerializeObject(jobApplication);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-                    HttpResponseMessage responseMessage = await _client.PostAsync(ApiUriBasePath, stringContent);
+                    HttpResponseMessage responseMessage = await Client.PostAsync(ApiUriBasePath, stringContent);
                     if (responseMessage.IsSuccessStatusCode)
                     {
                         return RedirectToAction("ListAllApplications");
                     }
 
-                    return new StatusCodeResult((int)responseMessage.StatusCode);
+                    return new StatusCodeResult((int) responseMessage.StatusCode);
                 }
 
                 return View(jobApplication);
@@ -106,13 +104,13 @@ namespace JAH.Web.Controllers
         {
             string json = JsonConvert.SerializeObject(application);
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage responseMessage = await _client.PutAsync($"{ApiUriBasePath}/{application.CompanyName}", stringContent);
+            HttpResponseMessage responseMessage = await Client.PutAsync($"{ApiUriBasePath}/{application.CompanyName}", stringContent);
             if (responseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction("ListAllApplications");
             }
 
-            return new StatusCodeResult((int)responseMessage.StatusCode);
+            return new StatusCodeResult((int) responseMessage.StatusCode);
         }
     }
 }

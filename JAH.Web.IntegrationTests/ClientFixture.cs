@@ -27,9 +27,9 @@ namespace JAH.Web.IntegrationTests
         public ClientFixture()
         {
             var dbContextOptions = new DbContextOptionsBuilder<JobApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .EnableSensitiveDataLogging()
-                .Options;
+                                   .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                                   .EnableSensitiveDataLogging()
+                                   .Options;
 
             var builder = new ContainerBuilder();
             builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
@@ -64,6 +64,20 @@ namespace JAH.Web.IntegrationTests
             JobApplicationDbContext.SaveChanges();
         }
 
+        public void SetupAuthentication()
+        {
+            _apiClient.DefaultRequestHeaders.Add(AuthenticatedTestRequestMiddleware.TestingHeader,
+                                                 AuthenticatedTestRequestMiddleware.TestingHeaderValue);
+
+            _apiClient.DefaultRequestHeaders.Add("my-name", "abcde");
+            _apiClient.DefaultRequestHeaders.Add("my-id", "12345");
+        }
+
+        public void ClearAuthentication()
+        {
+            _apiClient.DefaultRequestHeaders.Clear();
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -77,16 +91,16 @@ namespace JAH.Web.IntegrationTests
 
         private void SetupClients()
         {
-            using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<Api.Startup>().AsSelf()))
+            using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<TestApiServerStartup>().AsSelf()))
             {
                 string fullPath =
                     Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "..", "..", "..", "..", "JAH.Api"));
 
-                var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Api.Startup>>();
+                var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, TestApiServerStartup>>();
                 IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
                                                               .UseContentRoot(fullPath)
-                                                              .UseEnvironment("Development")
-                                                              .UseStartup<Api.Startup>()
+                                                              .UseEnvironment("Testing")
+                                                              .UseStartup<TestApiServerStartup>()
                                                               .ConfigureServices(services =>
                                                                                      services.TryAddTransient(provider =>
                                                                                                                   SetupStartup(provider, factory)));
@@ -102,7 +116,7 @@ namespace JAH.Web.IntegrationTests
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
                 IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
                                                               .UseContentRoot(fullPath)
-                                                              .UseEnvironment("Development")
+                                                              .UseEnvironment("Testing")
                                                               .UseStartup<Startup>()
                                                               .ConfigureServices(services =>
                                                                                      services.AddTransient(provider =>
@@ -121,7 +135,7 @@ namespace JAH.Web.IntegrationTests
             return factory(hostingEnv, config);
         }
 
-        private Api.Startup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, Api.Startup> factory)
+        private TestApiServerStartup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, TestApiServerStartup> factory)
         {
             var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
             var config = provider.GetRequiredService<IConfiguration>();

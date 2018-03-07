@@ -2,8 +2,8 @@
 
 namespace JAH.Api.Controllers
 {
-    [Route("api/hello")]
-    public class HelloApiController : Controller
+    [Route("api/[controller]")]
+    public class HelloController : Controller
     {
         [HttpGet("{name}")]
         public IActionResult Greet(string name)

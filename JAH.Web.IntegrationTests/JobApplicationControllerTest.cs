@@ -60,6 +60,8 @@ namespace JAH.Web.IntegrationTests
                     CurrentStatus = Status.Rejected
                 }
             };
+
+            _fixture.SetupAuthentication();
         }
 
         public void Dispose()
@@ -179,8 +181,6 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            Assert.Empty(responseData);
         }
 
         [Fact]
@@ -210,7 +210,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async void UpdateApplication_ApplicationDoesNotExist_OkObjectResult()
+        public async void UpdateApplication_ApplicationDoesNotExist_NotFoundResult()
         {
             // Arrange
             var jobApplication = new JobApplication
@@ -226,8 +226,7 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            Assert.Empty(responseData);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }

@@ -1,10 +1,11 @@
 using JAH.Data.Entities;
 using JAH.DomainModels;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace JAH.Data
 {
-    public class JobApplicationDbContext : DbContext
+    public class JobApplicationDbContext : IdentityDbContext<JobApplicationUser>
     {
         public JobApplicationDbContext(DbContextOptions options)
             : base(options)

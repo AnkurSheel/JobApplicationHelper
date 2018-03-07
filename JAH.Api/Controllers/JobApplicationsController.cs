@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JAH.Api.Filters;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace JAH.Api.Controllers
 {
     [Route("api/[controller]")]
+    [ValidateModel]
     public class JobApplicationsController : BaseController
     {
         private readonly ILogger<JobApplicationsController> _logger;
@@ -60,11 +62,6 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
                 JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication);
                 return CreatedAtRoute("GetJobApplication", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
             }
@@ -82,11 +79,6 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
                 JobApplication oldApplication = await _service.UpdateApplication(companyName, jobApplication);
                 if (oldApplication == null)
                 {

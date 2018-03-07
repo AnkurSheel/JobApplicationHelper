@@ -38,11 +38,8 @@ namespace JAH.Web
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
-            }
+            app.UseExceptionHandler("/Error");
+            app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 
             app.UseStaticFiles();
 
