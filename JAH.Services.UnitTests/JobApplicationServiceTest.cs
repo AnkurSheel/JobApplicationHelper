@@ -1,18 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
-
 using AutoMapper;
-
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
-
 using NSubstitute;
-
 using Xunit;
 
 namespace JAH.Services.UnitTests
@@ -24,14 +21,17 @@ namespace JAH.Services.UnitTests
         private readonly JobApplicationService _jobApplicationService;
         private readonly IList<JobApplicationEntity> _jobApplicationEntities;
         private readonly IMapper _mapper;
+        private readonly IUserResolverService _userResolver;
+        private readonly JobApplicationUser _user;
 
         public JobApplicationServiceTest()
         {
             _jobApplicationRepository = Substitute.For<IRepository<JobApplicationEntity>>();
             _mapper = Substitute.For<IMapper>();
-            IUserResolverService userResolver = Substitute.For<IUserResolverService>();
+            _userResolver = Substitute.For<IUserResolverService>();
+            _user = new JobApplicationUser("user");
 
-            _jobApplicationService = new JobApplicationService(_jobApplicationRepository, _mapper, userResolver);
+            _jobApplicationService = new JobApplicationService(_jobApplicationRepository, _mapper, _userResolver);
 
             _jobApplications = new[]
             {
@@ -46,6 +46,7 @@ namespace JAH.Services.UnitTests
             {
                 var jobApplicationEntity = new JobApplicationEntity
                 {
+                    Owner = _user,
                     CompanyName = jobApplication.CompanyName,
                     ApplicationDate = jobApplication.ApplicationDate,
                     CurrentStatus = jobApplication.Status
@@ -58,9 +59,10 @@ namespace JAH.Services.UnitTests
         public async Task GetAllApplications_MultipleApplications_AllJobApplications()
         {
             // Arrange
+            _userResolver.GetCurrentUser().Returns(_user);
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(_jobApplicationEntities);
 
-            _jobApplicationRepository.GetAll().Returns(jobApplicationEntities);
+            _jobApplicationRepository.GetAll(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns(jobApplicationEntities);
             _mapper.Map<IEnumerable<JobApplication>>(Arg.Any<IEnumerable<JobApplicationEntity>>()).Returns(_jobApplications);
 
             // Act
@@ -71,11 +73,12 @@ namespace JAH.Services.UnitTests
         }
 
         [Fact]
-        public async Task GetAllApplications_NoApplications_AllJobApplications()
+        public async Task GetAllApplications_NoApplications_EmptyList()
         {
             // Arrange
+            _userResolver.GetCurrentUser().Returns(_user);
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>());
-            _jobApplicationRepository.GetAll().Returns(jobApplicationEntities);
+            _jobApplicationRepository.GetAll(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns(jobApplicationEntities);
 
             // Act
             IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
@@ -88,13 +91,18 @@ namespace JAH.Services.UnitTests
         public async void AddNewApplication_ApplicationDoesNotExist_InsertJobApplication()
         {
             // Arrange
+            JobApplicationUser user = new JobApplicationUser("user");
+            _userResolver.GetCurrentUser().Returns(user);
             var jobApplicationEntity = new JobApplicationEntity
             {
+                Owner = user,
                 CompanyName = _jobApplications[0].CompanyName,
                 ApplicationDate = _jobApplications[0].ApplicationDate,
                 CurrentStatus = _jobApplications[0].Status
             };
-            _mapper.Map<JobApplicationEntity>(_jobApplications[0]).Returns(jobApplicationEntity);
+
+            _mapper.Map(_jobApplications[0], Arg.Any<Action<IMappingOperationOptions<JobApplication, JobApplicationEntity>>>())
+                   .Returns(jobApplicationEntity);
 
             // Act
             await _jobApplicationService.AddNewApplication(_jobApplications[0]);
@@ -114,7 +122,7 @@ namespace JAH.Services.UnitTests
                 CurrentStatus = _jobApplications[0].Status
             };
             _jobApplicationRepository.Create(jobApplicationEntity).Returns(x => throw new ArgumentException());
-            _mapper.Map<JobApplicationEntity>(Arg.Any<JobApplication>()).Returns(jobApplicationEntity);
+            _mapper.Map<JobApplication, JobApplicationEntity>(Arg.Any<JobApplication>(), opt => { }).ReturnsForAnyArgs(jobApplicationEntity);
 
             // Act
             Task<Exception> ex = Record.ExceptionAsync(() => _jobApplicationService.AddNewApplication(_jobApplications[0]));
