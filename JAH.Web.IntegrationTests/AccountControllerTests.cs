@@ -26,7 +26,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task Register_Suceeds_RedirectsToLogin()
+        public async Task Register_Succeeds_RedirectsToLogin()
         {
             // Arrange
             var credentials = new CredentialModel { UserName = "username", Password = "password" };
@@ -37,11 +37,11 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
-            Assert.Equal("/Account/Login", response.Headers.Location.OriginalString);
+            Assert.Equal("/JobApplications", response.Headers.Location.OriginalString);
         }
 
         [Fact]
-        public async Task Login_Suceeds_RedirectsToJobApplications()
+        public async Task Login_Succeeds_RedirectsToJobApplications()
         {
             // Arrange
             var credentials = new CredentialModel { UserName = "username", Password = "password" };

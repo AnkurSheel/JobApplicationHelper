@@ -36,7 +36,7 @@ namespace JAH.Web.Controllers
                     HttpResponseMessage responseMessage = await Client.PostAsync($"{ApiUriBasePath}/register", stringContent);
                     if (responseMessage.IsSuccessStatusCode)
                     {
-                        return RedirectToAction("Login", null);
+                        return await Login(credentials);
                     }
 
                     ModelState.AddModelError("", responseMessage.Content.ReadAsStringAsync().Result);
@@ -51,14 +51,13 @@ namespace JAH.Web.Controllers
             }
         }
 
-        [HttpGet("")]
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        [HttpPost("")]
-        [Route("Login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login(CredentialModel credentials)
         {
             try
