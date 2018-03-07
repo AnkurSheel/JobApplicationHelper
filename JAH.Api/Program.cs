@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Autofac;
-using JAH.Data;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -33,8 +32,9 @@ namespace JAH.Api
         {
             try
             {
-                var context = container.Resolve<JobApplicationDbContext>();
-                DbInitializer.Initialize(context);
+                //var context = container.Resolve<JobApplicationDbContext>();
+                //var context = container.Resolve<JobApplicationDbContext>();
+                //DbInitializer.Initialize(context);
             }
             catch (Exception e)
             {

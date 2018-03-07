@@ -20,6 +20,13 @@ namespace JAH.Data
             modelBuilder.Entity<JobApplicationEntity>().Property(p => p.CompanyName).IsRequired().HasMaxLength(100);
             modelBuilder.Entity<JobApplicationEntity>().Property(p => p.ApplicationDate).HasDefaultValueSql("getdate()");
             modelBuilder.Entity<JobApplicationEntity>().Property(p => p.CurrentStatus).HasDefaultValue(Status.Applied);
+
+            modelBuilder.Entity<JobApplicationEntity>()
+                        .HasOne(application => application.Owner)
+                        .WithMany(user => user.Applications)
+                        .IsRequired()
+                        .OnDelete(DeleteBehavior.Cascade);
+
             base.OnModelCreating(modelBuilder);
         }
     }

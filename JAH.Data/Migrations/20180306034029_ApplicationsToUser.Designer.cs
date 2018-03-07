@@ -12,9 +12,10 @@ using System;
 namespace JAH.Data.Migrations
 {
     [DbContext(typeof(JobApplicationDbContext))]
-    partial class JobApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180306034029_ApplicationsToUser")]
+    partial class ApplicationsToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
