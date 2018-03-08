@@ -59,9 +59,9 @@ namespace JAH.Services.UnitTests
         public async Task GetAllApplications_MultipleApplications_AllJobApplications()
         {
             // Arrange
-            _userResolver.GetCurrentUser().Returns(_user);
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(_jobApplicationEntities);
 
+            _userResolver.GetCurrentUser().Returns(_user);
             _jobApplicationRepository.GetAll(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns(jobApplicationEntities);
             _mapper.Map<IEnumerable<JobApplication>>(Arg.Any<IEnumerable<JobApplicationEntity>>()).Returns(_jobApplications);
 
@@ -76,8 +76,9 @@ namespace JAH.Services.UnitTests
         public async Task GetAllApplications_NoApplications_EmptyList()
         {
             // Arrange
-            _userResolver.GetCurrentUser().Returns(_user);
             var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>());
+
+            _userResolver.GetCurrentUser().Returns(_user);
             _jobApplicationRepository.GetAll(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns(jobApplicationEntities);
 
             // Act
@@ -88,14 +89,33 @@ namespace JAH.Services.UnitTests
         }
 
         [Fact]
+        public async Task GetAllApplications_FiltersAgainstUser_CorrectFilterInvoked()
+        {
+            // Arrange
+            var jobApplicationEntities = new TestAsyncEnumerable<JobApplicationEntity>(new List<JobApplicationEntity>());
+            Expression<Func<JobApplicationEntity, bool>> actualFilter = null;
+
+            _userResolver.GetCurrentUser().Returns(_user);
+            _jobApplicationRepository.GetAll(Arg.Do<Expression<Func<JobApplicationEntity, bool>>>(filter => actualFilter = filter))
+                                     .Returns(jobApplicationEntities);
+
+            // Act
+            await _jobApplicationService.GetAllApplications();
+
+            // Assert
+            var compiledActualFilter = actualFilter.Compile();
+            Assert.True(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user }));
+            Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = new JobApplicationUser("user1") }));
+        }
+
+        [Fact]
         public async void AddNewApplication_ApplicationDoesNotExist_InsertJobApplication()
         {
             // Arrange
-            JobApplicationUser user = new JobApplicationUser("user");
-            _userResolver.GetCurrentUser().Returns(user);
+            _userResolver.GetCurrentUser().Returns(_user);
             var jobApplicationEntity = new JobApplicationEntity
             {
-                Owner = user,
+                Owner = _user,
                 CompanyName = _jobApplications[0].CompanyName,
                 ApplicationDate = _jobApplications[0].ApplicationDate,
                 CurrentStatus = _jobApplications[0].Status
@@ -139,8 +159,10 @@ namespace JAH.Services.UnitTests
             const string companyName = "Company 1";
             var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
             JobApplicationEntity jobApplicationEntity = jobApplicationEntities.First(x => x.CompanyName.Equals(companyName));
-            _jobApplicationRepository.GetOne().ReturnsForAnyArgs(jobApplicationEntity);
+
+            _jobApplicationRepository.GetOne(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns(jobApplicationEntity);
             _mapper.Map<JobApplication>(jobApplicationEntity).Returns(_jobApplications[0]);
+            _userResolver.GetCurrentUser().Returns(_user);
 
             // Act
             JobApplication result = _jobApplicationService.GetApplication(companyName);
@@ -153,14 +175,78 @@ namespace JAH.Services.UnitTests
         public void GetApplication_NoApplications_Null()
         {
             // Arrange
-            const string company = "Company 1";
-            _jobApplicationRepository.GetOne().ReturnsForAnyArgs((JobApplicationEntity)null);
+            const string companyName = "Company 1";
+
+            _jobApplicationRepository.GetOne(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns((JobApplicationEntity)null);
+            _userResolver.GetCurrentUser().Returns(_user);
 
             // Act
-            JobApplication result = _jobApplicationService.GetApplication(company);
+            JobApplication result = _jobApplicationService.GetApplication(companyName);
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetApplication_FiltersAgainstUserAndCompany_FilterInvoked()
+        {
+            // Arrange
+            const string companyName = "Company 1";
+            Expression<Func<JobApplicationEntity, bool>> actualFilter = null;
+
+            _jobApplicationRepository.GetOne(Arg.Do<Expression<Func<JobApplicationEntity, bool>>>(filter => actualFilter = filter))
+                                     .Returns((JobApplicationEntity)null);
+            _userResolver.GetCurrentUser().Returns(_user);
+
+            // Act
+            _jobApplicationService.GetApplication(companyName);
+
+            // Assert
+            var compiledActualFilter = actualFilter.Compile();
+            Assert.True(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = companyName }));
+        }
+
+        [Fact]
+        public void GetApplication_FiltersAgainstNotLoggedInUser_FilterNotInvoked()
+        {
+            // Arrange
+            const string companyName = "Company 1";
+            Expression<Func<JobApplicationEntity, bool>> actualFilter = null;
+
+            _jobApplicationRepository.GetOne(Arg.Do<Expression<Func<JobApplicationEntity, bool>>>(filter => actualFilter = filter))
+                                     .Returns((JobApplicationEntity)null);
+            _userResolver.GetCurrentUser().Returns(_user);
+
+            // Act
+            JobApplication result = _jobApplicationService.GetApplication(companyName);
+
+            // Assert
+            var compiledActualFilter = actualFilter.Compile();
+            Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity
+            {
+                Owner = new JobApplicationUser("user1"),
+                CompanyName = companyName
+            }));
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetApplication_FiltersAgainstCompanyDoesNotExistForUser_FilterNotInvoked()
+        {
+            // Arrange
+            const string companyName = "Company 1";
+            Expression<Func<JobApplicationEntity, bool>> actualFilter = null;
+
+            _jobApplicationRepository.GetOne(Arg.Do<Expression<Func<JobApplicationEntity, bool>>>(filter => actualFilter = filter))
+                                     .Returns((JobApplicationEntity)null);
+            _userResolver.GetCurrentUser().Returns(_user);
+
+            // Act
+            _jobApplicationService.GetApplication(companyName);
+
+            // Assert
+            var compiledActualFilter = actualFilter.Compile();
+            Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = "Deleted" }));
         }
 
         [Fact]
@@ -170,14 +256,16 @@ namespace JAH.Services.UnitTests
             const string companyName = "Company 1";
             var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
             JobApplicationEntity jobApplicationEntity = jobApplicationEntities.First(x => x.CompanyName.Equals(companyName));
-            _jobApplicationRepository.GetOne().ReturnsForAnyArgs(jobApplicationEntity);
+            _jobApplicationRepository.GetOne(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns(jobApplicationEntity);
             _mapper.Map<JobApplication>(jobApplicationEntity).Returns(_jobApplications[0]);
+            _userResolver.GetCurrentUser().Returns(_user);
 
             // Act
             var jobApplication = await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
 
             // Assert
             await _jobApplicationRepository.Received().Update(_jobApplicationEntities[0]);
+
             Assert.Equal(_jobApplications[0], jobApplication);
         }
 
@@ -191,6 +279,74 @@ namespace JAH.Services.UnitTests
 
             // Assert
             Assert.Null(jobApplication);
+        }
+
+        [Fact]
+        public async void UpdateApplication_FiltersAgainstUserAndCompany_FilterInvoked()
+        {
+            // Arrange
+            const string companyName = "Company 1";
+            Expression<Func<JobApplicationEntity, bool>> actualFilter = null;
+            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
+
+            JobApplicationEntity jobApplicationEntity = jobApplicationEntities.First(x => x.CompanyName.Equals(companyName));
+            _jobApplicationRepository.GetOne(Arg.Do<Expression<Func<JobApplicationEntity, bool>>>(filter => actualFilter = filter))
+                                     .Returns(jobApplicationEntity);
+            _mapper.Map<JobApplication>(jobApplicationEntity).Returns(_jobApplications[0]);
+            _userResolver.GetCurrentUser().Returns(_user);
+
+            // Act
+            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+
+            // Assert
+            var compiledActualFilter = actualFilter.Compile();
+            Assert.True(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = companyName }));
+        }
+
+        [Fact]
+        public async void UpdateApplication_FiltersAgainstCompanyDoesNotExistForUser_FilterNotInvoked()
+        {
+            const string companyName = "Company 1";
+            Expression<Func<JobApplicationEntity, bool>> actualFilter = null;
+            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
+
+            JobApplicationEntity jobApplicationEntity = jobApplicationEntities.First(x => x.CompanyName.Equals(companyName));
+            _jobApplicationRepository.GetOne(Arg.Do<Expression<Func<JobApplicationEntity, bool>>>(filter => actualFilter = filter))
+                                     .Returns(jobApplicationEntity);
+            _mapper.Map<JobApplication>(jobApplicationEntity).Returns(_jobApplications[0]);
+            _userResolver.GetCurrentUser().Returns(_user);
+
+            // Act
+            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+
+            // Assert
+            var compiledActualFilter = actualFilter.Compile();
+            Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = "Deleted" }));
+        }
+
+        [Fact]
+        public async void UpdateApplication_FiltersAgainstNotLoggedInUser_FilterNotInvoked()
+        {
+            const string companyName = "Company 1";
+            Expression<Func<JobApplicationEntity, bool>> actualFilter = null;
+            var jobApplicationEntities = (IEnumerable<JobApplicationEntity>)_jobApplicationEntities;
+
+            JobApplicationEntity jobApplicationEntity = jobApplicationEntities.First(x => x.CompanyName.Equals(companyName));
+            _jobApplicationRepository.GetOne(Arg.Do<Expression<Func<JobApplicationEntity, bool>>>(filter => actualFilter = filter))
+                                     .Returns(jobApplicationEntity);
+            _mapper.Map<JobApplication>(jobApplicationEntity).Returns(_jobApplications[0]);
+            _userResolver.GetCurrentUser().Returns(_user);
+
+            // Act
+            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+
+            // Assert
+            var compiledActualFilter = actualFilter.Compile();
+            Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity
+            {
+                Owner = new JobApplicationUser("user1"),
+                CompanyName = companyName
+            }));
         }
     }
 }
