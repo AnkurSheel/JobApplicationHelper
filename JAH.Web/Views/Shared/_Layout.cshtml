@@ -15,6 +15,12 @@
 </head>
 
 <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            @await Html.PartialAsync("LoginPartial")
+        </div>
+    </nav>
+
     <div>
         @RenderBody()
     </div>
