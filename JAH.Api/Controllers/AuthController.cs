@@ -27,6 +27,22 @@ namespace JAH.Api.Controllers
             _logger = logger;
         }
 
+        [HttpGet("api/auth/signedIn")]
+        [AllowAnonymous]
+        public IActionResult SignedIn()
+        {
+            try
+            {
+                bool result = _signInManager.IsSignedIn(User);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(LoggingEvents.Auth, e, $"Exception when trying to register");
+                return BadRequest(e);
+            }
+        }
+
         [HttpPost("api/auth/register")]
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] CredentialModel model)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using JAH.Api.Controllers;
 using JAH.Data.Entities;
@@ -118,6 +119,38 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public void IsSignedIn_UserNotSignedIn_OkObjectResultWithFalseValue()
+        {
+            // Arrange
+            //_signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
+            _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(true);
+
+            // Act
+            IActionResult result = _authController.SignedIn();
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            var okResult = (OkObjectResult) result;
+            Assert.True(okResult.Value as bool?);
+        }
+
+        [Fact]
+        public void IsSignedIn_UserSignedIn_OkObjectResultWithTrueValue()
+        {
+            // Arrange
+            //_signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
+            _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(false);
+
+            // Act
+            IActionResult result = _authController.SignedIn();
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            var okResult = (OkObjectResult) result;
+            Assert.False(okResult.Value as bool?);
         }
     }
 }

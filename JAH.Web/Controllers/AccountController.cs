@@ -93,13 +93,13 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await Client.GetAsync($"{ApiUriBasePath}/logout");
+                HttpResponseMessage responseMessage = await Client.PostAsync($"{ApiUriBasePath}/logout", null);
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    return RedirectToAction("ListAllApplications", "JobApplications");
+                    return RedirectToAction("Login");
                 }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
+                return new StatusCodeResult((int) responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {

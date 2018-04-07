@@ -2,27 +2,27 @@
 
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Application Helper</title>
 
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro">
     <environment include="Development">
-        <link rel="stylesheet" asp-href-include="~/css/*" asp-href-exclude="~/css/all.min.css" />
+        <link rel="stylesheet" asp-href-include="~/css/*" asp-href-exclude="~/css/all.min.css"/>
     </environment>
     <environment exclude="Development">
-        <link rel="stylesheet" asp-href-include="~/css/all.min.css" />
+        <link rel="stylesheet" asp-href-include="~/css/all.min.css"/>
     </environment>
 </head>
 
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container-fluid">
-            @await Html.PartialAsync("LoginPartial")
-        </div>
-    </nav>
-
-    <div>
-        @RenderBody()
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        @await Html.PartialAsync("LoginPartial")
     </div>
+</nav>
+
+<div>
+    @RenderBody()
+</div>
 </body>
 </html>

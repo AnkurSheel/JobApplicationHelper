@@ -25,7 +25,7 @@ namespace JAH.Web
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
+            services.AddScoped<UserHelper, UserHelper>();
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
 
             return new AutofacServiceProvider(_aspNetScope);
@@ -38,6 +38,7 @@ namespace JAH.Web
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseExceptionHandler("/Error");
             app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 
