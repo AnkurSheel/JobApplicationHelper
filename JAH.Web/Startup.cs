@@ -1,6 +1,8 @@
 ﻿using System;
+
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,10 +39,13 @@ namespace JAH.Web
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
-
-            app.UseExceptionHandler("/Error");
-            app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+            }
 
             app.UseStaticFiles();
 
