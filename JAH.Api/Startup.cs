@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+
 using AutoMapper;
+
 using JAH.Data;
 using JAH.Data.Entities;
+using JAH.Services.Interfaces;
+using JAH.Services.Services;
+
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +43,8 @@ namespace JAH.Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<IUserResolverService, UserResolverService>();
+
             services.AddAutoMapper();
 
             services.AddIdentity<JobApplicationUser, IdentityRole>(options =>

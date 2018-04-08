@@ -57,5 +57,19 @@ namespace JAH.Web.IntegrationTests
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
             Assert.Equal("/JobApplications", response.Headers.Location.OriginalString);
         }
+
+        [Fact]
+        public async Task Logout_Succeeds_RedirectsToLoginPage()
+        {
+            // Arrange
+            _fixture.SetupAuthentication();
+
+            // Act
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/logout", null);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Found, response.StatusCode);
+            Assert.Equal("/Account/Login", response.Headers.Location.OriginalString);
+        }
     }
 }

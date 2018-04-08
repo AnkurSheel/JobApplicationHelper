@@ -13,16 +13,21 @@ namespace JAH.Data.Entities
 
         public int Id { get; set; }
 
+        public JobApplicationUser Owner { get; set; }
+
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
             {
                 return false;
             }
+
             if (ReferenceEquals(this, obj))
             {
                 return true;
             }
+
             if (obj.GetType() != this.GetType())
             {
                 return false;
@@ -35,18 +40,18 @@ namespace JAH.Data.Entities
         {
             unchecked
             {
-                int hashCode = CompanyName != null ? CompanyName.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ ApplicationDate.GetHashCode();
+                int hashCode = ApplicationDate.GetHashCode();
+                hashCode = (hashCode * 397) ^ (CompanyName != null ? CompanyName.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int)CurrentStatus;
+                hashCode = (hashCode * 397) ^ Id;
+                hashCode = (hashCode * 397) ^ (Owner != null ? Owner.GetHashCode() : 0);
                 return hashCode;
             }
         }
 
         protected bool Equals(JobApplicationEntity other)
         {
-            return string.Equals(CompanyName, other.CompanyName) &&
-                   ApplicationDate.Equals(other.ApplicationDate) &&
-                   CurrentStatus == other.CurrentStatus;
+            return ApplicationDate.Equals(other.ApplicationDate) && string.Equals(CompanyName, other.CompanyName) && CurrentStatus == other.CurrentStatus && Id == other.Id && Equals(Owner, other.Owner);
         }
     }
 }

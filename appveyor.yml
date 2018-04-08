@@ -1,5 +1,5 @@
 # common configuration for ALL branches
-version: 0.0.7.{build}
+version: 0.0.8.{build}
 image: Visual Studio 2017
 # branches:
   # only:

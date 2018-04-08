@@ -51,7 +51,8 @@ namespace JAH.Web.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("Login")]
+        [Route("")]
         public IActionResult Login()
         {
             return View();
@@ -92,10 +93,10 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await Client.GetAsync($"{ApiUriBasePath}/logout");
+                HttpResponseMessage responseMessage = await Client.PostAsync($"{ApiUriBasePath}/logout", null);
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    return RedirectToAction("ListAllApplications", "JobApplications");
+                    return RedirectToAction("Login");
                 }
 
                 return new StatusCodeResult((int) responseMessage.StatusCode);
