@@ -20,15 +20,23 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
 
 namespace JAH.Api
 {
     public class Startup
     {
-        private readonly ILifetimeScope _webHostScope;
+        private static readonly LoggerFactory MyLoggerFactory =
+            new LoggerFactory(new[] { new DebugLoggerProvider((_, level) => level >= LogLevel.Information) });
+
         private readonly IHostingEnvironment _env;
+
+        private readonly ILifetimeScope _webHostScope;
+
         private ILifetimeScope _aspNetScope;
 
         public Startup(ILifetimeScope webHostScope, IHostingEnvironment env, IConfiguration configuration)
@@ -40,12 +48,30 @@ namespace JAH.Api
 
         public IConfiguration Configuration { get; }
 
+        public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                TelemetryConfiguration.Active.DisableTelemetry = true;
+                app.UseDeveloperExceptionPage();
+            }
+
+            ConfigureAdditionalMiddleware(app);
+
+            app.UseAuthentication();
+            app.UseMvc();
+
+            appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
+        }
+
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IUserResolverService, UserResolverService>();
 
             services.AddAutoMapper();
+
+            ConfigureDatabase(services);
 
             services.AddIdentity<JobApplicationUser, IdentityRole>(options =>
                     {
@@ -90,7 +116,7 @@ namespace JAH.Api
                     opt.Filters.Add(new RequireHttpsAttribute());
                 }
 
-                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                 opt.Filters.Add(new AuthorizeFilter(policy));
             });
 
@@ -99,24 +125,15 @@ namespace JAH.Api
             return new AutofacServiceProvider(_aspNetScope);
         }
 
-        public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                TelemetryConfiguration.Active.DisableTelemetry = true;
-                app.UseDeveloperExceptionPage();
-            }
-
-            ConfigureAdditionalMiddleware(app);
-
-            app.UseAuthentication();
-            app.UseMvc();
-
-            appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
-        }
-
         protected virtual void ConfigureAdditionalMiddleware(IApplicationBuilder app)
         {
+        }
+
+        protected virtual void ConfigureDatabase(IServiceCollection services)
+        {
+            services.AddDbContext<JobApplicationDbContext>(options => options
+                                                                      .UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+                                                                      .UseLoggerFactory(MyLoggerFactory));
         }
     }
 }
