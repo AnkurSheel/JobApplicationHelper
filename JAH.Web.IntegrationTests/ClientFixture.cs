@@ -1,16 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
+
 using Autofac;
+
 using JAH.Data;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.Data.Repositories;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -21,47 +23,47 @@ namespace JAH.Web.IntegrationTests
     public class ClientFixture : IDisposable
     {
         private readonly IContainer _container;
-        private readonly ILifetimeScope _defaultScope;
+
         private HttpClient _apiClient;
+
+        private IServiceProvider _serviceProvider;
 
         public ClientFixture()
         {
-            var dbContextOptions = new DbContextOptionsBuilder<JobApplicationDbContext>()
-                                   .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                                   .EnableSensitiveDataLogging()
-                                   .Options;
-
             var builder = new ContainerBuilder();
             builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
             builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
-            builder.RegisterType<JobApplicationDbContext>()
-                   .As<JobApplicationDbContext>()
-                   .WithParameter(new TypedParameter(typeof(DbContextOptions), dbContextOptions))
-                   .InstancePerLifetimeScope();
 
             _container = builder.Build();
-            _defaultScope = _container.BeginLifetimeScope();
 
             SetupClients();
         }
 
-        public HttpClient WebClient { get; private set; }
-
         public JobApplicationDbContext JobApplicationDbContext
         {
-            get { return _defaultScope.Resolve<JobApplicationDbContext>(); }
+            get
+            {
+                return _serviceProvider.GetService(typeof(JobApplicationDbContext)) as JobApplicationDbContext;
+            }
         }
 
-        public void Dispose()
+        public HttpClient WebClient { get; private set; }
+
+        public void ClearAuthentication()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _apiClient.DefaultRequestHeaders.Clear();
         }
 
         public void DetachAllEntities()
         {
             JobApplicationDbContext.JobApplications.RemoveRange(JobApplicationDbContext.JobApplications);
             JobApplicationDbContext.SaveChanges();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void SetupAuthentication()
@@ -73,17 +75,11 @@ namespace JAH.Web.IntegrationTests
             _apiClient.DefaultRequestHeaders.Add("my-id", "12345");
         }
 
-        public void ClearAuthentication()
-        {
-            _apiClient.DefaultRequestHeaders.Clear();
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
                 _apiClient?.Dispose();
-                _defaultScope?.Dispose();
                 _container?.Dispose();
                 WebClient?.Dispose();
             }
@@ -91,6 +87,7 @@ namespace JAH.Web.IntegrationTests
 
         private void SetupClients()
         {
+            const string Environment = "Testing";
             using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<TestApiServerStartup>().AsSelf()))
             {
                 string fullPath =
@@ -99,12 +96,13 @@ namespace JAH.Web.IntegrationTests
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, TestApiServerStartup>>();
                 IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
                                                               .UseContentRoot(fullPath)
-                                                              .UseEnvironment("Testing")
+                                                              .UseEnvironment(Environment)
                                                               .UseStartup<TestApiServerStartup>()
                                                               .ConfigureServices(services =>
                                                                                      services.TryAddTransient(provider =>
                                                                                                                   SetupStartup(provider, factory)));
                 var testServer = new TestServer(builder);
+                _serviceProvider = testServer.Host.Services;
                 _apiClient = testServer.CreateClient();
             }
 
@@ -116,7 +114,7 @@ namespace JAH.Web.IntegrationTests
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
                 IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
                                                               .UseContentRoot(fullPath)
-                                                              .UseEnvironment("Testing")
+                                                              .UseEnvironment(Environment)
                                                               .UseStartup<Startup>()
                                                               .ConfigureServices(services =>
                                                                                      services.AddTransient(provider =>

@@ -66,8 +66,8 @@ namespace JAH.Web.IntegrationTests
 
         public void Dispose()
         {
-            _fixture.DetachAllEntities();
-            _fixture.JobApplicationDbContext.Database.EnsureDeleted();
+            //_fixture.DetachAllEntities();
+            //_fixture.JobApplicationDbContext.Database.EnsureDeleted();
         }
 
         [Fact]
@@ -154,15 +154,25 @@ namespace JAH.Web.IntegrationTests
         public async Task GetApplicationByCompanyName_ApplicationExists_HtmlView()
         {
             // Arrange
-            foreach (JobApplicationEntity jobApplicationEntity in _jobApplicationEntities)
+            try
             {
-                _fixture.JobApplicationDbContext.JobApplications.Add(jobApplicationEntity);
+                foreach (JobApplicationEntity jobApplicationEntity in _jobApplicationEntities)
+                {
+                    _fixture.JobApplicationDbContext.JobApplications.Add(jobApplicationEntity);
+                }
+
+
+                _fixture.JobApplicationDbContext.SaveChanges();
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        
 
-            _fixture.JobApplicationDbContext.SaveChanges();
-
-            // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync($"{UriBasePath}/{_jobApplicationEntities[0].CompanyName}");
+        // Act
+        HttpResponseMessage response = await _fixture.WebClient.GetAsync($"{UriBasePath}/{_jobApplicationEntities[0].CompanyName}");
 
             // Assert
             response.EnsureSuccessStatusCode();
