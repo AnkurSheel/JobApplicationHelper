@@ -94,8 +94,6 @@ namespace JAH.Web.IntegrationTests
             // Assert
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            Assert.Empty(responseData);
         }
 
         [Fact]

@@ -78,8 +78,8 @@ namespace JAH.Web.IntegrationTests
         {
             try
             {
-                IQueryable<JobApplicationEntity> jobApplications = from p in Context.JobApplications select p;
-                Context.JobApplications.RemoveRange(jobApplications);
+                DetachAllEntities();
+                Context.JobApplications.RemoveRange(Context.JobApplications.ToList());
 
                 Context.SaveChanges();
             }
