@@ -4,7 +4,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
+using JAH.Data.Entities;
 using JAH.DomainModels;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
 
@@ -28,17 +32,33 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task Login_Succeeds_RedirectsToJobApplications()
+        public async Task Login_Fails_RedirectsToJobApplications()
         {
             // Arrange
             var credentials = new CredentialModel { UserName = "username", Password = "password" };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            // TODO: This should be replaced by actually making an entry in the database
-            await _fixture.WebClient.PostAsync($"{UriBasePath}/register", stringContent);
+            // Act
+            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/login", stringContent);
+
+            // Assert
+            var responseData = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("UserName/Password Not found", responseData);
+        }
+
+        [Fact]
+        public async Task Login_Succeeds_RedirectsToJobApplications()
+        {
+            // Arrange
+            var userManager = _fixture.Services.GetRequiredService<UserManager<JobApplicationUser>>();
+            var credentials = new CredentialModel { UserName = "username", Password = "password" };
+            var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            var user = new JobApplicationUser(credentials.UserName);
+            await userManager.CreateAsync(user, credentials.Password);
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/login", stringContent);
+            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/login", stringContent);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -52,7 +72,7 @@ namespace JAH.Web.IntegrationTests
             _fixture.SetupAuthentication();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/logout", null);
+            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/logout", null);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -67,7 +87,7 @@ namespace JAH.Web.IntegrationTests
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync($"{UriBasePath}/register", stringContent);
+            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/register", stringContent);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
