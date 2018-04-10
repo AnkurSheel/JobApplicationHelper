@@ -3,25 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace JAH.Data.Repositories
 {
-    public class JobApplicationRepository : IRepository<JobApplicationEntity>, IDisposable
+    public class JobApplicationRepository : IRepository<JobApplicationEntity>
     {
         private readonly JobApplicationDbContext _context;
 
         public JobApplicationRepository(JobApplicationDbContext context)
         {
             _context = context;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         public async Task Create(JobApplicationEntity jobApplication)
@@ -50,14 +46,6 @@ namespace JAH.Data.Repositories
         {
             _context.JobApplications.Update(jobApplication);
             await SaveAsync();
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _context?.Dispose();
-            }
         }
 
         private Task SaveAsync()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 
 using Autofac;
@@ -13,6 +14,8 @@ using JAH.Services.Services;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,7 +29,7 @@ namespace JAH.Web.IntegrationTests
 
         private HttpClient _apiClient;
 
-        private IServiceProvider _serviceProvider;
+        private TestServer _testServer;
 
         public ClientFixture()
         {
@@ -39,11 +42,11 @@ namespace JAH.Web.IntegrationTests
             SetupClients();
         }
 
-        public JobApplicationDbContext JobApplicationDbContext
+        public JobApplicationDbContext Context
         {
             get
             {
-                return _serviceProvider.GetService(typeof(JobApplicationDbContext)) as JobApplicationDbContext;
+                return _testServer.Host.Services.GetService(typeof(JobApplicationDbContext)) as JobApplicationDbContext;
             }
         }
 
@@ -56,8 +59,13 @@ namespace JAH.Web.IntegrationTests
 
         public void DetachAllEntities()
         {
-            JobApplicationDbContext.JobApplications.RemoveRange(JobApplicationDbContext.JobApplications);
-            JobApplicationDbContext.SaveChanges();
+            foreach (EntityEntry<JobApplicationEntity> dbEntityEntry in Context.ChangeTracker.Entries<JobApplicationEntity>().ToList())
+            {
+                if (dbEntityEntry.Entity != null)
+                {
+                    dbEntityEntry.State = EntityState.Detached;
+                }
+            }
         }
 
         public void Dispose()
@@ -66,10 +74,26 @@ namespace JAH.Web.IntegrationTests
             GC.SuppressFinalize(this);
         }
 
+        public void EmptyDatabase()
+        {
+            try
+            {
+                IQueryable<JobApplicationEntity> jobApplications = from p in Context.JobApplications select p;
+                Context.JobApplications.RemoveRange(jobApplications);
+
+                Context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
         public void SetupAuthentication()
         {
-            _apiClient.DefaultRequestHeaders.Add(AuthenticatedTestRequestMiddleware.TestingHeader,
-                                                 AuthenticatedTestRequestMiddleware.TestingHeaderValue);
+            _apiClient.DefaultRequestHeaders.Add(AuthenticatedTestRequestMiddleware.TestingHeader
+                                               , AuthenticatedTestRequestMiddleware.TestingHeaderValue);
 
             _apiClient.DefaultRequestHeaders.Add("my-name", "abcde");
             _apiClient.DefaultRequestHeaders.Add("my-id", "12345");
@@ -79,6 +103,7 @@ namespace JAH.Web.IntegrationTests
         {
             if (disposing)
             {
+                _testServer?.Dispose();
                 _apiClient?.Dispose();
                 _container?.Dispose();
                 WebClient?.Dispose();
@@ -101,9 +126,8 @@ namespace JAH.Web.IntegrationTests
                                                               .ConfigureServices(services =>
                                                                                      services.TryAddTransient(provider =>
                                                                                                                   SetupStartup(provider, factory)));
-                var testServer = new TestServer(builder);
-                _serviceProvider = testServer.Host.Services;
-                _apiClient = testServer.CreateClient();
+                _testServer = new TestServer(builder);
+                _apiClient = _testServer.CreateClient();
             }
 
             using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
