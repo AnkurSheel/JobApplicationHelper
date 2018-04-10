@@ -22,8 +22,8 @@ namespace JAH.Api
             {
                 using (var container = IOCBuilder.Build())
                 {
-                    var host = BuildWebHost(container);
-                    using (var scope = host.Services.CreateScope())
+                    var webHost = BuildWebHost(container);
+                    using (var scope = webHost.Services.CreateScope())
                     {
                         var services = scope.ServiceProvider;
                         try
@@ -37,7 +37,7 @@ namespace JAH.Api
                         }
                     }
 
-                    host.Run();
+                    webHost.Run();
                 }
             }
             catch (Exception e)
