@@ -20,12 +20,12 @@ namespace JAH.Api
         {
             try
             {
-                using (var container = IOCBuilder.Build())
+                using (IContainer container = IOCBuilder.Build())
                 {
-                    var webHost = BuildWebHost(container);
-                    using (var scope = webHost.Services.CreateScope())
+                    IWebHost webHost = BuildWebHost(container);
+                    using (IServiceScope scope = webHost.Services.CreateScope())
                     {
-                        var services = scope.ServiceProvider;
+                        IServiceProvider services = scope.ServiceProvider;
                         try
                         {
                             SeedDatabase(services);
@@ -49,18 +49,19 @@ namespace JAH.Api
 
         private static IWebHost BuildWebHost(ILifetimeScope scope)
         {
-            using (var webHostScope = scope.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+            using (ILifetimeScope webHostScope = scope.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
             {
-                return WebHost.CreateDefaultBuilder().
-                    UseStartup<Startup>().
-                    ConfigureServices(services => services.AddTransient(provider =>
-                        {
-                            var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-                            var config = provider.GetRequiredService<IConfiguration>();
-                            var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
-                            return factory(hostingEnv, config);
-                        })).
-                    Build();
+                return WebHost.CreateDefaultBuilder()
+                              .UseStartup<Startup>()
+                              .UseApplicationInsights()
+                              .ConfigureServices(services => services.AddTransient(provider =>
+                              {
+                                  var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+                                  var config = provider.GetRequiredService<IConfiguration>();
+                                  var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
+                                  return factory(hostingEnv, config);
+                              }))
+                              .Build();
             }
         }
 
