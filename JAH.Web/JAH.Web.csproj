@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <ApplicationInsightsResourceId>/subscriptions/d7a53874-7e65-4e6f-8522-937c40b0d7c7/resourcegroups/Website/providers/microsoft.insights/components/JAH.Web</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/d7a53874-7e65-4e6f-8522-937c40b0d7c7/resourcegroups/Website/providers/microsoft.insights/components/JAH.Web</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -21,6 +23,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JAH.DomainModels\JAH.DomainModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
 </Project>
