@@ -6,6 +6,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -51,14 +52,9 @@ namespace JAH.Web
 
             app.UseMvc();
 
-            app.Run(context =>
+            app.Run(async context =>
             {
-                if (env.IsDevelopment())
-                {
-                    throw new Exception();
-                }
-
-                return null;
+                await context.Response.WriteAsync("Hello World");
             });
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
         }

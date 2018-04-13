@@ -51,8 +51,10 @@ namespace JAH.Web.Controllers
             }
         }
 
-        [HttpGet("Login")]
+        [HttpGet]
         [Route("")]
+        [Route("~/")]
+        [Route("Login")]
         public IActionResult Login()
         {
             return View();
@@ -99,7 +101,7 @@ namespace JAH.Web.Controllers
                     return RedirectToAction("Login");
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
