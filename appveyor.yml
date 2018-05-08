@@ -55,7 +55,14 @@ for:
     only:
       - master
       - develop
+      - /feature/.*/
       
+  configuration:
+    - Release
+    
+  environment:
+    ASPNETCORE_ENVIRONMENT: Development
+    
   after_build:
     - cmd: dotnet publish JAH.Web\JAH.Web.csproj -c %configuration%
     - cmd: dotnet publish JAH.Api\JAH.Api.csproj -c %configuration%
@@ -67,6 +74,12 @@ for:
     - path: 'JAH.Api\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: Api
       type: WebDeployPackage
+  
+  deploy:
+    - provider: Environment
+      name: JAH_API_Production
+    - provider: Environment
+      name: JAH_Web_Production
 # "fall back" configuration for all other branches
 -
   configuration:
