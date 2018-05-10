@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JAH.Api\JAH.Api.csproj" />
-    <ProjectReference Include="..\JAH.Web\JAH.Web.csproj" />
+    <ProjectReference Include="..\..\src\JAH.Api\JAH.Api.csproj" />
+    <ProjectReference Include="..\..\src\JAH.Web\JAH.Web.csproj" />
   </ItemGroup>
     <!--
     Work around https://github.com/NuGet/Home/issues/4412. MVC uses DependencyContext.Load() which looks next to a .dll

@@ -25,7 +25,7 @@ namespace JAH.Web.IntegrationTests
 {
     public class ClientFixture : IDisposable
     {
-        private readonly IContainer _container;
+        private readonly Autofac.IContainer _container;
 
         private HttpClient _apiClient;
 
@@ -129,6 +129,8 @@ namespace JAH.Web.IntegrationTests
                                                            , ".."
                                                            , ".."
                                                            , ".."
+                                                           , ".."
+                                                           , "src"
                                                            , "JAH.Api"));
 
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, TestApiServerStartup>>();
@@ -149,6 +151,8 @@ namespace JAH.Web.IntegrationTests
                                                            , ".."
                                                            , ".."
                                                            , ".."
+                                                           , ".."
+                                                           , "src"
                                                            , "JAH.Web"));
 
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();

@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JAH.Data\JAH.Data.csproj" />
+    <ProjectReference Include="..\..\src\JAH.Data\JAH.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>

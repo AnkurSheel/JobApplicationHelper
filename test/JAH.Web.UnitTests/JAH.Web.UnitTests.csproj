@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JAH.DomainModels\JAH.DomainModels.csproj" />
-    <ProjectReference Include="..\JAH.Web\JAH.Web.csproj" />
+    <ProjectReference Include="..\..\src\JAH.DomainModels\JAH.DomainModels.csproj" />
+    <ProjectReference Include="..\..\src\JAH.Web\JAH.Web.csproj" />
   </ItemGroup>
 
 </Project>

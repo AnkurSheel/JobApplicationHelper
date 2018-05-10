@@ -15,8 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JAH.Api\JAH.Api.csproj" />
-    <ProjectReference Include="..\JAH.Services\JAH.Services.csproj" />
+    <ProjectReference Include="..\..\src\JAH.Api\JAH.Api.csproj" />
   </ItemGroup>
 
 </Project>
