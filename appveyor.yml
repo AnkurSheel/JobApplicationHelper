@@ -34,7 +34,7 @@ install:
   - cmd: >- 
         appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
 
-        "External Tools\secure-file" -decrypt JAH.Api\appsettings.Production.json.enc -secret %encrypt_secret%
+        "External Tools\secure-file" -decrypt src\JAH.Api\appsettings.Production.json.enc -secret %encrypt_secret%
         
   # - ps : .\resetbuildnumber.ps1  
 before_build:
@@ -50,7 +50,7 @@ build:
   parallel: true
 
 test_script:
-- cmd: dotnet vstest .\JAH.Data.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Data.UnitTests.dll .\JAH.Services.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Services.UnitTests.dll .\JAH.Api.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Api.UnitTests.dll .\JAH.Web.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Web.UnitTests.dll .\JAH.Web.IntegrationTests\bin\%configuration%\netcoreapp2.0\JAH.Web.IntegrationTests.dll
+- cmd: dotnet vstest .\test\JAH.Data.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Data.UnitTests.dll .\test\\JAH.Services.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Services.UnitTests.dll .\test\JAH.Api.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Api.UnitTests.dll .\test\JAH.Web.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Web.UnitTests.dll .\test\JAH.Web.IntegrationTests\bin\%configuration%\netcoreapp2.0\JAH.Web.IntegrationTests.dll
 
 # here we are going to override common configuration
 for:
@@ -69,14 +69,14 @@ for:
     ASPNETCORE_ENVIRONMENT: Production
     
   after_build:
-    - cmd: dotnet publish JAH.Web\JAH.Web.csproj -c %configuration%
-    - cmd: dotnet publish JAH.Api\JAH.Api.csproj -c %configuration%
+    - cmd: dotnet publish src\JAH.Web\JAH.Web.csproj -c %configuration%
+    - cmd: dotnet publish src\JAH.Api\JAH.Api.csproj -c %configuration%
     
   artifacts:
-    - path: 'JAH.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+    - path: 'src\JAH.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: WebSite
       type: WebDeployPackage
-    - path: 'JAH.Api\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+    - path: 'src\JAH.Api\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: Api
       type: WebDeployPackage
   
