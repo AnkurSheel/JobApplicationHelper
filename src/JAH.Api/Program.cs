@@ -3,14 +3,11 @@
 using Autofac;
 
 using JAH.Data;
-using JAH.Data.Entities;
 
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace JAH.Api
 {
@@ -23,20 +20,7 @@ namespace JAH.Api
                 using (IContainer container = IOCBuilder.Build())
                 {
                     IWebHost webHost = BuildWebHost(container);
-                    using (IServiceScope scope = webHost.Services.CreateScope())
-                    {
-                        IServiceProvider services = scope.ServiceProvider;
-                        try
-                        {
-                            SeedDatabase(services);
-                        }
-                        catch (Exception ex)
-                        {
-                            var logger = services.GetRequiredService<ILogger<Program>>();
-                            logger.LogError(ex, "An error occurred while seeding the database.");
-                        }
-                    }
-
+                    ProcessDb(webHost);
                     webHost.Run();
                 }
             }
@@ -65,20 +49,15 @@ namespace JAH.Api
             }
         }
 
-        private static void SeedDatabase(IServiceProvider services)
+        private static void ProcessDb(IWebHost webHost)
         {
-            try
+            using (IServiceScope serviceScope = webHost.Services.GetService<IServiceScopeFactory>().CreateScope())
             {
-                var context = services.GetRequiredService<JobApplicationDbContext>();
-                var userManager = services.GetRequiredService<UserManager<JobApplicationUser>>();
-                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                var dbInitializerLogger = services.GetRequiredService<ILogger<DbInitializer>>();
-                DbInitializer.Initialize(context, userManager, roleManager, dbInitializerLogger).Wait();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
+                var context = serviceScope.ServiceProvider.GetService<JobApplicationDbContext>();
+                var dbSeeder = serviceScope.ServiceProvider.GetService<DbSeeder>();
+
+                context.UpdateDB();
+                context.EnsureSeedData(dbSeeder);
             }
         }
     }

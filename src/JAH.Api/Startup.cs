@@ -68,6 +68,7 @@ namespace JAH.Api
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IUserResolverService, UserResolverService>();
+            services.AddTransient<DbSeeder, DbSeeder>();
 
             services.AddAutoMapper();
 
