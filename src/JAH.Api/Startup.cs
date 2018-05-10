@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -7,19 +6,13 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 
 using JAH.Data;
-using JAH.Data.Entities;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -74,52 +67,8 @@ namespace JAH.Api
 
             ConfigureDatabase(services);
 
-            services.AddIdentity<JobApplicationUser, IdentityRole>(options =>
-                    {
-                        options.Password.RequireLowercase = false;
-                        options.Password.RequireNonAlphanumeric = false;
-                        options.Password.RequireUppercase = false;
-                        options.Password.RequiredLength = 5;
-                        options.Password.RequiredUniqueChars = 0;
-                        options.Password.RequireDigit = false;
-                    })
-                    .AddEntityFrameworkStores<JobApplicationDbContext>();
-            services.ConfigureApplicationCookie(options => options.Events = new CookieAuthenticationEvents
-            {
-                OnRedirectToLogin = ctx =>
-                {
-                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                    {
-                        ctx.Response.StatusCode = 401;
-                    }
-
-                    return Task.CompletedTask;
-                },
-                OnRedirectToAccessDenied = ctx =>
-                {
-                    if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
-                    {
-                        ctx.Response.StatusCode = 403;
-                    }
-
-                    return Task.CompletedTask;
-                }
-            });
-            services.AddMvc(opt =>
-            {
-                if (!_env.IsProduction())
-                {
-                    opt.SslPort = 44324;
-                }
-
-                if (!_env.IsEnvironment("Testing"))
-                {
-                    opt.Filters.Add(new RequireHttpsAttribute());
-                }
-
-                AuthorizationPolicy policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                opt.Filters.Add(new AuthorizeFilter(policy));
-            });
+            services.AddSecurity();
+            services.AddCustomizedMVC(_env);
 
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
 
