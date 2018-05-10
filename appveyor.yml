@@ -61,7 +61,6 @@ for:
     only:
       - master
       - develop
-      - /feature/.*/
       
   configuration:
     - Release
