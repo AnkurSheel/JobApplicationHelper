@@ -41,6 +41,7 @@ namespace JAH.Web
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
             }
             else
             {

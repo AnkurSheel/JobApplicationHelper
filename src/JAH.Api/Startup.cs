@@ -47,6 +47,8 @@ namespace JAH.Api
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
             }
 
             ConfigureAdditionalMiddleware(app);
