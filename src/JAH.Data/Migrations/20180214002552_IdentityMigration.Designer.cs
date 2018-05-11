@@ -12,8 +12,8 @@ using System;
 namespace JAH.Data.Migrations
 {
     [DbContext(typeof(JobApplicationDbContext))]
-    [Migration("20180214002552_Identity")]
-    partial class Identity
+    [Migration("20180214002552_IdentityMigration")]
+    partial class IdentityMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

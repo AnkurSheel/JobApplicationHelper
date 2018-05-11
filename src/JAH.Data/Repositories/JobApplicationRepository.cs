@@ -23,7 +23,7 @@ namespace JAH.Data.Repositories
         public async Task Create(JobApplicationEntity jobApplication)
         {
             _context.JobApplications.Add(jobApplication);
-            await SaveAsync();
+            await SaveAsync().ConfigureAwait(false);
         }
 
         public IQueryable<JobApplicationEntity> GetAll(Expression<Func<JobApplicationEntity, bool>> filter = null)
@@ -45,7 +45,16 @@ namespace JAH.Data.Repositories
         public async Task Update(JobApplicationEntity jobApplication)
         {
             _context.JobApplications.Update(jobApplication);
-            await SaveAsync();
+            await SaveAsync().ConfigureAwait(false);
+        }
+
+        private static void ThrowEnhancedValidationException(DbUpdateException dbu)
+        {
+            IEnumerable<char> errorMessages = dbu.Entries.SelectMany(x => x.Entity.GetType().Name);
+
+            string fullErrorMessage = string.Join("; ", errorMessages);
+            string exceptionMessage = string.Concat(dbu.Message, " The validation errors are: ", fullErrorMessage);
+            throw new DbUpdateException(exceptionMessage, dbu);
         }
 
         private Task SaveAsync()
@@ -60,15 +69,6 @@ namespace JAH.Data.Repositories
             }
 
             return Task.FromResult(0);
-        }
-
-        private void ThrowEnhancedValidationException(DbUpdateException dbu)
-        {
-            IEnumerable<char> errorMessages = dbu.Entries.SelectMany(x => x.Entity.GetType().Name);
-
-            string fullErrorMessage = string.Join("; ", errorMessages);
-            string exceptionMessage = string.Concat(dbu.Message, " The validation errors are: ", fullErrorMessage);
-            throw new DbUpdateException(exceptionMessage, dbu);
         }
     }
 }

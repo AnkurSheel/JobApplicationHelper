@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using JAH.Api.Filters;
 using JAH.Data.Entities;
 using JAH.DomainModels;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +16,9 @@ namespace JAH.Api.Controllers
     public class AuthController : Controller
     {
         private readonly SignInManager<JobApplicationUser> _signInManager;
+
         private readonly UserManager<JobApplicationUser> _userManager;
+
         private readonly ILogger<AuthController> _logger;
 
         /// <inheritdoc />
@@ -50,7 +54,7 @@ namespace JAH.Api.Controllers
             try
             {
                 var jobApplicationUser = new JobApplicationUser { UserName = model.UserName };
-                var result = await _userManager.CreateAsync(jobApplicationUser, model.Password);
+                IdentityResult result = await _userManager.CreateAsync(jobApplicationUser, model.Password).ConfigureAwait(false);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(3, "User created a new account with password.");
@@ -72,7 +76,8 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false);
+                Microsoft.AspNetCore.Identity.SignInResult result =
+                    await _signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false).ConfigureAwait(false);
                 if (result.Succeeded)
                 {
                     return Ok();
@@ -92,7 +97,7 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                await _signInManager.SignOutAsync();
+                await _signInManager.SignOutAsync().ConfigureAwait(false);
                 return Ok();
             }
             catch (Exception e)

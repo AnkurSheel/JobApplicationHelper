@@ -15,10 +15,10 @@ namespace JAH.Web
 
         public async Task<bool> IsSignedIn()
         {
-            HttpResponseMessage responseMessage = await _client.GetAsync("api/auth/signedIn");
+            HttpResponseMessage responseMessage = await _client.GetAsync(new Uri(_client.BaseAddress, "api/auth/signedIn")).ConfigureAwait(false);
             if (responseMessage.IsSuccessStatusCode)
             {
-                var responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                string responseData = responseMessage.Content.ReadAsStringAsync().Result;
 
                 return Convert.ToBoolean(responseData);
             }

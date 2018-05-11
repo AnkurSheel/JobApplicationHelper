@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+
 using JAH.DomainModels;
+
 using Microsoft.AspNetCore.Mvc;
+
 using Newtonsoft.Json;
 
 namespace JAH.Web.Controllers
@@ -11,11 +15,10 @@ namespace JAH.Web.Controllers
     [Route("[controller]")]
     public class JobApplicationsController : BaseController
     {
-        private const string ApiUriBasePath = "api/jobApplications";
-
         public JobApplicationsController(HttpClient client)
             : base(client)
         {
+            ApiUri = new Uri(client.BaseAddress, "api/jobApplications/");
         }
 
         [HttpGet]
@@ -23,7 +26,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await Client.GetAsync(ApiUriBasePath);
+                HttpResponseMessage responseMessage = await Client.GetAsync(ApiUri).ConfigureAwait(false);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -32,7 +35,7 @@ namespace JAH.Web.Controllers
                     return View(applications);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -46,7 +49,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await Client.GetAsync($"{ApiUriBasePath}/{companyName}");
+                HttpResponseMessage responseMessage = await Client.GetAsync(new Uri(ApiUri, $"{companyName}")).ConfigureAwait(false);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     string responseData = responseMessage.Content.ReadAsStringAsync().Result;
@@ -54,7 +57,7 @@ namespace JAH.Web.Controllers
                     return View(application);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
             catch (HttpRequestException)
             {
@@ -79,13 +82,13 @@ namespace JAH.Web.Controllers
                 {
                     string json = JsonConvert.SerializeObject(jobApplication);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-                    HttpResponseMessage responseMessage = await Client.PostAsync(ApiUriBasePath, stringContent);
+                    HttpResponseMessage responseMessage = await Client.PostAsync(ApiUri, stringContent).ConfigureAwait(false);
                     if (responseMessage.IsSuccessStatusCode)
                     {
                         return RedirectToAction("ListAllApplications");
                     }
 
-                    return new StatusCodeResult((int) responseMessage.StatusCode);
+                    return new StatusCodeResult((int)responseMessage.StatusCode);
                 }
 
                 return View(jobApplication);
@@ -104,13 +107,14 @@ namespace JAH.Web.Controllers
         {
             string json = JsonConvert.SerializeObject(application);
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage responseMessage = await Client.PutAsync($"{ApiUriBasePath}/{application.CompanyName}", stringContent);
+            HttpResponseMessage responseMessage =
+                await Client.PutAsync(new Uri(ApiUri, $"{application.CompanyName}"), stringContent).ConfigureAwait(false);
             if (responseMessage.IsSuccessStatusCode)
             {
                 return RedirectToAction("ListAllApplications");
             }
 
-            return new StatusCodeResult((int) responseMessage.StatusCode);
+            return new StatusCodeResult((int)responseMessage.StatusCode);
         }
     }
 }

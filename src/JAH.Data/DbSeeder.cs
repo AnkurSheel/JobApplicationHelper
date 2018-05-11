@@ -21,10 +21,10 @@ namespace JAH.Data
         private readonly UserManager<JobApplicationUser> _userManager;
 
         /// <inheritdoc />
-        public DbSeeder(JobApplicationDbContext context
-                      , UserManager<JobApplicationUser> userManager
-                      , RoleManager<IdentityRole> roleManager
-                      , ILogger<JobApplicationDbContext> logger)
+        public DbSeeder(JobApplicationDbContext context,
+                        UserManager<JobApplicationUser> userManager,
+                        RoleManager<IdentityRole> roleManager,
+                        ILogger<JobApplicationDbContext> logger)
         {
             _context = context;
             _userManager = userManager;
@@ -42,25 +42,37 @@ namespace JAH.Data
                 return;
             }
 
-            JobApplicationUser user = await CreateDefaultUserAndRole();
+            JobApplicationUser user = await CreateDefaultUserAndRole().ConfigureAwait(false);
 
             var jobApplication = new JobApplicationEntity
                                  {
-                                     CompanyName = "Company 1"
-                                   , ApplicationDate = new DateTime(2017, 11, 13)
-                                   , CurrentStatus = Status.Applied
-                                   , Owner = user
+                                     CompanyName = "Company 1",
+                                     ApplicationDate = new DateTime(2017, 11, 13),
+                                     CurrentStatus = Status.Applied,
+                                     Owner = user
                                  };
 
             _context.JobApplications.Add(jobApplication);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        private static string GetIdentityErrorsInCommaSeperatedList(IdentityResult ir)
+        {
+            string errors = null;
+            foreach (IdentityError identityError in ir.Errors)
+            {
+                errors += identityError.Description;
+                errors += ", ";
+            }
+
+            return errors;
         }
 
         private async Task AddDefaultRoleToDefaultUser(string administratorRole, JobApplicationUser user)
         {
             _logger.LogInformation($"Add default user 'admin' to role '{administratorRole}'");
-            IdentityResult ir = await _userManager.AddToRoleAsync(user, administratorRole);
+            IdentityResult ir = await _userManager.AddToRoleAsync(user, administratorRole).ConfigureAwait(false);
             if (ir.Succeeded)
             {
                 _logger.LogDebug($"Added the role '{administratorRole}' to default user 'admin' successfully");
@@ -76,7 +88,7 @@ namespace JAH.Data
         private async Task CreateDefaultAdministratorRole(string administratorRole)
         {
             _logger.LogInformation($"Create the role `{administratorRole}` for application");
-            IdentityResult ir = await _roleManager.CreateAsync(new IdentityRole(administratorRole));
+            IdentityResult ir = await _roleManager.CreateAsync(new IdentityRole(administratorRole)).ConfigureAwait(false);
             if (ir.Succeeded)
             {
                 _logger.LogDebug($"Created the role `{administratorRole}` successfully");
@@ -96,7 +108,7 @@ namespace JAH.Data
 
             var user = new JobApplicationUser(UserName);
 
-            IdentityResult ir = await _userManager.CreateAsync(user);
+            IdentityResult ir = await _userManager.CreateAsync(user).ConfigureAwait(false);
             if (ir.Succeeded)
             {
                 _logger.LogDebug("Created default 'user' admin successfully");
@@ -108,7 +120,7 @@ namespace JAH.Data
                 throw exception;
             }
 
-            JobApplicationUser createdUser = await _userManager.FindByNameAsync(UserName);
+            JobApplicationUser createdUser = await _userManager.FindByNameAsync(UserName).ConfigureAwait(false);
             return createdUser;
         }
 
@@ -116,31 +128,19 @@ namespace JAH.Data
         {
             const string AdministratorRole = "Administrator";
 
-            await CreateDefaultAdministratorRole(AdministratorRole);
-            JobApplicationUser user = await CreateDefaultUser();
-            await SetPasswordForDefaultUser(user);
-            await AddDefaultRoleToDefaultUser(AdministratorRole, user);
+            await CreateDefaultAdministratorRole(AdministratorRole).ConfigureAwait(false);
+            JobApplicationUser user = await CreateDefaultUser().ConfigureAwait(false);
+            await SetPasswordForDefaultUser(user).ConfigureAwait(false);
+            await AddDefaultRoleToDefaultUser(AdministratorRole, user).ConfigureAwait(false);
 
             return user;
-        }
-
-        private string GetIdentityErrorsInCommaSeperatedList(IdentityResult ir)
-        {
-            string errors = null;
-            foreach (IdentityError identityError in ir.Errors)
-            {
-                errors += identityError.Description;
-                errors += ", ";
-            }
-
-            return errors;
         }
 
         private async Task SetPasswordForDefaultUser(JobApplicationUser user)
         {
             _logger.LogInformation($"Set password for default user 'admin'");
             const string password = "admin";
-            IdentityResult ir = await _userManager.AddPasswordAsync(user, password);
+            IdentityResult ir = await _userManager.AddPasswordAsync(user, password).ConfigureAwait(false);
             if (ir.Succeeded)
             {
                 _logger.LogTrace($"Set password `{password}` for default user 'admin' successfully");

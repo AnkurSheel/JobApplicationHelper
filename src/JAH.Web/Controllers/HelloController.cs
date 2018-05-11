@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace JAH.Web.Controllers
 {
     [Route("hello")]
-    public class HelloController : Controller
+    public class HelloController : BaseController
     {
-        private readonly HttpClient _client;
-
         public HelloController(HttpClient client)
+            : base(client)
         {
-            _client = client;
+            ApiUri = new Uri(client.BaseAddress, "api/hello/");
         }
 
         [HttpGet("{name}")]
@@ -20,17 +20,18 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await _client.GetAsync($"api/hello/{name}");
+                var requestUri = new Uri(ApiUri, $"{name}");
+                HttpResponseMessage responseMessage = await Client.GetAsync(requestUri).ConfigureAwait(false);
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    var responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                    string responseData = responseMessage.Content.ReadAsStringAsync().Result;
 
                     return Ok(responseData);
                 }
 
-                return new StatusCodeResult((int) responseMessage.StatusCode);
+                return new StatusCodeResult((int)responseMessage.StatusCode);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new StatusCodeResult(501);
             }

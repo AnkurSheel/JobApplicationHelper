@@ -1,4 +1,5 @@
 using System;
+
 using JAH.DomainModels;
 
 namespace JAH.Data.Entities
@@ -15,7 +16,6 @@ namespace JAH.Data.Entities
 
         public JobApplicationUser Owner { get; set; }
 
-
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -28,7 +28,7 @@ namespace JAH.Data.Entities
                 return true;
             }
 
-            if (obj.GetType() != this.GetType())
+            if (obj.GetType() != GetType())
             {
                 return false;
             }
@@ -41,7 +41,7 @@ namespace JAH.Data.Entities
             unchecked
             {
                 int hashCode = ApplicationDate.GetHashCode();
-                hashCode = (hashCode * 397) ^ (CompanyName != null ? CompanyName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (CompanyName != null ? CompanyName.GetHashCode(StringComparison.Ordinal) : 0);
                 hashCode = (hashCode * 397) ^ (int)CurrentStatus;
                 hashCode = (hashCode * 397) ^ Id;
                 hashCode = (hashCode * 397) ^ (Owner != null ? Owner.GetHashCode() : 0);
@@ -51,7 +51,11 @@ namespace JAH.Data.Entities
 
         protected bool Equals(JobApplicationEntity other)
         {
-            return ApplicationDate.Equals(other.ApplicationDate) && string.Equals(CompanyName, other.CompanyName) && CurrentStatus == other.CurrentStatus && Id == other.Id && Equals(Owner, other.Owner);
+            return ApplicationDate.Equals(other.ApplicationDate)
+                   && string.Equals(CompanyName, other.CompanyName, StringComparison.Ordinal)
+                   && CurrentStatus == other.CurrentStatus
+                   && Id == other.Id
+                   && Equals(Owner, other.Owner);
         }
     }
 }

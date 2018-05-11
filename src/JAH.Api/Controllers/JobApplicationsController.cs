@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using JAH.Api.Filters;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -15,6 +17,7 @@ namespace JAH.Api.Controllers
     public class JobApplicationsController : BaseController
     {
         private readonly ILogger<JobApplicationsController> _logger;
+
         private readonly IJobApplicationService _service;
 
         public JobApplicationsController(IJobApplicationService service, ILogger<JobApplicationsController> logger)
@@ -26,7 +29,7 @@ namespace JAH.Api.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Get()
         {
-            IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications();
+            IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications().ConfigureAwait(false);
             if (jobApplications.Any())
             {
                 return Ok(jobApplications);
@@ -62,7 +65,7 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication);
+                JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication).ConfigureAwait(false);
                 return CreatedAtRoute("GetJobApplication", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
             }
             catch (Exception e)
@@ -79,7 +82,7 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                JobApplication oldApplication = await _service.UpdateApplication(companyName, jobApplication);
+                JobApplication oldApplication = await _service.UpdateApplication(companyName, jobApplication).ConfigureAwait(false);
                 if (oldApplication == null)
                 {
                     return NotFound($"Company with Name \"{companyName}\" was not found");

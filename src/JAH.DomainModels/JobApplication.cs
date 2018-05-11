@@ -40,23 +40,25 @@ namespace JAH.DomainModels
                 return false;
             }
 
-            return Equals((JobApplication) obj);
+            return Equals((JobApplication)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = CompanyName != null ? CompanyName.GetHashCode() : 0;
+                int hashCode = CompanyName != null ? CompanyName.GetHashCode(StringComparison.Ordinal) : 0;
                 hashCode = (hashCode * 397) ^ ApplicationDate.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int) Status;
+                hashCode = (hashCode * 397) ^ (int)Status;
                 return hashCode;
             }
         }
 
-        private bool Equals(JobApplication other)
+        public bool Equals(JobApplication other)
         {
-            return string.Equals(CompanyName, other.CompanyName) && ApplicationDate.Equals(other.ApplicationDate) && Status == other.Status;
+            return string.Equals(CompanyName, other.CompanyName, StringComparison.Ordinal)
+                   && ApplicationDate.Equals(other.ApplicationDate)
+                   && Status == other.Status;
         }
     }
 }

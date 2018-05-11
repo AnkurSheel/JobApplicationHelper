@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using JAH.Data;
 using JAH.Data.Entities;
@@ -28,33 +29,7 @@ namespace JAH.Api
                     })
                     .AddEntityFrameworkStores<JobApplicationDbContext>();
 
-            services.ConfigureApplicationCookie(options => options.Events = new CookieAuthenticationEvents
-                                                                            {
-                                                                                OnRedirectToLogin = ctx =>
-                                                                                {
-                                                                                    if (ctx.Request.Path
-                                                                                           .StartsWithSegments("/api")
-                                                                                        && ctx.Response.StatusCode
-                                                                                        == 200)
-                                                                                    {
-                                                                                        ctx.Response.StatusCode = 401;
-                                                                                    }
-
-                                                                                    return Task.CompletedTask;
-                                                                                }
-                                                                              , OnRedirectToAccessDenied = ctx =>
-                                                                                {
-                                                                                    if (ctx.Request.Path
-                                                                                           .StartsWithSegments("/api")
-                                                                                        && ctx.Response.StatusCode
-                                                                                        == 200)
-                                                                                    {
-                                                                                        ctx.Response.StatusCode = 403;
-                                                                                    }
-
-                                                                                    return Task.CompletedTask;
-                                                                                }
-                                                                            });
+            services.ConfigureApplicationCookie(options => options.Events = GetCookieAuthenticationEvents());
         }
 
         public static void AddCustomizedMVC(this IServiceCollection services, IHostingEnvironment hostingEnvironment)
@@ -76,5 +51,31 @@ namespace JAH.Api
             });
         }
 
+        private static CookieAuthenticationEvents GetCookieAuthenticationEvents()
+        {
+            return new CookieAuthenticationEvents
+                   {
+                       OnRedirectToLogin = ctx =>
+                       {
+                           if (ctx.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCultureIgnoreCase)
+                               && ctx.Response.StatusCode == 200)
+                           {
+                               ctx.Response.StatusCode = 401;
+                           }
+
+                           return Task.CompletedTask;
+                       },
+                       OnRedirectToAccessDenied = ctx =>
+                       {
+                           if (ctx.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCultureIgnoreCase)
+                               && ctx.Response.StatusCode == 200)
+                           {
+                               ctx.Response.StatusCode = 403;
+                           }
+
+                           return Task.CompletedTask;
+                       }
+                   };
+        }
     }
 }

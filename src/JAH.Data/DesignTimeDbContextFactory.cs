@@ -8,7 +8,7 @@ namespace JAH.Data
     {
         public JobApplicationDbContext CreateDbContext(string[] args)
         {
-            //IConfigurationRoot configuration = new ConfigurationBuilder()
+            // IConfigurationRoot configuration = new ConfigurationBuilder()
             //    .SetBasePath(Directory.GetCurrentDirectory())
             //    .AddJsonFile("appsettings.json")
             //    .Build();

@@ -4,7 +4,7 @@ namespace JAH.Data
 {
     public static class JobApplicationDbContextExtensions
     {
-        public static void EnsureSeedData(this JobApplicationDbContext context, DbSeeder dbSeeder)
+        public static void SeedData(this DbSeeder dbSeeder)
         {
             dbSeeder.SeedDefaultUserAndRoles().Wait();
         }

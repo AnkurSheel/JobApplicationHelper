@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace JAH.Web
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -42,23 +42,29 @@ namespace JAH.Web
                              .UseStartup<Startup>()
                              .UseContentRoot(Directory.GetCurrentDirectory())
                              .ConfigureServices(services => services.TryAddTransient(provider =>
-                             {
-                                 var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-                                 var config = provider.GetRequiredService<IConfiguration>();
-                                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
-                                 return factory(hostingEnv, config);
-                             }))
+                                                                                     {
+                                                                                         var hostingEnv =
+                                                                                             provider.GetRequiredService<IHostingEnvironment>();
+                                                                                         var config = provider.GetRequiredService<IConfiguration>();
+                                                                                         var factory = webHostScope
+                                                                                             .Resolve<Func<IHostingEnvironment, IConfiguration,
+                                                                                                 Startup>>();
+                                                                                         return factory(hostingEnv, config);
+                                                                                     }))
                              .ConfigureServices(services => services.TryAddSingleton(provider =>
-                             {
-                                 var config = provider.GetRequiredService<IConfiguration>();
-                                 string uri = config.GetSection("ApiOptions:BaseUri").Value;
-                                 var client = new HttpClient { BaseAddress = new Uri(uri) };
-                                 client.DefaultRequestHeaders.Accept.Clear();
-                                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                                 return client;
-                             }))
+                                                                                     {
+                                                                                         var config = provider.GetRequiredService<IConfiguration>();
+                                                                                         string uri = config.GetSection("ApiOptions:BaseUri").Value;
+                                                                                         var client = new HttpClient { BaseAddress = new Uri(uri) };
+                                                                                         client.DefaultRequestHeaders.Accept.Clear();
+                                                                                         client.DefaultRequestHeaders.Accept
+                                                                                               .Add(new
+                                                                                                        MediaTypeWithQualityHeaderValue("application/json"));
+                                                                                         return client;
+                                                                                     }))
                              .Build()
-                             .RunAsync();
+                             .RunAsync()
+                             .ConfigureAwait(false);
             }
         }
     }

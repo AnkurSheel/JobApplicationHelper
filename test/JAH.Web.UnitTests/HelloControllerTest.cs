@@ -2,9 +2,13 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+
 using JAH.Web.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
+
 using NSubstitute;
+
 using Xunit;
 
 namespace JAH.Web.UnitTests
@@ -12,13 +16,14 @@ namespace JAH.Web.UnitTests
     public class HelloControllerTest
     {
         private readonly HelloController _helloController;
+
         private readonly FakeHttpMessageHandler _httpMessageHandler;
 
         public HelloControllerTest()
         {
             _httpMessageHandler = Substitute.ForPartsOf<FakeHttpMessageHandler>();
 
-            var httpClient = new HttpClient(_httpMessageHandler) { BaseAddress = new Uri("http://localhost/api/") };
+            var httpClient = new HttpClient(_httpMessageHandler) { BaseAddress = new Uri("http://localhost/") };
 
             _helloController = new HelloController(httpClient);
         }
@@ -40,7 +45,7 @@ namespace JAH.Web.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
+            var okResult = (OkObjectResult)result;
             var actual = okResult.Value as string;
             Assert.Equal(expected, actual);
         }

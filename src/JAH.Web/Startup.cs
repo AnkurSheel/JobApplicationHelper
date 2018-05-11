@@ -15,12 +15,16 @@ namespace JAH.Web
     public class Startup
     {
         private readonly ILifetimeScope _webHostScope;
+
+        private readonly IHostingEnvironment _hostingEnvironment;
+
         private ILifetimeScope _aspNetScope;
 
         public Startup(ILifetimeScope webHostScope, IHostingEnvironment hostingEnvironment, IConfiguration configuration)
         {
             Configuration = configuration;
             _webHostScope = webHostScope ?? throw new ArgumentNullException(nameof(webHostScope));
+            _hostingEnvironment = hostingEnvironment;
         }
 
         private IConfiguration Configuration { get; }
@@ -53,10 +57,7 @@ namespace JAH.Web
 
             app.UseMvc();
 
-            app.Run(async context =>
-            {
-                await context.Response.WriteAsync("Hello World");
-            });
+            app.Run(async context => { await context.Response.WriteAsync("Hello World").ConfigureAwait(false); });
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
         }
     }

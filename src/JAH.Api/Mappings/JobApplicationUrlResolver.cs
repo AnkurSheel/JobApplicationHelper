@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+
 using JAH.Api.Controllers;
 using JAH.Data.Entities;
 using JAH.DomainModels;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +13,6 @@ namespace JAH.Api.Mappings
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        /// <inheritdoc />
         public JobApplicationUrlResolver(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
@@ -20,7 +21,7 @@ namespace JAH.Api.Mappings
         /// <inheritdoc />
         public string Resolve(JobApplicationEntity source, JobApplication destination, string destMember, ResolutionContext context)
         {
-            var url = (IUrlHelper) _httpContextAccessor.HttpContext.Items[BaseController.Urlhelper];
+            var url = (IUrlHelper)_httpContextAccessor.HttpContext.Items[BaseController.Urlhelper];
             return url.Link("GetJobApplication", new { companyName = source.CompanyName });
         }
     }

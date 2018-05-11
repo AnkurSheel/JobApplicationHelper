@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace JAH.Api
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -57,7 +57,7 @@ namespace JAH.Api
                 var dbSeeder = serviceScope.ServiceProvider.GetService<DbSeeder>();
 
                 context.UpdateDB();
-                context.EnsureSeedData(dbSeeder);
+                dbSeeder.SeedData();
             }
         }
     }

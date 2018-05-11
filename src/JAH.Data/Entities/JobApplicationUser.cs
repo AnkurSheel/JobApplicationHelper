@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Identity;
 
@@ -41,13 +42,13 @@ namespace JAH.Data.Entities
 
         public override int GetHashCode()
         {
-            int hashCode = Id != null ? Id.GetHashCode() : 0;
+            int hashCode = Id != null ? Id.GetHashCode(StringComparison.Ordinal) : 0;
             return hashCode;
         }
 
         protected bool Equals(JobApplicationUser other)
         {
-            return Id.Equals(other.Id);
+            return Id.Equals(other.Id, StringComparison.Ordinal);
         }
     }
 }

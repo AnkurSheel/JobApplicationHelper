@@ -6,7 +6,7 @@ using JAH.Data.Repositories;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 
-public class IOCBuilder
+public static class IOCBuilder
 {
     internal static IContainer Build()
     {

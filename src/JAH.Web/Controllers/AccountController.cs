@@ -1,8 +1,12 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+
 using JAH.DomainModels;
+
 using Microsoft.AspNetCore.Mvc;
+
 using Newtonsoft.Json;
 
 namespace JAH.Web.Controllers
@@ -10,12 +14,10 @@ namespace JAH.Web.Controllers
     [Route("[controller]")]
     public class AccountController : BaseController
     {
-        private const string ApiUriBasePath = "api/auth";
-
-        /// <inheritdoc />
         public AccountController(HttpClient client)
             : base(client)
         {
+            ApiUri = new Uri(client.BaseAddress, "api/auth/");
         }
 
         [HttpGet("Register")]
@@ -33,14 +35,14 @@ namespace JAH.Web.Controllers
                 {
                     string json = JsonConvert.SerializeObject(credentials);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-                    HttpResponseMessage responseMessage = await Client.PostAsync($"{ApiUriBasePath}/register", stringContent);
+                    HttpResponseMessage responseMessage = await Client.PostAsync(new Uri(ApiUri, "register"), stringContent).ConfigureAwait(false);
                     if (responseMessage.IsSuccessStatusCode)
                     {
-                        return await Login(credentials);
+                        return await Login(credentials).ConfigureAwait(false);
                     }
 
-                    ModelState.AddModelError("", responseMessage.Content.ReadAsStringAsync().Result);
-                    ModelState.AddModelError("", "Could not register user");
+                    ModelState.AddModelError(string.Empty, responseMessage.Content.ReadAsStringAsync().Result);
+                    ModelState.AddModelError(string.Empty, "Could not register user");
                 }
 
                 return View(credentials);
@@ -70,15 +72,15 @@ namespace JAH.Web.Controllers
                     string json = JsonConvert.SerializeObject(credentials);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                    HttpResponseMessage responseMessage = await Client.PostAsync($"{ApiUriBasePath}/login", stringContent);
+                    HttpResponseMessage responseMessage = await Client.PostAsync(new Uri(ApiUri, "login"), stringContent).ConfigureAwait(false);
 
                     if (responseMessage.IsSuccessStatusCode)
                     {
                         return RedirectToAction("ListAllApplications", "JobApplications");
                     }
 
-                    ModelState.AddModelError("", responseMessage.Content.ReadAsStringAsync().Result);
-                    ModelState.AddModelError("", "UserName/Password Not found");
+                    ModelState.AddModelError(string.Empty, responseMessage.Content.ReadAsStringAsync().Result);
+                    ModelState.AddModelError(string.Empty, "UserName/Password Not found");
                 }
 
                 return View(credentials);
@@ -95,7 +97,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await Client.PostAsync($"{ApiUriBasePath}/logout", null);
+                HttpResponseMessage responseMessage = await Client.PostAsync(new Uri(ApiUri, "logout"), null).ConfigureAwait(false);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Login");

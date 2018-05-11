@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
+
 using JAH.Data.Entities;
 using JAH.DomainModels;
 
 namespace JAH.Api.Mappings
 {
-    class JobApplicationMappingProfile : Profile
+    internal class JobApplicationMappingProfile : Profile
     {
         public JobApplicationMappingProfile()
         {
