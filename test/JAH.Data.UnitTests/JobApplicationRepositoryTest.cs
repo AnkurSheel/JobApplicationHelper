@@ -1,9 +1,12 @@
 using System;
 using System.Linq;
+
 using JAH.Data.Entities;
 using JAH.Data.Repositories;
 using JAH.DomainModels;
+
 using Microsoft.EntityFrameworkCore;
+
 using Xunit;
 
 namespace JAH.Data.UnitTests
@@ -11,8 +14,11 @@ namespace JAH.Data.UnitTests
     public class JobApplicationRepositoryTest
     {
         private readonly JobApplicationDbContext _jobApplicationDbContext;
+
         private readonly JobApplicationEntity[] _jobApplicationEntities;
+
         private readonly Guid _guid;
+
         private JobApplicationRepository _jobApplicationRepository;
 
         public JobApplicationRepositoryTest()
@@ -64,7 +70,6 @@ namespace JAH.Data.UnitTests
         public void GetAll_MultipleApplications_AllJobApplications()
         {
             // Arrange
-
             foreach (JobApplicationEntity jobApplication in _jobApplicationEntities)
             {
                 _jobApplicationDbContext.JobApplications.Add(jobApplication);
@@ -103,7 +108,7 @@ namespace JAH.Data.UnitTests
             };
 
             // Act
-            await _jobApplicationRepository.Create(jobApplication);
+            await _jobApplicationRepository.Create(jobApplication).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(1, _jobApplicationDbContext.JobApplications.Count());
@@ -131,7 +136,8 @@ namespace JAH.Data.UnitTests
             _jobApplicationRepository = new JobApplicationRepository(context);
 
             // Act
-            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(jobApplication));
+            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Create(jobApplication).ConfigureAwait(false))
+                                       .ConfigureAwait(false);
 
             // Assert
             JobApplicationEntity entity = ContextFixture.GetContext(_guid).JobApplications.FirstOrDefault(x => x.Id == jobApplication.Id);
@@ -144,7 +150,6 @@ namespace JAH.Data.UnitTests
         public void GetOne_SingleApplicationExists_Application()
         {
             // Arrange
-
             foreach (JobApplicationEntity jobApplication in _jobApplicationEntities)
             {
                 _jobApplicationDbContext.JobApplications.Add(jobApplication);
@@ -163,7 +168,6 @@ namespace JAH.Data.UnitTests
         public void GetOne_MultipleApplicationsMatched_ThrowsException()
         {
             // Arrange
-
             foreach (JobApplicationEntity jobApplication in _jobApplicationEntities)
             {
                 _jobApplicationDbContext.JobApplications.Add(jobApplication);
@@ -185,7 +189,7 @@ namespace JAH.Data.UnitTests
             // Arrange
 
             // Act
-            var jobApplication = _jobApplicationRepository.GetOne(x => x.CompanyName.Equals(_jobApplicationEntities[0].CompanyName));
+            JobApplicationEntity jobApplication = _jobApplicationRepository.GetOne(x => x.CompanyName.Equals(_jobApplicationEntities[0].CompanyName));
 
             // Assert
             Assert.Null(jobApplication);
@@ -209,7 +213,7 @@ namespace JAH.Data.UnitTests
             _jobApplicationRepository = new JobApplicationRepository(context);
 
             // Act
-            await _jobApplicationRepository.Update(jobApplication);
+            await _jobApplicationRepository.Update(jobApplication).ConfigureAwait(false);
 
             // Assert
             JobApplicationEntity entity = ContextFixture.GetContext(_guid).JobApplications.FirstOrDefault(x => x.Id == jobApplication.Id);
@@ -229,7 +233,8 @@ namespace JAH.Data.UnitTests
             };
 
             // Act
-            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Update(jobApplication));
+            Exception ex = await Record.ExceptionAsync(async () => await _jobApplicationRepository.Update(jobApplication).ConfigureAwait(false))
+                                       .ConfigureAwait(false);
 
             // Assert
             Assert.IsType<DbUpdateConcurrencyException>(ex);

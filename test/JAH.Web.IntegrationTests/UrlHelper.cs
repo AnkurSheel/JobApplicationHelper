@@ -1,10 +1,9 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 
 public static class UrlHelper
 {
-    public static string ToUrl(this Object instance)
+    public static string ToUrl(this object instance)
     {
         var urlBuilder = new StringBuilder();
         PropertyInfo[] properties = instance.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -17,6 +16,7 @@ public static class UrlHelper
         {
             urlBuilder.Remove(urlBuilder.Length - 1, 1);
         }
+
         return urlBuilder.ToString();
     }
 }

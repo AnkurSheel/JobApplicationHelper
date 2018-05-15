@@ -2,26 +2,31 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+
 using JAH.Api.Controllers;
 using JAH.Data.Entities;
 using JAH.DomainModels;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using NSubstitute;
+
 using Xunit;
 
 namespace JAH.Api.UnitTests
 {
-    public class AuthApiControllerTest
+    public class AuthApiControllerTest : IDisposable
     {
         private readonly AuthController _authController;
+
         private readonly SignInManager<JobApplicationUser> _signInManager;
+
         private readonly UserManager<JobApplicationUser> _userManager;
-        private readonly ILogger<AuthController> _authControllerLogger;
 
         public AuthApiControllerTest()
         {
@@ -56,9 +61,16 @@ namespace JAH.Api.UnitTests
                                                                          optionsAccessor,
                                                                          signinManagerLogger,
                                                                          schemes);
-            _authControllerLogger = Substitute.For<ILogger<AuthController>>();
+            var authControllerLogger = Substitute.For<ILogger<AuthController>>();
 
-            _authController = new AuthController(_signInManager, _userManager, _authControllerLogger);
+            _authController = new AuthController(_signInManager, _userManager, authControllerLogger);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         [Fact]
@@ -125,7 +137,7 @@ namespace JAH.Api.UnitTests
         public void IsSignedIn_UserNotSignedIn_OkObjectResultWithFalseValue()
         {
             // Arrange
-            //_signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
+            // _signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
             _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(true);
 
             // Act
@@ -133,7 +145,7 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
+            var okResult = (OkObjectResult)result;
             Assert.True(okResult.Value as bool?);
         }
 
@@ -141,7 +153,7 @@ namespace JAH.Api.UnitTests
         public void IsSignedIn_UserSignedIn_OkObjectResultWithTrueValue()
         {
             // Arrange
-            //_signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
+            // _signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
             _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(false);
 
             // Act
@@ -149,8 +161,17 @@ namespace JAH.Api.UnitTests
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
-            var okResult = (OkObjectResult) result;
+            var okResult = (OkObjectResult)result;
             Assert.False(okResult.Value as bool?);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _authController?.Dispose();
+                _userManager?.Dispose();
+            }
         }
     }
 }

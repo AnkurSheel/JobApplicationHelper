@@ -25,7 +25,7 @@ namespace JAH.Web.IntegrationTests
 {
     public class ClientFixture : IDisposable
     {
-        private readonly Autofac.IContainer _container;
+        private readonly IContainer _container;
 
         private HttpClient _apiClient;
 
@@ -101,8 +101,8 @@ namespace JAH.Web.IntegrationTests
 
         public void SetupAuthentication()
         {
-            _apiClient.DefaultRequestHeaders.Add(AuthenticatedTestRequestMiddleware.TestingHeader
-                                               , AuthenticatedTestRequestMiddleware.TestingHeaderValue);
+            _apiClient.DefaultRequestHeaders.Add(AuthenticatedTestRequestMiddleware.TestingHeader,
+                                                 AuthenticatedTestRequestMiddleware.TestingHeaderValue);
 
             _apiClient.DefaultRequestHeaders.Add("my-name", "abcde");
             _apiClient.DefaultRequestHeaders.Add("my-id", "12345");
@@ -119,67 +119,71 @@ namespace JAH.Web.IntegrationTests
             }
         }
 
+        private static Startup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, Startup> factory)
+        {
+            var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+            var config = provider.GetRequiredService<IConfiguration>();
+            return factory(hostingEnv, config);
+        }
+
+        private static TestApiServerStartup SetupStartup(IServiceProvider provider,
+                                                         Func<IHostingEnvironment, IConfiguration, TestApiServerStartup> factory)
+        {
+            var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
+            var config = provider.GetRequiredService<IConfiguration>();
+            return factory(hostingEnv, config);
+        }
+
         private void SetupClients()
         {
             const string Environment = "Testing";
-            using (var webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<TestApiServerStartup>().AsSelf()))
+            using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<TestApiServerStartup>().AsSelf()))
             {
-                var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath
-                                                           , ".."
-                                                           , ".."
-                                                           , ".."
-                                                           , ".."
-                                                           , ".."
-                                                           , "src"
-                                                           , "JAH.Api"));
+                string fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath,
+                                                                "..",
+                                                                "..",
+                                                                "..",
+                                                                "..",
+                                                                "..",
+                                                                "src",
+                                                                "JAH.Api"));
 
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, TestApiServerStartup>>();
-                var builder = new WebHostBuilder().UseKestrel()
-                                                  .UseContentRoot(fullPath)
-                                                  .UseEnvironment(Environment)
-                                                  .UseStartup<TestApiServerStartup>()
-                                                  .ConfigureServices(services =>
-                                                                         services.TryAddTransient(provider => SetupStartup(provider, factory)));
+                IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
+                                                              .UseContentRoot(fullPath)
+                                                              .UseEnvironment(Environment)
+                                                              .UseStartup<TestApiServerStartup>()
+                                                              .ConfigureServices(services =>
+                                                                                     services.TryAddTransient(provider =>
+                                                                                                                  SetupStartup(provider, factory)));
                 _testServer = new TestServer(builder);
                 _apiClient = _testServer.CreateClient();
             }
 
-            using (var webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+            using (ILifetimeScope webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
             {
-                var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath
-                                                           , ".."
-                                                           , ".."
-                                                           , ".."
-                                                           , ".."
-                                                           , ".."
-                                                           , "src"
-                                                           , "JAH.Web"));
+                string fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath,
+                                                                "..",
+                                                                "..",
+                                                                "..",
+                                                                "..",
+                                                                "..",
+                                                                "src",
+                                                                "JAH.Web"));
 
                 var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
-                var builder = new WebHostBuilder().UseKestrel()
-                                                  .UseContentRoot(fullPath)
-                                                  .UseEnvironment(Environment)
-                                                  .UseStartup<Startup>()
-                                                  .ConfigureServices(services => services.AddTransient(provider => SetupStartup(provider, factory)))
-                                                  .ConfigureServices(services => services.TryAddSingleton(_apiClient));
+                IWebHostBuilder builder = new WebHostBuilder().UseKestrel()
+                                                              .UseContentRoot(fullPath)
+                                                              .UseEnvironment(Environment)
+                                                              .UseStartup<Startup>()
+                                                              .ConfigureServices(services =>
+                                                                                     services.AddTransient(provider =>
+                                                                                                               SetupStartup(provider, factory)))
+                                                              .ConfigureServices(services => services.TryAddSingleton(_apiClient));
 
                 var testServer = new TestServer(builder);
                 WebClient = testServer.CreateClient();
             }
-        }
-
-        private Startup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, Startup> factory)
-        {
-            var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-            var config = provider.GetRequiredService<IConfiguration>();
-            return factory(hostingEnv, config);
-        }
-
-        private TestApiServerStartup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, TestApiServerStartup> factory)
-        {
-            var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
-            var config = provider.GetRequiredService<IConfiguration>();
-            return factory(hostingEnv, config);
         }
     }
 }

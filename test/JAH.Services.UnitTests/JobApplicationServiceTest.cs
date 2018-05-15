@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
 using AutoMapper;
+
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.DomainModels;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
+
 using NSubstitute;
+
 using Xunit;
 
 namespace JAH.Services.UnitTests
@@ -17,11 +21,17 @@ namespace JAH.Services.UnitTests
     public class JobApplicationServiceTest
     {
         private readonly IRepository<JobApplicationEntity> _jobApplicationRepository;
+
         private readonly JobApplication[] _jobApplications;
+
         private readonly JobApplicationService _jobApplicationService;
+
         private readonly IList<JobApplicationEntity> _jobApplicationEntities;
+
         private readonly IMapper _mapper;
+
         private readonly IUserResolverService _userResolver;
+
         private readonly JobApplicationUser _user;
 
         public JobApplicationServiceTest()
@@ -34,23 +44,43 @@ namespace JAH.Services.UnitTests
             _jobApplicationService = new JobApplicationService(_jobApplicationRepository, _mapper, _userResolver);
 
             _jobApplications = new[]
-            {
-                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Rejected },
-                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
-                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Interview },
-                new JobApplication { CompanyName = "Company 4", ApplicationDate = new DateTime(2017, 10, 9), Status = Status.Offer }
-            };
+                               {
+                                   new JobApplication
+                                   {
+                                       CompanyName = "Company 1",
+                                       ApplicationDate = new DateTime(2017, 11, 13),
+                                       Status = Status.Rejected
+                                   },
+                                   new JobApplication
+                                   {
+                                       CompanyName = "Company 2",
+                                       ApplicationDate = new DateTime(2017, 11, 14),
+                                       Status = Status.Applied
+                                   },
+                                   new JobApplication
+                                   {
+                                       CompanyName = "Company 3",
+                                       ApplicationDate = new DateTime(2017, 11, 14),
+                                       Status = Status.Interview
+                                   },
+                                   new JobApplication
+                                   {
+                                       CompanyName = "Company 4",
+                                       ApplicationDate = new DateTime(2017, 10, 9),
+                                       Status = Status.Offer
+                                   }
+                               };
 
             _jobApplicationEntities = new List<JobApplicationEntity>();
             foreach (JobApplication jobApplication in _jobApplications)
             {
                 var jobApplicationEntity = new JobApplicationEntity
-                {
-                    Owner = _user,
-                    CompanyName = jobApplication.CompanyName,
-                    ApplicationDate = jobApplication.ApplicationDate,
-                    CurrentStatus = jobApplication.Status
-                };
+                                           {
+                                               Owner = _user,
+                                               CompanyName = jobApplication.CompanyName,
+                                               ApplicationDate = jobApplication.ApplicationDate,
+                                               CurrentStatus = jobApplication.Status
+                                           };
                 _jobApplicationEntities.Add(jobApplicationEntity);
             }
         }
@@ -66,7 +96,7 @@ namespace JAH.Services.UnitTests
             _mapper.Map<IEnumerable<JobApplication>>(Arg.Any<IEnumerable<JobApplicationEntity>>()).Returns(_jobApplications);
 
             // Act
-            IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
+            IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications().ConfigureAwait(false);
 
             // Assert
             Assert.Equal(_jobApplications, result);
@@ -82,7 +112,7 @@ namespace JAH.Services.UnitTests
             _jobApplicationRepository.GetAll(Arg.Any<Expression<Func<JobApplicationEntity, bool>>>()).Returns(jobApplicationEntities);
 
             // Act
-            IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications();
+            IEnumerable<JobApplication> result = await _jobApplicationService.GetAllApplications().ConfigureAwait(false);
 
             // Assert
             Assert.Equal(new List<JobApplication>(), result);
@@ -100,10 +130,10 @@ namespace JAH.Services.UnitTests
                                      .Returns(jobApplicationEntities);
 
             // Act
-            await _jobApplicationService.GetAllApplications();
+            await _jobApplicationService.GetAllApplications().ConfigureAwait(false);
 
             // Assert
-            var compiledActualFilter = actualFilter.Compile();
+            Func<JobApplicationEntity, bool> compiledActualFilter = actualFilter.Compile();
             Assert.True(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user }));
             Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = new JobApplicationUser("user1") }));
         }
@@ -114,21 +144,21 @@ namespace JAH.Services.UnitTests
             // Arrange
             _userResolver.GetCurrentUser().Returns(_user);
             var jobApplicationEntity = new JobApplicationEntity
-            {
-                Owner = _user,
-                CompanyName = _jobApplications[0].CompanyName,
-                ApplicationDate = _jobApplications[0].ApplicationDate,
-                CurrentStatus = _jobApplications[0].Status
-            };
+                                       {
+                                           Owner = _user,
+                                           CompanyName = _jobApplications[0].CompanyName,
+                                           ApplicationDate = _jobApplications[0].ApplicationDate,
+                                           CurrentStatus = _jobApplications[0].Status
+                                       };
 
             _mapper.Map(_jobApplications[0], Arg.Any<Action<IMappingOperationOptions<JobApplication, JobApplicationEntity>>>())
                    .Returns(jobApplicationEntity);
 
             // Act
-            await _jobApplicationService.AddNewApplication(_jobApplications[0]);
+            await _jobApplicationService.AddNewApplication(_jobApplications[0]).ConfigureAwait(false);
 
             // Assert
-            await _jobApplicationRepository.Received().Create(jobApplicationEntity);
+            await _jobApplicationRepository.Received().Create(jobApplicationEntity).ConfigureAwait(false);
         }
 
         [Fact]
@@ -136,19 +166,19 @@ namespace JAH.Services.UnitTests
         {
             // Arrange
             var jobApplicationEntity = new JobApplicationEntity
-            {
-                CompanyName = _jobApplications[0].CompanyName,
-                ApplicationDate = _jobApplications[0].ApplicationDate,
-                CurrentStatus = _jobApplications[0].Status
-            };
-            _jobApplicationRepository.Create(jobApplicationEntity).Returns(x => throw new ArgumentException());
+                                       {
+                                           CompanyName = _jobApplications[0].CompanyName,
+                                           ApplicationDate = _jobApplications[0].ApplicationDate,
+                                           CurrentStatus = _jobApplications[0].Status
+                                       };
+            _jobApplicationRepository.Create(jobApplicationEntity).Returns(x => throw new ArgumentException("Could not create a new application"));
             _mapper.Map<JobApplication, JobApplicationEntity>(Arg.Any<JobApplication>(), opt => { }).ReturnsForAnyArgs(jobApplicationEntity);
 
             // Act
             Task<Exception> ex = Record.ExceptionAsync(() => _jobApplicationService.AddNewApplication(_jobApplications[0]));
 
             // Assert
-            await _jobApplicationRepository.Received().Create(jobApplicationEntity);
+            await _jobApplicationRepository.Received().Create(jobApplicationEntity).ConfigureAwait(false);
             Assert.NotNull(ex.Result);
         }
 
@@ -202,7 +232,7 @@ namespace JAH.Services.UnitTests
             _jobApplicationService.GetApplication(companyName);
 
             // Assert
-            var compiledActualFilter = actualFilter.Compile();
+            Func<JobApplicationEntity, bool> compiledActualFilter = actualFilter.Compile();
             Assert.True(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = companyName }));
         }
 
@@ -221,12 +251,12 @@ namespace JAH.Services.UnitTests
             JobApplication result = _jobApplicationService.GetApplication(companyName);
 
             // Assert
-            var compiledActualFilter = actualFilter.Compile();
+            Func<JobApplicationEntity, bool> compiledActualFilter = actualFilter.Compile();
             Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity
-            {
-                Owner = new JobApplicationUser("user1"),
-                CompanyName = companyName
-            }));
+                                                     {
+                                                         Owner = new JobApplicationUser("user1"),
+                                                         CompanyName = companyName
+                                                     }));
             Assert.Null(result);
         }
 
@@ -245,7 +275,7 @@ namespace JAH.Services.UnitTests
             _jobApplicationService.GetApplication(companyName);
 
             // Assert
-            var compiledActualFilter = actualFilter.Compile();
+            Func<JobApplicationEntity, bool> compiledActualFilter = actualFilter.Compile();
             Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = "Deleted" }));
         }
 
@@ -261,10 +291,12 @@ namespace JAH.Services.UnitTests
             _userResolver.GetCurrentUser().Returns(_user);
 
             // Act
-            var jobApplication = await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+            JobApplication jobApplication = await _jobApplicationService
+                                                  .UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0])
+                                                  .ConfigureAwait(false);
 
             // Assert
-            await _jobApplicationRepository.Received().Update(_jobApplicationEntities[0]);
+            await _jobApplicationRepository.Received().Update(_jobApplicationEntities[0]).ConfigureAwait(false);
 
             Assert.Equal(_jobApplications[0], jobApplication);
         }
@@ -275,7 +307,9 @@ namespace JAH.Services.UnitTests
             // Arrange
 
             // Act
-            var jobApplication = await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+            JobApplication jobApplication = await _jobApplicationService
+                                                  .UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0])
+                                                  .ConfigureAwait(false);
 
             // Assert
             Assert.Null(jobApplication);
@@ -296,10 +330,10 @@ namespace JAH.Services.UnitTests
             _userResolver.GetCurrentUser().Returns(_user);
 
             // Act
-            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]).ConfigureAwait(false);
 
             // Assert
-            var compiledActualFilter = actualFilter.Compile();
+            Func<JobApplicationEntity, bool> compiledActualFilter = actualFilter.Compile();
             Assert.True(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = companyName }));
         }
 
@@ -317,10 +351,10 @@ namespace JAH.Services.UnitTests
             _userResolver.GetCurrentUser().Returns(_user);
 
             // Act
-            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]).ConfigureAwait(false);
 
             // Assert
-            var compiledActualFilter = actualFilter.Compile();
+            Func<JobApplicationEntity, bool> compiledActualFilter = actualFilter.Compile();
             Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity { Owner = _user, CompanyName = "Deleted" }));
         }
 
@@ -338,15 +372,15 @@ namespace JAH.Services.UnitTests
             _userResolver.GetCurrentUser().Returns(_user);
 
             // Act
-            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]);
+            await _jobApplicationService.UpdateApplication(_jobApplications[0].CompanyName, _jobApplications[0]).ConfigureAwait(false);
 
             // Assert
-            var compiledActualFilter = actualFilter.Compile();
+            Func<JobApplicationEntity, bool> compiledActualFilter = actualFilter.Compile();
             Assert.False(compiledActualFilter.Invoke(new JobApplicationEntity
-            {
-                Owner = new JobApplicationUser("user1"),
-                CompanyName = companyName
-            }));
+                                                     {
+                                                         Owner = new JobApplicationUser("user1"),
+                                                         CompanyName = companyName
+                                                     }));
         }
     }
 }

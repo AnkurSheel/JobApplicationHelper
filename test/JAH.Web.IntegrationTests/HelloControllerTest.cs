@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,11 +9,14 @@ namespace JAH.Web.IntegrationTests
 {
     public class HelloControllerTest : IClassFixture<ClientFixture>
     {
+        private readonly Uri _baseUri;
+
         private readonly ClientFixture _fixture;
 
         public HelloControllerTest(ClientFixture fixture)
         {
             _fixture = fixture;
+            _baseUri = new Uri(_fixture.WebClient.BaseAddress, "hello/");
         }
 
         [Theory]
@@ -24,7 +28,7 @@ namespace JAH.Web.IntegrationTests
             _fixture.SetupAuthentication();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync($"/hello/{name}");
+            HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{name}")).ConfigureAwait(false);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -39,7 +43,7 @@ namespace JAH.Web.IntegrationTests
             _fixture.ClearAuthentication();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync("/hello/name");
+            HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"name")).ConfigureAwait(false);
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);

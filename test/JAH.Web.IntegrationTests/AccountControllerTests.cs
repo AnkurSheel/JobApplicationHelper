@@ -16,19 +16,20 @@ namespace JAH.Web.IntegrationTests
 {
     public class AccountControllerTests : IClassFixture<ClientFixture>, IDisposable
     {
-        private const string UriBasePath = "/account";
+        private readonly Uri _baseUri;
 
         private readonly ClientFixture _fixture;
 
-        /// <inheritdoc />
         public AccountControllerTests(ClientFixture fixture)
         {
             _fixture = fixture;
+            _baseUri = new Uri(_fixture.WebClient.BaseAddress, "account/");
         }
 
         public void Dispose()
         {
-            _fixture.EmptyDatabase();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         [Fact]
@@ -39,10 +40,10 @@ namespace JAH.Web.IntegrationTests
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             // Act
-            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/login", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "login"), stringContent).ConfigureAwait(false);
 
             // Assert
-            var responseData = response.Content.ReadAsStringAsync().Result;
+            string responseData = response.Content.ReadAsStringAsync().Result;
             Assert.Contains("UserName/Password Not found", responseData);
         }
 
@@ -55,10 +56,10 @@ namespace JAH.Web.IntegrationTests
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             var user = new JobApplicationUser(credentials.UserName);
-            await userManager.CreateAsync(user, credentials.Password);
+            await userManager.CreateAsync(user, credentials.Password).ConfigureAwait(false);
 
             // Act
-            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/login", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "login"), stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -72,7 +73,7 @@ namespace JAH.Web.IntegrationTests
             _fixture.SetupAuthentication();
 
             // Act
-            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/logout", null);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "logout"), null).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -87,11 +88,19 @@ namespace JAH.Web.IntegrationTests
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             // Act
-            var response = await _fixture.WebClient.PostAsync($"{UriBasePath}/register", stringContent);
+            HttpResponseMessage response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "register"), stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
             Assert.Equal("/JobApplications", response.Headers.Location.OriginalString);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _fixture.EmptyDatabase();
+            }
         }
     }
 }

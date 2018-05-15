@@ -38,8 +38,8 @@ namespace JAH.Web.IntegrationTests
                     .AddDbContext<JobApplicationDbContext>(options => options
                                                                       .UseInMemoryDatabase(Guid.NewGuid().ToString())
                                                                       .EnableSensitiveDataLogging()
-                                                                      .UseLoggerFactory(MyLoggerFactory)
-                                                         , ServiceLifetime.Singleton);
+                                                                      .UseLoggerFactory(MyLoggerFactory),
+                                                           ServiceLifetime.Singleton);
         }
     }
 }

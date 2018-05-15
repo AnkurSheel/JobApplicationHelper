@@ -10,10 +10,10 @@ namespace JAH.Data.UnitTests
         private static readonly LoggerFactory MyLoggerFactory =
             new LoggerFactory(new[] { new DebugLoggerProvider((_, level) => level >= LogLevel.Information) });
 
-        public static JobApplicationDbContext GetContext(Guid guid)
+        public static JobApplicationDbContext GetContext(Guid id)
         {
             DbContextOptions<JobApplicationDbContext> options = new DbContextOptionsBuilder<JobApplicationDbContext>()
-                .UseInMemoryDatabase(guid.ToString())
+                .UseInMemoryDatabase(id.ToString())
                 .UseLoggerFactory(MyLoggerFactory)
                 .EnableSensitiveDataLogging()
                 .Options;

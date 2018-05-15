@@ -13,7 +13,7 @@ using Xunit;
 
 namespace JAH.Web.UnitTests
 {
-    public class HelloControllerTest
+    public class HelloControllerTest : IDisposable
     {
         private readonly HelloController _helloController;
 
@@ -26,6 +26,13 @@ namespace JAH.Web.UnitTests
             var httpClient = new HttpClient(_httpMessageHandler) { BaseAddress = new Uri("http://localhost/") };
 
             _helloController = new HelloController(httpClient);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         [Theory]
@@ -41,13 +48,22 @@ namespace JAH.Web.UnitTests
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _helloController.Greet(name);
+            IActionResult result = await _helloController.Greet(name).ConfigureAwait(false);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult)result;
             var actual = okResult.Value as string;
             Assert.Equal(expected, actual);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _helloController?.Dispose();
+                _httpMessageHandler?.Dispose();
+            }
         }
     }
 }
