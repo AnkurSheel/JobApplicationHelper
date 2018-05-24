@@ -20,6 +20,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 
+using Swashbuckle.AspNetCore.Swagger;
+
 namespace JAH.Api
 {
     public class Startup
@@ -54,6 +56,9 @@ namespace JAH.Api
 
             ConfigureAdditionalMiddleware(app);
 
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JAH API v1"));
+
             app.UseAuthentication();
             app.UseMvc();
 
@@ -67,7 +72,7 @@ namespace JAH.Api
             services.AddTransient<DbSeeder, DbSeeder>();
 
             services.AddAutoMapper();
-
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new Info { Title = "JAH Api", Version = "v1" }));
             ConfigureDatabase(services);
 
             services.AddSecurity(_env, Configuration.GetSection(nameof(TokenOptions)));
