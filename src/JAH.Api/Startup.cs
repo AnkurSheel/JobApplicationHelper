@@ -72,7 +72,11 @@ namespace JAH.Api
             services.AddTransient<DbSeeder, DbSeeder>();
 
             services.AddAutoMapper();
-            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new Info { Title = "JAH Api", Version = "v1" }));
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "JAH Api", Version = "v1" });
+                c.DescribeAllEnumsAsStrings();
+            });
             ConfigureDatabase(services);
 
             services.AddSecurity(_env, Configuration.GetSection(nameof(TokenOptions)));
