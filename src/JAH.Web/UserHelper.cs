@@ -15,7 +15,7 @@ namespace JAH.Web
 
         public async Task<bool> IsSignedIn()
         {
-            HttpResponseMessage responseMessage = await _client.GetAsync(new Uri(_client.BaseAddress, "api/auth/signedIn")).ConfigureAwait(false);
+            HttpResponseMessage responseMessage = await _client.GetAsync(new Uri(_client.BaseAddress, "api/account/signedIn")).ConfigureAwait(false);
             if (responseMessage.IsSuccessStatusCode)
             {
                 string responseData = responseMessage.Content.ReadAsStringAsync().Result;

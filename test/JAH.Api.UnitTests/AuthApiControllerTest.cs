@@ -44,15 +44,15 @@ namespace JAH.Api.UnitTests
             var signinManagerLogger = Substitute.For<ILogger<SignInManager<JobApplicationUser>>>();
             var schemes = Substitute.For<IAuthenticationSchemeProvider>();
 
-            _userManager = Substitute.ForPartsOf<UserManager<JobApplicationUser>>(store,
-                                                                                  optionsAccessor,
-                                                                                  passwordHasher,
-                                                                                  userValidators,
-                                                                                  passwordValidators,
-                                                                                  keyNormalizer,
-                                                                                  errors,
-                                                                                  services,
-                                                                                  userManagerLogger);
+            _userManager = Substitute.For<UserManager<JobApplicationUser>>(store,
+                                                                           optionsAccessor,
+                                                                           passwordHasher,
+                                                                           userValidators,
+                                                                           passwordValidators,
+                                                                           keyNormalizer,
+                                                                           errors,
+                                                                           services,
+                                                                           userManagerLogger);
 
             _signInManager =
                 Substitute.ForPartsOf<SignInManager<JobApplicationUser>>(_userManager,
@@ -61,9 +61,10 @@ namespace JAH.Api.UnitTests
                                                                          optionsAccessor,
                                                                          signinManagerLogger,
                                                                          schemes);
-            var authControllerLogger = Substitute.For<ILogger<AuthController>>();
 
-            _authController = new AuthController(_signInManager, _userManager, authControllerLogger);
+            var logger = Substitute.For<ILogger<AuthController>>();
+
+            _authController = new AuthController(_signInManager, _userManager, logger);
         }
 
         /// <inheritdoc />
@@ -71,34 +72,6 @@ namespace JAH.Api.UnitTests
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        [Fact]
-        public void Register_Succeeds_Ok()
-        {
-            // Arrange
-            var model = new CredentialModel();
-            _userManager.CreateAsync(Arg.Any<JobApplicationUser>(), string.Empty).ReturnsForAnyArgs(IdentityResult.Success);
-
-            // Act
-            Task<IActionResult> result = _authController.Register(model);
-
-            // Assert
-            Assert.IsType<OkResult>(result.Result);
-        }
-
-        [Fact]
-        public void Register_Fails_BadRequestObjectResult()
-        {
-            // Arrange
-            var model = new CredentialModel();
-            _userManager.CreateAsync(Arg.Any<JobApplicationUser>(), string.Empty).ReturnsForAnyArgs(IdentityResult.Failed(null));
-
-            // Act
-            Task<IActionResult> result = _authController.Register(model);
-
-            // Assert
-            Assert.IsType<BadRequestObjectResult>(result.Result);
         }
 
         [Fact]
@@ -137,7 +110,6 @@ namespace JAH.Api.UnitTests
         public void IsSignedIn_UserNotSignedIn_OkObjectResultWithFalseValue()
         {
             // Arrange
-            // _signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
             _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(true);
 
             // Act
@@ -153,7 +125,6 @@ namespace JAH.Api.UnitTests
         public void IsSignedIn_UserSignedIn_OkObjectResultWithTrueValue()
         {
             // Arrange
-            // _signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
             _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(false);
 
             // Act

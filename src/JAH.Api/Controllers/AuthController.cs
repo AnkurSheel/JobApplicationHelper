@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace JAH.Api.Controllers
 {
     [ValidateModel]
+    [Route("api/[controller]")]
     public class AuthController : Controller
     {
         private readonly SignInManager<JobApplicationUser> _signInManager;
@@ -21,17 +22,16 @@ namespace JAH.Api.Controllers
 
         private readonly ILogger<AuthController> _logger;
 
-        /// <inheritdoc />
         public AuthController(SignInManager<JobApplicationUser> signInManager,
-                              UserManager<JobApplicationUser> userManager,
-                              ILogger<AuthController> logger)
+                                 UserManager<JobApplicationUser> userManager,
+                                 ILogger<AuthController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
         }
 
-        [HttpGet("api/auth/signedIn")]
+        [HttpGet("signedIn")]
         [AllowAnonymous]
         public IActionResult SignedIn()
         {
@@ -47,30 +47,7 @@ namespace JAH.Api.Controllers
             }
         }
 
-        [HttpPost("api/auth/register")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] CredentialModel model)
-        {
-            try
-            {
-                var jobApplicationUser = new JobApplicationUser { UserName = model.UserName };
-                IdentityResult result = await _userManager.CreateAsync(jobApplicationUser, model.Password).ConfigureAwait(false);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation(3, "User created a new account with password.");
-                    return Ok();
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(LoggingEvents.Auth, e, $"Exception when trying to register");
-                return BadRequest(e);
-            }
-
-            return BadRequest("Failed to Register");
-        }
-
-        [HttpPost("api/auth/login")]
+        [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] CredentialModel model)
         {
@@ -92,7 +69,7 @@ namespace JAH.Api.Controllers
             return BadRequest("Failed to Login");
         }
 
-        [HttpPost("api/auth/logout")]
+        [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             try
