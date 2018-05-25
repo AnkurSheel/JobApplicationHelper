@@ -466,22 +466,11 @@
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ESettingsUpgrade_002EMigrateThisQualifierSettings/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002EXml_002ECodeStyle_002EFormatSettingsUpgrade_002EXmlMoveToCommonFormatterSettingsUpgrade/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2CAB0A567F30704CA99AA3EC249E3153/CustomProperties/=ValidateFileName/@EntryIndexedValue">False</s:String>
-	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2CAB0A567F30704CA99AA3EC249E3153/Text/@EntryValue">// -----------------------------------------------------------------------&#xD;
-// &lt;copyright file="$FILENAME$" company="$COMPANYNAME$"&gt;&#xD;
-// $COPYRIGHT$&#xD;
-// &lt;/copyright&gt;&#xD;
-// &lt;summary&gt;&#xD;
-// $SUMMARY$&#xD;
-// &lt;/summary&gt;&#xD;
-&#xD;
-&#xD;
-namespace $NAMESPACE$&#xD;
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2CAB0A567F30704CA99AA3EC249E3153/Field/=HEADER/@KeyIndexDefined">False</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2CAB0A567F30704CA99AA3EC249E3153/Text/@EntryValue">namespace $NAMESPACE$&#xD;
 {&#xD;
   using System;&#xD;
 &#xD;
-  /// &lt;summary&gt;&#xD;
-  /// $SUMMARY$&#xD;
-  /// &lt;/summary&gt;&#xD;
   public class $CLASS$ {$END$}&#xD;
 }</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2CAB0A567F30704CA99AA3EC249E3153/Field/=CLASS/Expression/@EntryValue">getFileNameWithoutExtension()</s:String>
@@ -494,22 +483,11 @@ namespace $NAMESPACE$&#xD;
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2CAB0A567F30704CA99AA3EC249E3153/Field/=NAMESPACE/Order/@EntryValue">1</s:Int64>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2CAB0A567F30704CA99AA3EC249E3153/Field/=SUMMARY/Order/@EntryValue">4</s:Int64>
 	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FAA6736247D464489DF536819A6D103/CustomProperties/=ValidateFileName/@EntryIndexedValue">False</s:String>
-	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FAA6736247D464489DF536819A6D103/Text/@EntryValue">// -----------------------------------------------------------------------&#xD;
-// &lt;copyright file="$FILENAME$" company="$COMPANYNAME$"&gt;&#xD;
-// $COPYRIGHT$&#xD;
-// &lt;/copyright&gt;&#xD;
-// &lt;summary&gt;&#xD;
-// $SUMMARY$&#xD;
-// &lt;/summary&gt;&#xD;
-&#xD;
-&#xD;
-namespace $NAMESPACE$&#xD;
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FAA6736247D464489DF536819A6D103/Field/=HEADER/@KeyIndexDefined">False</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FAA6736247D464489DF536819A6D103/Text/@EntryValue">namespace $NAMESPACE$&#xD;
 {&#xD;
   using System;&#xD;
 &#xD;
-  /// &lt;summary&gt;&#xD;
-  /// $SUMMARY$&#xD;
-  /// &lt;/summary&gt;&#xD;
   public interface $INTERFACE$ {$END$}&#xD;
 }</s:String>
 	<s:Int64 x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6FAA6736247D464489DF536819A6D103/Field/=COMPANYNAME/Order/@EntryValue">2</s:Int64>
