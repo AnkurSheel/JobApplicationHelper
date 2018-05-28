@@ -26,8 +26,6 @@ namespace JAH.Api.UnitTests
 
         private readonly SignInManager<JobApplicationUser> _signInManager;
 
-        private readonly UserManager<JobApplicationUser> _userManager;
-
         public AuthApiControllerTest()
         {
             var store = Substitute.For<IUserStore<JobApplicationUser>>();
@@ -44,7 +42,7 @@ namespace JAH.Api.UnitTests
             var signinManagerLogger = Substitute.For<ILogger<SignInManager<JobApplicationUser>>>();
             var schemes = Substitute.For<IAuthenticationSchemeProvider>();
 
-            _userManager = Substitute.For<UserManager<JobApplicationUser>>(store,
+            var userManager = Substitute.For<UserManager<JobApplicationUser>>(store,
                                                                            optionsAccessor,
                                                                            passwordHasher,
                                                                            userValidators,
@@ -55,7 +53,7 @@ namespace JAH.Api.UnitTests
                                                                            userManagerLogger);
 
             _signInManager =
-                Substitute.ForPartsOf<SignInManager<JobApplicationUser>>(_userManager,
+                Substitute.ForPartsOf<SignInManager<JobApplicationUser>>(userManager,
                                                                          contextAccessor,
                                                                          claimsFactory,
                                                                          optionsAccessor,
@@ -64,7 +62,7 @@ namespace JAH.Api.UnitTests
 
             var logger = Substitute.For<ILogger<AuthController>>();
 
-            _authController = new AuthController(_signInManager, _userManager, logger);
+            _authController = new AuthController(_signInManager, logger);
         }
 
         /// <inheritdoc />
@@ -141,7 +139,6 @@ namespace JAH.Api.UnitTests
             if (disposing)
             {
                 _authController?.Dispose();
-                _userManager?.Dispose();
             }
         }
     }

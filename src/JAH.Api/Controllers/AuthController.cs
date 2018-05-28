@@ -18,16 +18,11 @@ namespace JAH.Api.Controllers
     {
         private readonly SignInManager<JobApplicationUser> _signInManager;
 
-        private readonly UserManager<JobApplicationUser> _userManager;
-
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(SignInManager<JobApplicationUser> signInManager,
-                                 UserManager<JobApplicationUser> userManager,
-                                 ILogger<AuthController> logger)
+        public AuthController(SignInManager<JobApplicationUser> signInManager, ILogger<AuthController> logger)
         {
             _signInManager = signInManager;
-            _userManager = userManager;
             _logger = logger;
         }
 
@@ -37,7 +32,7 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                bool result = _signInManager.IsSignedIn(User);
+                var result = _signInManager.IsSignedIn(User);
                 return Ok(result);
             }
             catch (Exception e)
@@ -53,8 +48,7 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                Microsoft.AspNetCore.Identity.SignInResult result =
-                    await _signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false).ConfigureAwait(false);
+                var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, false, false).ConfigureAwait(false);
                 if (result.Succeeded)
                 {
                     return Ok();

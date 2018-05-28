@@ -36,10 +36,10 @@ namespace JAH.Web.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    string json = JsonConvert.SerializeObject(credentials);
+                    var json = JsonConvert.SerializeObject(credentials);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                    HttpResponseMessage responseMessage = await Client.PostAsync(new Uri(ApiUri, "login"), stringContent).ConfigureAwait(false);
+                    var responseMessage = await Client.PostAsync(new Uri(ApiUri, "login"), stringContent).ConfigureAwait(false);
 
                     if (responseMessage.IsSuccessStatusCode)
                     {
@@ -64,7 +64,7 @@ namespace JAH.Web.Controllers
         {
             try
             {
-                HttpResponseMessage responseMessage = await Client.PostAsync(new Uri(ApiUri, "logout"), null).ConfigureAwait(false);
+                var responseMessage = await Client.PostAsync(new Uri(ApiUri, "logout"), null).ConfigureAwait(false);
                 if (responseMessage.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Login");
