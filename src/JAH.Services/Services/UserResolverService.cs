@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
 
 using JAH.Data.Entities;
 using JAH.Services.Interfaces;
@@ -21,7 +22,13 @@ namespace JAH.Services.Services
 
         public Task<JobApplicationUser> GetCurrentUser()
         {
-            return _userManager.GetUserAsync(_context.HttpContext.User);
+            var userId = _context.HttpContext.User.FindFirstValue("id");
+            if (userId != null)
+            {
+                return _userManager.FindByIdAsync(userId);
+            }
+
+            return Task.FromResult<JobApplicationUser>(default(JobApplicationUser));
         }
     }
 }

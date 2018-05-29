@@ -17,9 +17,9 @@ namespace JAH.Api
         {
             try
             {
-                using (IContainer container = IOCBuilder.Build())
+                using (var container = IOCBuilder.Build())
                 {
-                    IWebHost webHost = BuildWebHost(container);
+                    var webHost = BuildWebHost(container);
                     ProcessDb(webHost);
                     webHost.Run();
                 }
@@ -33,7 +33,7 @@ namespace JAH.Api
 
         private static IWebHost BuildWebHost(ILifetimeScope scope)
         {
-            using (ILifetimeScope webHostScope = scope.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+            using (var webHostScope = scope.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
             {
                 return WebHost.CreateDefaultBuilder()
                               .UseStartup<Startup>()
@@ -51,7 +51,7 @@ namespace JAH.Api
 
         private static void ProcessDb(IWebHost webHost)
         {
-            using (IServiceScope serviceScope = webHost.Services.GetService<IServiceScopeFactory>().CreateScope())
+            using (var serviceScope = webHost.Services.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetService<JobApplicationDbContext>();
                 var dbSeeder = serviceScope.ServiceProvider.GetService<DbSeeder>();

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JAH.Api.Controllers;
 using JAH.Data.Entities;
 using JAH.DomainModels;
+using JAH.Helper;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +25,11 @@ namespace JAH.Api.UnitTests
     {
         private readonly AuthController _authController;
 
-        private readonly SignInManager<JobApplicationUser> _signInManager;
+        private readonly UserManager<JobApplicationUser> _userManager;
+
+        private readonly ITokenGenerator _tokenGenerator;
+
+        private readonly HttpContext _httpContext;
 
         public AuthApiControllerTest()
         {
@@ -37,12 +42,8 @@ namespace JAH.Api.UnitTests
             var errors = Substitute.For<IdentityErrorDescriber>();
             var services = Substitute.For<IServiceProvider>();
             var userManagerLogger = Substitute.For<ILogger<UserManager<JobApplicationUser>>>();
-            var contextAccessor = Substitute.For<IHttpContextAccessor>();
-            var claimsFactory = Substitute.For<IUserClaimsPrincipalFactory<JobApplicationUser>>();
-            var signinManagerLogger = Substitute.For<ILogger<SignInManager<JobApplicationUser>>>();
-            var schemes = Substitute.For<IAuthenticationSchemeProvider>();
 
-            var userManager = Substitute.For<UserManager<JobApplicationUser>>(store,
+            _userManager = Substitute.For<UserManager<JobApplicationUser>>(store,
                                                                            optionsAccessor,
                                                                            passwordHasher,
                                                                            userValidators,
@@ -52,17 +53,27 @@ namespace JAH.Api.UnitTests
                                                                            services,
                                                                            userManagerLogger);
 
-            _signInManager =
-                Substitute.ForPartsOf<SignInManager<JobApplicationUser>>(userManager,
-                                                                         contextAccessor,
-                                                                         claimsFactory,
-                                                                         optionsAccessor,
-                                                                         signinManagerLogger,
-                                                                         schemes);
+            _tokenGenerator = Substitute.For<ITokenGenerator>();
+
+            _httpContext = Substitute.For<HttpContext>();
+
+            var authServiceMock = Substitute.For<IAuthenticationService>();
+            var serviceProviderMock = Substitute.For<IServiceProvider>();
+
+            authServiceMock.SignInAsync(Arg.Any<HttpContext>(), Arg.Any<string>(), Arg.Any<ClaimsPrincipal>(), Arg.Any<AuthenticationProperties>())
+                           .Returns(Task.FromResult((object)null));
+            serviceProviderMock.GetService(typeof(IAuthenticationService)).Returns(authServiceMock);
+
+            _httpContext.RequestServices.Returns(serviceProviderMock);
 
             var logger = Substitute.For<ILogger<AuthController>>();
-
-            _authController = new AuthController(_signInManager, logger);
+            _authController = new AuthController(_userManager, _tokenGenerator, logger)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = _httpContext
+                }
+            };
         }
 
         /// <inheritdoc />
@@ -73,19 +84,20 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public void Login_Succeeds_Ok()
+        public void Login_Succeeds_OkObjectResult()
         {
             // Arrange
             var model = new CredentialModel();
-            _signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
-            _signInManager.PasswordSignInAsync(string.Empty, string.Empty, true, true)
-                          .ReturnsForAnyArgs(Task.FromResult(Microsoft.AspNetCore.Identity.SignInResult.Success));
+            var user = new JobApplicationUser();
+            _userManager.FindByNameAsync(string.Empty).ReturnsForAnyArgs(user);
+            _userManager.CheckPasswordAsync(user, string.Empty).ReturnsForAnyArgs(true);
+            _tokenGenerator.GenerateAccessTokenWithClaimsPrincipal(string.Empty, null).ReturnsForAnyArgs(new TokenWithClaimsPrincipal());
 
             // Act
             Task<IActionResult> result = _authController.Login(model);
 
             // Assert
-            Assert.IsType<OkResult>(result.Result);
+            Assert.IsType<OkObjectResult>(result.Result);
         }
 
         [Fact]
@@ -93,9 +105,6 @@ namespace JAH.Api.UnitTests
         {
             // Arrange
             var model = new CredentialModel();
-            _signInManager.WhenForAnyArgs(x => x.PasswordSignInAsync(string.Empty, string.Empty, true, true)).DoNotCallBase();
-            _signInManager.PasswordSignInAsync(string.Empty, string.Empty, true, true)
-                          .ReturnsForAnyArgs(Task.FromResult(Microsoft.AspNetCore.Identity.SignInResult.Failed));
 
             // Act
             Task<IActionResult> result = _authController.Login(model);
@@ -108,30 +117,30 @@ namespace JAH.Api.UnitTests
         public void IsSignedIn_UserNotSignedIn_OkObjectResultWithFalseValue()
         {
             // Arrange
-            _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(true);
+            _httpContext.User.Identity.IsAuthenticated.Returns(false);
 
             // Act
-            IActionResult result = _authController.SignedIn();
+            var result = _authController.SignedIn();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult)result;
-            Assert.True(okResult.Value as bool?);
+            Assert.False(okResult.Value as bool?);
         }
 
         [Fact]
         public void IsSignedIn_UserSignedIn_OkObjectResultWithTrueValue()
         {
             // Arrange
-            _signInManager.IsSignedIn(Arg.Any<ClaimsPrincipal>()).ReturnsForAnyArgs(false);
+            _httpContext.User.Identity.IsAuthenticated.Returns(true);
 
             // Act
-            IActionResult result = _authController.SignedIn();
+            var result = _authController.SignedIn();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult)result;
-            Assert.False(okResult.Value as bool?);
+            Assert.True(okResult.Value as bool?);
         }
 
         protected virtual void Dispose(bool disposing)

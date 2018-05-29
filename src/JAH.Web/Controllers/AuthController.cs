@@ -24,12 +24,24 @@ namespace JAH.Web.Controllers
         [Route("")]
         [Route("~/")]
         [Route("Login")]
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
+            var responseMessage = await Client.GetAsync(new Uri(ApiUri, "signedIn")).ConfigureAwait(false);
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                var signedIn = JsonConvert.DeserializeObject<bool>(responseData);
+                if (signedIn)
+                {
+                    return RedirectToAction("ListAllApplications", "JobApplications");
+                }
+            }
+
             return View();
         }
 
         [HttpPost("Login")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(CredentialModel credentials)
         {
             try
@@ -58,8 +70,8 @@ namespace JAH.Web.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("Logout")]
+        [HttpPost("Logout")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             try
