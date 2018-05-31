@@ -70,7 +70,7 @@ namespace JAH.Api
 
             ConfigureDatabase(services);
 
-            services.AddJwtSecurity(_env, Configuration.GetSection(nameof(TokenOptions)));
+            services.AddSecurity(_env, Configuration.GetSection(nameof(TokenOptions)));
             services.AddCustomizedMvc(_env);
 
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));

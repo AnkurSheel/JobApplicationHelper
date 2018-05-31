@@ -27,9 +27,8 @@ namespace JAH.Api
 {
     public static class ServicesExtension
     {
-        public static void AddJwtSecurity(this IServiceCollection services, IHostingEnvironment env, IConfigurationSection jwtAppSettingOptions)
+        public static void AddSecurity(this IServiceCollection services, IHostingEnvironment env, IConfigurationSection jwtAppSettingOptions)
         {
-            AddSecurityCommon(services);
             services.AddDataProtection(options => options.ApplicationDiscriminator = env.ApplicationName).SetApplicationName(env.ApplicationName);
 
             services.AddScoped<IDataSerializer<AuthenticationTicket>, TicketSerializer>();
@@ -85,31 +84,23 @@ namespace JAH.Api
             services.AddScoped<ITokenGenerator, TokenGenerator>(serviceProvider =>
                                                                     new TokenGenerator(tokenValidationParameters
                                                                                            .ToTokenOptions(tokenExpiryInMinutes)));
-        }
+            services.ConfigureApplicationCookie(cfg => cfg.Events = GetCookieAuthenticationEvents());
 
-        public static void AddCookieSecurity(this IServiceCollection services)
-        {
-            AddSecurityCommon(services);
+            ////services.TryAddScoped<IRoleValidator<IdentityRole>, RoleValidator<IdentityRole>>();
+            services.TryAddScoped<ISecurityStampValidator, SecurityStampValidator<JobApplicationUser>>();
+            services.TryAddScoped<RoleManager<IdentityRole>, AspNetRoleManager<IdentityRole>>();
 
-            services.AddAuthentication(options =>
-                    {
-                        options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-                        options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-                        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-                    })
-                    .AddCookie(IdentityConstants.ApplicationScheme, o => { o.LoginPath = new PathString("/Account/Login"); })
-                    .AddCookie(IdentityConstants.ExternalScheme,
-                               o =>
-                               {
-                                   o.Cookie.Name = IdentityConstants.ExternalScheme;
-                                   o.ExpireTimeSpan = TimeSpan.FromMinutes(5.0);
-                               })
-                    .AddCookie(IdentityConstants.TwoFactorUserIdScheme,
-                               o =>
-                               {
-                                   o.Cookie.Name = IdentityConstants.TwoFactorUserIdScheme;
-                                   o.ExpireTimeSpan = TimeSpan.FromMinutes(5.0);
-                               });
+            var builder = services.AddIdentityCore<JobApplicationUser>(options =>
+            {
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireDigit = false;
+            });
+            builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);
+            builder.AddEntityFrameworkStores<JobApplicationDbContext>().AddDefaultTokenProviders();
         }
 
         public static void AddCustomizedMvc(this IServiceCollection services, IHostingEnvironment hostingEnvironment)
@@ -129,28 +120,6 @@ namespace JAH.Api
                 var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                 opt.Filters.Add(new AuthorizeFilter(policy));
             });
-        }
-
-        private static void AddSecurityCommon(IServiceCollection services)
-        {
-            services.ConfigureApplicationCookie(cfg => cfg.Events = GetCookieAuthenticationEvents());
-
-            ////services.TryAddScoped<IRoleValidator<IdentityRole>, RoleValidator<IdentityRole>>();
-            services.TryAddScoped<ISecurityStampValidator, SecurityStampValidator<JobApplicationUser>>();
-            services.TryAddScoped<SignInManager<JobApplicationUser>, SignInManager<JobApplicationUser>>();
-            services.TryAddScoped<RoleManager<IdentityRole>, AspNetRoleManager<IdentityRole>>();
-
-            var builder = services.AddIdentityCore<JobApplicationUser>(options =>
-            {
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 5;
-                options.Password.RequiredUniqueChars = 0;
-                options.Password.RequireDigit = false;
-            });
-            builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);
-            builder.AddEntityFrameworkStores<JobApplicationDbContext>().AddDefaultTokenProviders();
         }
 
         private static CookieAuthenticationEvents GetCookieAuthenticationEvents()
