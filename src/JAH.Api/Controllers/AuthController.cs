@@ -80,7 +80,6 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPost("logout")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             try

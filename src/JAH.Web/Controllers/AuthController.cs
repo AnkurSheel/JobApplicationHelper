@@ -41,7 +41,6 @@ namespace JAH.Web.Controllers
         }
 
         [HttpPost("Login")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(CredentialModel credentials)
         {
             try
@@ -71,7 +70,6 @@ namespace JAH.Web.Controllers
         }
 
         [HttpPost("Logout")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             try
