@@ -80,6 +80,7 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPost("logout")]
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             try
@@ -123,7 +124,11 @@ namespace JAH.Api.Controllers
 
         private static Claim[] AddDefaultClaims(JobApplicationUser user)
         {
-            return new[] { new Claim(JwtClaimIdentifiers.Id, user.Id), new Claim(JwtClaimIdentifiers.Role, JwtClaims.Admin) };
+            return new[]
+            {
+                new Claim(JwtClaimIdentifiers.Id, user.Id),
+                new Claim(JwtClaimIdentifiers.Role, JwtClaims.Admin)
+            };
         }
     }
 }

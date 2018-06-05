@@ -29,11 +29,11 @@ namespace JAH.Helper
             var claimsIdentity = new ClaimsIdentity(MergeUserClaimsWithDefaultClaims(userName, userClaimList), "Token");
 
             return new TokenWithClaimsPrincipal
-                   {
-                       AuthenticationProperties = CreateAuthenticationProperties(accessToken),
-                       ClaimsPrincipal = new ClaimsPrincipal(claimsIdentity),
-                       JwtResponse = GetJwtResponse(accessToken)
-                   };
+            {
+                AuthenticationProperties = CreateAuthenticationProperties(accessToken),
+                ClaimsPrincipal = new ClaimsPrincipal(claimsIdentity),
+                JwtResponse = GetJwtResponse(accessToken)
+            };
         }
 
         public string GetJwtToken(string userName, IEnumerable<Claim> claims)
@@ -43,32 +43,7 @@ namespace JAH.Helper
             return GetJwtResponse(accessToken);
         }
 
-        private static AuthenticationProperties CreateAuthenticationProperties(string accessToken)
-        {
-            var authProps = new AuthenticationProperties();
-            authProps.StoreTokens(new[] { new AuthenticationToken { Name = "Token", Value = accessToken } });
-            return authProps;
-        }
-
-        private static IEnumerable<Claim> MergeUserClaimsWithDefaultClaims(string userName, IEnumerable<Claim> claims)
-        {
-            return new List<Claim>(claims)
-                   {
-                       new Claim(JwtRegisteredClaimNames.Sub, userName),
-                       new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                       new Claim(JwtRegisteredClaimNames.Iat,
-                                 DateTime.UtcNow.TimeOfDay.Ticks.ToString(CultureInfo.CurrentCulture),
-                                 ClaimValueTypes.Integer64)
-                   };
-        }
-
-        private string GetJwtResponse(string accessToken)
-        {
-            var jwt = new { auth_token = accessToken, expires_in = _jwtOptions.Expiration };
-            return JsonConvert.SerializeObject(jwt);
-        }
-
-        private string GenerateAccessToken(string userName, IEnumerable<Claim> claims)
+        public string GenerateAccessToken(string userName, IEnumerable<Claim> claims)
         {
             List<Claim> claimsList = claims.ToList();
             var jwt = new JwtSecurityToken(_jwtOptions.Issuer,
@@ -79,6 +54,42 @@ namespace JAH.Helper
                                            new SigningCredentials(_jwtOptions.SigningKey, SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
+        }
+
+        private static AuthenticationProperties CreateAuthenticationProperties(string accessToken)
+        {
+            var authProps = new AuthenticationProperties();
+            authProps.StoreTokens(new[]
+            {
+                new AuthenticationToken
+                {
+                    Name = "Token",
+                    Value = accessToken
+                }
+            });
+            return authProps;
+        }
+
+        private static IEnumerable<Claim> MergeUserClaimsWithDefaultClaims(string userName, IEnumerable<Claim> claims)
+        {
+            return new List<Claim>(claims)
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, userName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat,
+                          DateTime.UtcNow.TimeOfDay.Ticks.ToString(CultureInfo.CurrentCulture),
+                          ClaimValueTypes.Integer64)
+            };
+        }
+
+        private string GetJwtResponse(string accessToken)
+        {
+            var jwt = new
+            {
+                auth_token = accessToken,
+                expires_in = _jwtOptions.Expiration
+            };
+            return JsonConvert.SerializeObject(jwt);
         }
     }
 }

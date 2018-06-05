@@ -11,13 +11,10 @@ using JAH.Helper.Constants;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -40,18 +37,18 @@ namespace JAH.Api
                 Convert.ToInt32(jwtAppSettingOptions[nameof(Helper.TokenOptions.TokenExpiryInMinutes)], CultureInfo.CurrentCulture);
 
             var tokenValidationParameters = new TokenValidationParameters
-                                            {
-                                                RequireExpirationTime = true,
-                                                RequireSignedTokens = true,
-                                                ValidateIssuerSigningKey = true,
-                                                IssuerSigningKey = key,
-                                                ValidateIssuer = true,
-                                                ValidIssuer = issuer,
-                                                ValidateAudience = true,
-                                                ValidAudience = audience,
-                                                ValidateLifetime = true,
-                                                ClockSkew = TimeSpan.Zero
-                                            };
+            {
+                RequireExpirationTime = true,
+                RequireSignedTokens = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = key,
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+                ValidateAudience = true,
+                ValidAudience = audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
 
             services.AddAuthentication(options =>
                     {
@@ -60,12 +57,12 @@ namespace JAH.Api
                     })
                     .AddCookie(options =>
                     {
-                        options.Cookie.Expiration = TimeSpan.FromMinutes(tokenExpiryInMinutes);
-                        options.TicketDataFormat = new CustomJwtDataFormat(tokenValidationParameters,
-                                                                           services.BuildServiceProvider()
-                                                                                   .GetService<IDataSerializer<AuthenticationTicket>>(),
-                                                                           services.BuildServiceProvider()
-                                                                                   .GetDataProtector(new[] { $"{env.ApplicationName}-Auth1" }));
+                        // options.Cookie.Expiration = TimeSpan.FromMinutes(tokenExpiryInMinutes);
+                        // options.TicketDataFormat = new CustomJwtDataFormat(tokenValidationParameters,
+                        //                                                   services.BuildServiceProvider()
+                        //                                                           .GetService<IDataSerializer<AuthenticationTicket>>(),
+                        //                                                   services.BuildServiceProvider()
+                        //                                                           .GetDataProtector(new[] { $"{env.ApplicationName}-Auth1" }));
                     })
                     .AddJwtBearer(options =>
                     {
@@ -86,7 +83,6 @@ namespace JAH.Api
                                                                                            .ToTokenOptions(tokenExpiryInMinutes)));
             services.ConfigureApplicationCookie(cfg => cfg.Events = GetCookieAuthenticationEvents());
 
-            ////services.TryAddScoped<IRoleValidator<IdentityRole>, RoleValidator<IdentityRole>>();
             services.TryAddScoped<ISecurityStampValidator, SecurityStampValidator<JobApplicationUser>>();
             services.TryAddScoped<RoleManager<IdentityRole>, AspNetRoleManager<IdentityRole>>();
 
@@ -116,38 +112,33 @@ namespace JAH.Api
                 {
                     opt.Filters.Add(new RequireHttpsAttribute());
                 }
-
-                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-                opt.Filters.Add(new AuthorizeFilter(policy));
             });
         }
 
         private static CookieAuthenticationEvents GetCookieAuthenticationEvents()
         {
             return new CookieAuthenticationEvents
-                   {
-                       OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync,
-                       OnRedirectToLogin = ctx =>
-                       {
-                           if (ctx.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCultureIgnoreCase)
-                               && ctx.Response.StatusCode == 200)
-                           {
-                               ctx.Response.StatusCode = 401;
-                           }
+            {
+                OnValidatePrincipal = SecurityStampValidator.ValidatePrincipalAsync,
+                OnRedirectToLogin = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCultureIgnoreCase) && ctx.Response.StatusCode == 200)
+                    {
+                        ctx.Response.StatusCode = 401;
+                    }
 
-                           return Task.CompletedTask;
-                       },
-                       OnRedirectToAccessDenied = ctx =>
-                       {
-                           if (ctx.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCultureIgnoreCase)
-                               && ctx.Response.StatusCode == 200)
-                           {
-                               ctx.Response.StatusCode = 403;
-                           }
+                    return Task.CompletedTask;
+                },
+                OnRedirectToAccessDenied = ctx =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api", StringComparison.InvariantCultureIgnoreCase) && ctx.Response.StatusCode == 200)
+                    {
+                        ctx.Response.StatusCode = 403;
+                    }
 
-                           return Task.CompletedTask;
-                       }
-                   };
+                    return Task.CompletedTask;
+                }
+            };
         }
     }
 }

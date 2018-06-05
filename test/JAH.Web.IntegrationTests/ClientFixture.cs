@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
+using System.Text;
 
 using Autofac;
 
@@ -9,6 +12,7 @@ using JAH.Data;
 using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.Data.Repositories;
+using JAH.Helper;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 
@@ -20,6 +24,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.IdentityModel.Tokens;
 
 namespace JAH.Web.IntegrationTests
 {
@@ -99,7 +104,21 @@ namespace JAH.Web.IntegrationTests
             }
         }
 
-        public void SetupAuthentication()
+        public void SetupJwtAuthentication()
+        {
+            if (_apiClient.DefaultRequestHeaders.Contains("Authorization"))
+            {
+                return;
+            }
+
+            var gen = new TokenGenerator(new TokenOptions("API Test",
+                                                          "Test",
+                                                          new SymmetricSecurityKey(Encoding.UTF8.GetBytes("VeryLongSecureString12345")),
+                                                          1));
+            _apiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {gen.GenerateAccessToken("abcde", new List<Claim>())}");
+        }
+
+        public void SetupCookieAuthentication()
         {
             _apiClient.DefaultRequestHeaders.Add(AuthenticatedTestRequestMiddleware.TestingHeader,
                                                  AuthenticatedTestRequestMiddleware.TestingHeaderValue);

@@ -36,14 +36,18 @@ namespace JAH.Web.IntegrationTests
         public async Task Login_Fails_RedirectsToJobApplications()
         {
             // Arrange
-            var credentials = new CredentialModel { UserName = "username", Password = "password" };
+            var credentials = new CredentialModel
+            {
+                UserName = "username",
+                Password = "password"
+            };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "login"), stringContent).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "login"), stringContent).ConfigureAwait(false);
 
             // Assert
-            string responseData = response.Content.ReadAsStringAsync().Result;
+            var responseData = response.Content.ReadAsStringAsync().Result;
             Assert.Contains("UserName/Password Not found", responseData);
         }
 
@@ -52,14 +56,18 @@ namespace JAH.Web.IntegrationTests
         {
             // Arrange
             var userManager = _fixture.Services.GetRequiredService<UserManager<JobApplicationUser>>();
-            var credentials = new CredentialModel { UserName = "username", Password = "password" };
+            var credentials = new CredentialModel
+            {
+                UserName = "username",
+                Password = "password"
+            };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             var user = new JobApplicationUser(credentials.UserName);
             await userManager.CreateAsync(user, credentials.Password).ConfigureAwait(false);
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "login"), stringContent).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "login"), stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -70,10 +78,10 @@ namespace JAH.Web.IntegrationTests
         public async Task Logout_Succeeds_RedirectsToLoginPage()
         {
             // Arrange
-            _fixture.SetupAuthentication();
+            _fixture.SetupCookieAuthentication();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "logout"), null).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "logout"), null).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);

@@ -17,6 +17,7 @@ namespace JAH.Web.IntegrationTests
         {
             _fixture = fixture;
             _baseUri = new Uri(_fixture.WebClient.BaseAddress, "hello/");
+            _fixture.ClearAuthentication();
         }
 
         [Theory]
@@ -25,7 +26,7 @@ namespace JAH.Web.IntegrationTests
         public async Task GetAsync_NameAndAuthorized_Greeting(string name, string expected)
         {
             // Arrange
-            _fixture.SetupAuthentication();
+            _fixture.SetupJwtAuthentication();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{name}")).ConfigureAwait(false);
@@ -40,7 +41,6 @@ namespace JAH.Web.IntegrationTests
         public async Task GetAsync_NameAndNotAuthorized_Greeting()
         {
             // Arrange
-            _fixture.ClearAuthentication();
 
             // Act
             HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"name")).ConfigureAwait(false);
