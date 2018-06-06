@@ -27,6 +27,7 @@ namespace JAH.Web.IntegrationTests
             _output = output;
             _fixture = fixture;
             _baseUri = new Uri(_fixture.WebClient.BaseAddress, "jobApplications/");
+            _fixture.SetupJwtAuthentication();
 
             _jobApplicationEntities = new[]
                                       {
@@ -67,7 +68,6 @@ namespace JAH.Web.IntegrationTests
                                           }
                                       };
 
-            _fixture.SetupAuthentication();
         }
 
         [Fact]

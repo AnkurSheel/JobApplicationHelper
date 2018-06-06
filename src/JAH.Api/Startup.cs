@@ -6,6 +6,7 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 
 using JAH.Data;
+using JAH.Helper;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 
@@ -69,8 +70,8 @@ namespace JAH.Api
 
             ConfigureDatabase(services);
 
-            services.AddSecurity();
-            services.AddCustomizedMVC(_env);
+            services.AddSecurity(_env, Configuration.GetSection(nameof(TokenOptions)));
+            services.AddCustomizedMvc(_env);
 
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
 

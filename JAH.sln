@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JAH.Web.IntegrationTests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JAH.Web.UnitTests", "test\JAH.Web.UnitTests\JAH.Web.UnitTests.csproj", "{045C049A-325D-493F-B6A4-13F8C47FA936}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JAH.Helper", "src\JAH.Helper\JAH.Helper.csproj", "{620BA27A-284E-4F21-8E7A-6CFD3AE6EF3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{045C049A-325D-493F-B6A4-13F8C47FA936}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{045C049A-325D-493F-B6A4-13F8C47FA936}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{045C049A-325D-493F-B6A4-13F8C47FA936}.Release|Any CPU.Build.0 = Release|Any CPU
+		{620BA27A-284E-4F21-8E7A-6CFD3AE6EF3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{620BA27A-284E-4F21-8E7A-6CFD3AE6EF3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{620BA27A-284E-4F21-8E7A-6CFD3AE6EF3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{620BA27A-284E-4F21-8E7A-6CFD3AE6EF3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +94,7 @@ Global
 		{1F455017-53F1-473C-A98C-97346706AB9A} = {B9A128B8-9CF8-48AF-BCF4-BDB512F6A0A0}
 		{0966F5AC-2EFF-45F9-B0A0-ADED726762FE} = {B9A128B8-9CF8-48AF-BCF4-BDB512F6A0A0}
 		{045C049A-325D-493F-B6A4-13F8C47FA936} = {B9A128B8-9CF8-48AF-BCF4-BDB512F6A0A0}
+		{620BA27A-284E-4F21-8E7A-6CFD3AE6EF3A} = {C2F5BF92-8F4A-41F3-BC54-9C915B0CFC63}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {12701368-BAFC-4B3D-99A4-5274327C9538}

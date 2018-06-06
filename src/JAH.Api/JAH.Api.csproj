@@ -40,11 +40,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\JAH.Helper\JAH.Helper.csproj" />
     <ProjectReference Include="..\JAH.Services\JAH.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <WCFMetadata Include="Connected Services" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.Testing.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
