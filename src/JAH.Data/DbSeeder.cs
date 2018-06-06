@@ -12,6 +12,14 @@ namespace JAH.Data
 {
     public class DbSeeder
     {
+        private const int NumberOfCompaniesToAdd = 2;
+
+        private const int NumberOfTestUsersToAdd = 2;
+
+        private const string AdministratorRole = "Administrator";
+
+        private const string FreeUserRole = "FreeUser";
+
         private readonly JobApplicationDbContext _context;
 
         private readonly ILogger<JobApplicationDbContext> _logger;
@@ -20,7 +28,6 @@ namespace JAH.Data
 
         private readonly UserManager<JobApplicationUser> _userManager;
 
-        /// <inheritdoc />
         public DbSeeder(JobApplicationDbContext context,
                         UserManager<JobApplicationUser> userManager,
                         RoleManager<IdentityRole> roleManager,
@@ -42,17 +49,23 @@ namespace JAH.Data
                 return;
             }
 
-            JobApplicationUser user = await CreateDefaultUserAndRole().ConfigureAwait(false);
+            await CreateUserAndRole(AdministratorRole, "admin", "admin").ConfigureAwait(false);
 
-            var jobApplication = new JobApplicationEntity
-                                 {
-                                     CompanyName = "Company 1",
-                                     ApplicationDate = new DateTime(2017, 11, 13),
-                                     CurrentStatus = Status.Applied,
-                                     Owner = user
-                                 };
-
-            _context.JobApplications.Add(jobApplication);
+            for (var i = 0; i < NumberOfTestUsersToAdd; i++)
+            {
+                var user = await CreateUserAndRole(FreeUserRole, $"test{i}", $"test{i}").ConfigureAwait(false);
+                for (var j = 0; j < NumberOfCompaniesToAdd; j++)
+                {
+                    var jobApplication = new JobApplicationEntity
+                    {
+                        CompanyName = $"{user.UserName} Company {j}",
+                        ApplicationDate = new DateTime(2017, 11, 13),
+                        CurrentStatus = Status.Applied,
+                        Owner = user
+                    };
+                    _context.JobApplications.Add(jobApplication);
+                }
+            }
 
             await _context.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -60,7 +73,7 @@ namespace JAH.Data
         private static string GetIdentityErrorsInCommaSeperatedList(IdentityResult ir)
         {
             string errors = null;
-            foreach (IdentityError identityError in ir.Errors)
+            foreach (var identityError in ir.Errors)
             {
                 errors += identityError.Description;
                 errors += ", ";
@@ -69,85 +82,87 @@ namespace JAH.Data
             return errors;
         }
 
-        private async Task AddDefaultRoleToDefaultUser(string administratorRole, JobApplicationUser user)
+        private async Task<JobApplicationUser> CreateUserAndRole(string roleName, string userName, string password)
         {
-            _logger.LogInformation($"Add default user 'admin' to role '{administratorRole}'");
-            IdentityResult ir = await _userManager.AddToRoleAsync(user, administratorRole).ConfigureAwait(false);
-            if (ir.Succeeded)
-            {
-                _logger.LogDebug($"Added the role '{administratorRole}' to default user 'admin' successfully");
-            }
-            else
-            {
-                var exception = new ApplicationException($"The role `{administratorRole}` cannot be set for the user 'admin'");
-                _logger.LogError(exception, GetIdentityErrorsInCommaSeperatedList(ir));
-                throw exception;
-            }
-        }
-
-        private async Task CreateDefaultAdministratorRole(string administratorRole)
-        {
-            _logger.LogInformation($"Create the role `{administratorRole}` for application");
-            IdentityResult ir = await _roleManager.CreateAsync(new IdentityRole(administratorRole)).ConfigureAwait(false);
-            if (ir.Succeeded)
-            {
-                _logger.LogDebug($"Created the role `{administratorRole}` successfully");
-            }
-            else
-            {
-                var exception = new ApplicationException($"Default role `{administratorRole}` cannot be created");
-                _logger.LogError(exception, GetIdentityErrorsInCommaSeperatedList(ir));
-                throw exception;
-            }
-        }
-
-        private async Task<JobApplicationUser> CreateDefaultUser()
-        {
-            _logger.LogInformation("Create default user for application");
-            const string UserName = "admin";
-
-            var user = new JobApplicationUser(UserName);
-
-            IdentityResult ir = await _userManager.CreateAsync(user).ConfigureAwait(false);
-            if (ir.Succeeded)
-            {
-                _logger.LogDebug("Created default 'user' admin successfully");
-            }
-            else
-            {
-                var exception = new ApplicationException($"Default user 'admin' cannot be created");
-                _logger.LogError(exception, GetIdentityErrorsInCommaSeperatedList(ir));
-                throw exception;
-            }
-
-            JobApplicationUser createdUser = await _userManager.FindByNameAsync(UserName).ConfigureAwait(false);
-            return createdUser;
-        }
-
-        private async Task<JobApplicationUser> CreateDefaultUserAndRole()
-        {
-            const string AdministratorRole = "Administrator";
-
-            await CreateDefaultAdministratorRole(AdministratorRole).ConfigureAwait(false);
-            JobApplicationUser user = await CreateDefaultUser().ConfigureAwait(false);
-            await SetPasswordForDefaultUser(user).ConfigureAwait(false);
-            await AddDefaultRoleToDefaultUser(AdministratorRole, user).ConfigureAwait(false);
+            await CreateRole(roleName).ConfigureAwait(false);
+            var user = await CreateUser(userName).ConfigureAwait(false);
+            await SetPasswordForUser(user, password).ConfigureAwait(false);
+            await AddRoleToUser(roleName, user).ConfigureAwait(false);
 
             return user;
         }
 
-        private async Task SetPasswordForDefaultUser(JobApplicationUser user)
+        private async Task CreateRole(string roleName)
         {
-            _logger.LogInformation($"Set password for default user 'admin'");
-            const string password = "admin";
-            IdentityResult ir = await _userManager.AddPasswordAsync(user, password).ConfigureAwait(false);
+            if (_roleManager.Roles.Any(r => r.Name.Equals(roleName, StringComparison.Ordinal)))
+            {
+                _logger.LogInformation($"Role `{roleName}` already created");
+                return;
+            }
+
+            _logger.LogInformation($"Create the role `{roleName}` for application");
+            var ir = await _roleManager.CreateAsync(new IdentityRole(roleName)).ConfigureAwait(false);
             if (ir.Succeeded)
             {
-                _logger.LogTrace($"Set password `{password}` for default user 'admin' successfully");
+                _logger.LogDebug($"Created the role `{roleName}` successfully");
             }
             else
             {
-                var exception = new ApplicationException($"Password for the user 'admin' cannot be set");
+                var exception = new ApplicationException($"Default role `{roleName}` cannot be created");
+                _logger.LogError(exception, GetIdentityErrorsInCommaSeperatedList(ir));
+                throw exception;
+            }
+        }
+
+        private async Task AddRoleToUser(string role, JobApplicationUser user)
+        {
+            _logger.LogInformation($"Add user {user.UserName}' to role '{role}'");
+            var ir = await _userManager.AddToRoleAsync(user, role).ConfigureAwait(false);
+            if (ir.Succeeded)
+            {
+                _logger.LogDebug($"Added the role '{role}' to default user 'admin' successfully");
+            }
+            else
+            {
+                var exception = new ApplicationException($"The role `{role}` cannot be set for the user 'admin'");
+                _logger.LogError(exception, GetIdentityErrorsInCommaSeperatedList(ir));
+                throw exception;
+            }
+        }
+
+        private async Task<JobApplicationUser> CreateUser(string userName)
+        {
+            _logger.LogInformation($"Create user {userName} for application");
+
+            var user = new JobApplicationUser(userName);
+
+            var ir = await _userManager.CreateAsync(user).ConfigureAwait(false);
+            if (ir.Succeeded)
+            {
+                _logger.LogDebug("Created '{userName}' admin successfully");
+            }
+            else
+            {
+                var exception = new ApplicationException($"user '{userName}' cannot be created");
+                _logger.LogError(exception, GetIdentityErrorsInCommaSeperatedList(ir));
+                throw exception;
+            }
+
+            var createdUser = await _userManager.FindByNameAsync(userName).ConfigureAwait(false);
+            return createdUser;
+        }
+
+        private async Task SetPasswordForUser(JobApplicationUser user, string password)
+        {
+            _logger.LogInformation($"Set password for default user '{user.UserName}'");
+            var ir = await _userManager.AddPasswordAsync(user, password).ConfigureAwait(false);
+            if (ir.Succeeded)
+            {
+                _logger.LogTrace($"Set password `{password}` for default user '{user.UserName}' successfully");
+            }
+            else
+            {
+                var exception = new ApplicationException($"Password for the user '{user.UserName}' cannot be set");
                 _logger.LogError(exception, GetIdentityErrorsInCommaSeperatedList(ir));
                 throw exception;
             }
