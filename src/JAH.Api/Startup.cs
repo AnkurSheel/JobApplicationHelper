@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -21,8 +19,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
-
-using Swashbuckle.AspNetCore.Swagger;
 
 namespace JAH.Api
 {
@@ -73,24 +69,10 @@ namespace JAH.Api
             services.AddScoped<IUserResolverService, UserResolverService>();
             services.AddTransient<DbSeeder, DbSeeder>();
 
-            services.AddAutoMapper();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "JAH Api", Version = "v1" });
-                var apiKeyScheme = new ApiKeyScheme
-                {
-                    In = "header",
-                    Description = "Please enter JWT with Bearer into field",
-                    Name = "Authorization",
-                    Type = "apiKey"
-                };
-                c.AddSecurityDefinition("Bearer", apiKeyScheme);
-
-                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>> { { "Bearer", Enumerable.Empty<string>() } });
-                c.DescribeAllEnumsAsStrings();
-            });
             ConfigureDatabase(services);
 
+            services.AddAutoMapper();
+            services.AddSwagger();
             services.AddSecurity(_env, Configuration.GetSection(nameof(TokenOptions)));
             services.AddCustomizedMvc(_env);
 

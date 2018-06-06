@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,6 +21,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
+
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace JAH.Api
 {
@@ -112,6 +116,25 @@ namespace JAH.Api
                 {
                     opt.Filters.Add(new RequireHttpsAttribute());
                 }
+            });
+        }
+
+        public static void AddSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "JAH Api", Version = "v1" });
+                var apiKeyScheme = new ApiKeyScheme
+                {
+                    In = "header",
+                    Description = "Please enter JWT with Bearer into field",
+                    Name = "Authorization",
+                    Type = "apiKey"
+                };
+                c.AddSecurityDefinition("Bearer", apiKeyScheme);
+
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>> { { "Bearer", Enumerable.Empty<string>() } });
+                c.DescribeAllEnumsAsStrings();
             });
         }
 
