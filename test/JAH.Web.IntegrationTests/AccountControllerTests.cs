@@ -32,11 +32,11 @@ namespace JAH.Web.IntegrationTests
         public async Task Register_Succeeds_RedirectsToLogin()
         {
             // Arrange
-            var credentials = new CredentialModel { UserName = "username", Password = "password" };
+            var credentials = new CredentialModel { Email = "user@test.com", Password = "password" };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.PostAsync(_baseUri, stringContent).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(_baseUri, stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);

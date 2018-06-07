@@ -32,8 +32,8 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                var jobApplicationUser = new JobApplicationUser { UserName = model.UserName };
-                IdentityResult result = await _userManager.CreateAsync(jobApplicationUser, model.Password).ConfigureAwait(false);
+                var jobApplicationUser = new JobApplicationUser(model.Email);
+                var result = await _userManager.CreateAsync(jobApplicationUser, model.Password).ConfigureAwait(false);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(3, "User created a new account with password.");

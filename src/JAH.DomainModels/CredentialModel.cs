@@ -5,8 +5,9 @@ namespace JAH.DomainModels
     public class CredentialModel
     {
         [Required]
-        [StringLength(30, MinimumLength = 5)]
-        public string UserName { get; set; }
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
 
         [Required]
         [StringLength(30, MinimumLength = 5)]

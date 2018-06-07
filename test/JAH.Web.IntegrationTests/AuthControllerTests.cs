@@ -36,11 +36,7 @@ namespace JAH.Web.IntegrationTests
         public async Task Login_Fails_RedirectsToJobApplications()
         {
             // Arrange
-            var credentials = new CredentialModel
-            {
-                UserName = "username",
-                Password = "password"
-            };
+            var credentials = new CredentialModel { Email = "username@test.com", Password = "password" };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             // Act
@@ -56,14 +52,10 @@ namespace JAH.Web.IntegrationTests
         {
             // Arrange
             var userManager = _fixture.Services.GetRequiredService<UserManager<JobApplicationUser>>();
-            var credentials = new CredentialModel
-            {
-                UserName = "username",
-                Password = "password"
-            };
+            var credentials = new CredentialModel { Email = "username@test.com", Password = "password" };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
-            var user = new JobApplicationUser(credentials.UserName);
+            var user = new JobApplicationUser(credentials.Email);
             await userManager.CreateAsync(user, credentials.Password).ConfigureAwait(false);
 
             // Act

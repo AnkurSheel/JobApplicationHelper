@@ -5,17 +5,17 @@ using Microsoft.AspNetCore.Identity;
 
 namespace JAH.Data.Entities
 {
-    public class JobApplicationUser : IdentityUser
+    public sealed class JobApplicationUser : IdentityUser
     {
-        /// <inheritdoc />
+        // needed for EF
         public JobApplicationUser()
         {
         }
 
-        /// <inheritdoc />
-        public JobApplicationUser(string userName)
-            : base(userName)
+        public JobApplicationUser(string email)
+            : base(email)
         {
+            Email = email;
         }
 
         public ICollection<JobApplicationEntity> Applications { get; set; }
@@ -42,11 +42,11 @@ namespace JAH.Data.Entities
 
         public override int GetHashCode()
         {
-            int hashCode = Id != null ? Id.GetHashCode(StringComparison.Ordinal) : 0;
+            var hashCode = Id != null ? Id.GetHashCode(StringComparison.Ordinal) : 0;
             return hashCode;
         }
 
-        protected bool Equals(JobApplicationUser other)
+        public bool Equals(JobApplicationUser other)
         {
             return Id.Equals(other.Id, StringComparison.Ordinal);
         }
