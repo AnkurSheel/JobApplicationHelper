@@ -75,7 +75,7 @@ namespace JAH.Api
             // api user claim policy
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Admin", policy => policy.RequireClaim(JwtClaimIdentifiers.Role, JwtClaims.Admin));
+                options.AddPolicy(Policies.Administrator, policy => policy.RequireClaim(JwtClaimIdentifiers.Role, Roles.AdministratorRole));
             });
 
             services.AddScoped<ITokenGenerator, TokenGenerator>(serviceProvider =>

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -61,7 +63,8 @@ namespace JAH.Api.Controllers
                     var checkPasswordAsync = await _userManager.CheckPasswordAsync(user, model.Password).ConfigureAwait(false);
                     if (checkPasswordAsync)
                     {
-                        var tokenWithClaimsPrincipal = _tokenGenerator.GenerateAccessTokenWithClaimsPrincipal(user.UserName, AddDefaultClaims(user));
+                        var claims = await AddDefaultClaims(user).ConfigureAwait(false);
+                        var tokenWithClaimsPrincipal = _tokenGenerator.GenerateAccessTokenWithClaimsPrincipal(user.UserName, claims);
 
                         await HttpContext.SignInAsync(tokenWithClaimsPrincipal.ClaimsPrincipal, tokenWithClaimsPrincipal.AuthenticationProperties)
                                          .ConfigureAwait(false);
@@ -107,7 +110,8 @@ namespace JAH.Api.Controllers
                     var checkPasswordAsync = await _userManager.CheckPasswordAsync(user, model.Password).ConfigureAwait(false);
                     if (checkPasswordAsync)
                     {
-                        var jwtResponse = _tokenGenerator.GetJwtToken(user.UserName, AddDefaultClaims(user));
+                        var claims = await AddDefaultClaims(user).ConfigureAwait(false);
+                        var jwtResponse = _tokenGenerator.GetJwtToken(user.UserName, claims);
 
                         return Ok(jwtResponse);
                     }
@@ -122,13 +126,14 @@ namespace JAH.Api.Controllers
             return BadRequest("Failed to Login");
         }
 
-        private static Claim[] AddDefaultClaims(JobApplicationUser user)
+        private async Task<IEnumerable<Claim>> AddDefaultClaims(JobApplicationUser user)
         {
-            return new[]
-            {
-                new Claim(JwtClaimIdentifiers.Id, user.Id),
-                new Claim(JwtClaimIdentifiers.Role, JwtClaims.Admin)
-            };
+            var claims = new List<Claim>() { new Claim(JwtClaimIdentifiers.Id, user.Id) };
+
+            var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+            claims.AddRange(roles.Select(role => new Claim(JwtClaimIdentifiers.Role, role)));
+
+            return claims;
         }
     }
 }

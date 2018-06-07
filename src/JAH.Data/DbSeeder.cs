@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using JAH.Data.Entities;
 using JAH.DomainModels;
+using JAH.Helper.Constants;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -15,10 +16,6 @@ namespace JAH.Data
         private const int NumberOfCompaniesToAdd = 2;
 
         private const int NumberOfTestUsersToAdd = 2;
-
-        private const string AdministratorRole = "Administrator";
-
-        private const string FreeUserRole = "FreeUser";
 
         private readonly JobApplicationDbContext _context;
 
@@ -49,11 +46,11 @@ namespace JAH.Data
                 return;
             }
 
-            await CreateUserAndRole(AdministratorRole, "admin", "admin").ConfigureAwait(false);
+            await CreateUserAndRole(Roles.AdministratorRole, "admin", "admin").ConfigureAwait(false);
 
             for (var i = 0; i < NumberOfTestUsersToAdd; i++)
             {
-                var user = await CreateUserAndRole(FreeUserRole, $"test{i}", $"test{i}").ConfigureAwait(false);
+                var user = await CreateUserAndRole(Roles.FreeUserRole, $"test{i}", $"test{i}").ConfigureAwait(false);
                 for (var j = 0; j < NumberOfCompaniesToAdd; j++)
                 {
                     var jobApplication = new JobApplicationEntity
