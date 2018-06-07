@@ -36,7 +36,7 @@ namespace JAH.Data
             _logger = logger;
         }
 
-        public async Task SeedDefaultUserAndRoles()
+        public async Task SeedDefaultUserAndRoles(bool isDevelopmentEnvironment)
         {
             _context.Database.EnsureCreated();
 
@@ -46,11 +46,14 @@ namespace JAH.Data
                 return;
             }
 
-            await CreateUserAndRole(Roles.AdministratorRole, "admin", "admin").ConfigureAwait(false);
+            if (isDevelopmentEnvironment)
+            {
+                await CreateUserAndRole(Roles.AdministratorRole, "admin", "admin").ConfigureAwait(false);
+            }
 
             for (var i = 0; i < NumberOfTestUsersToAdd; i++)
             {
-                var user = await CreateUserAndRole(Roles.FreeUserRole, $"test{i}", $"test{i}").ConfigureAwait(false);
+                var user = await CreateUserAndRole(Roles.FreeUserRole, $"test{i}@test.com", $"test{i}").ConfigureAwait(false);
                 for (var j = 0; j < NumberOfCompaniesToAdd; j++)
                 {
                     var jobApplication = new JobApplicationEntity
@@ -79,10 +82,10 @@ namespace JAH.Data
             return errors;
         }
 
-        private async Task<JobApplicationUser> CreateUserAndRole(string roleName, string userName, string password)
+        private async Task<JobApplicationUser> CreateUserAndRole(string roleName, string email, string password)
         {
             await CreateRole(roleName).ConfigureAwait(false);
-            var user = await CreateUser(userName).ConfigureAwait(false);
+            var user = await CreateUser(email).ConfigureAwait(false);
             await SetPasswordForUser(user, password).ConfigureAwait(false);
             await AddRoleToUser(roleName, user).ConfigureAwait(false);
 
