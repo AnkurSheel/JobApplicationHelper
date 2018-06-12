@@ -28,7 +28,7 @@ namespace JAH.Api.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] CredentialModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             IdentityResult result;
             try

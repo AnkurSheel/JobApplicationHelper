@@ -53,7 +53,7 @@ namespace JAH.Api.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] CredentialModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             try
             {
@@ -100,7 +100,7 @@ namespace JAH.Api.Controllers
 
         [HttpPost("token")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetToken([FromBody] CredentialModel model)
+        public async Task<IActionResult> GetToken([FromBody] LoginModel model)
         {
             try
             {

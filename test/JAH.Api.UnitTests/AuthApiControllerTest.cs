@@ -87,7 +87,7 @@ namespace JAH.Api.UnitTests
             // Arrange
             var email = "user@test.com";
             var password = "password";
-            var model = new CredentialModel { Email = email, Password = password };
+            var model = new LoginModel { Email = email, Password = password };
             var user = new JobApplicationUser(email);
             _userManager.FindByEmailAsync(email).Returns(user);
             _userManager.CheckPasswordAsync(user, password).Returns(true);
@@ -105,7 +105,7 @@ namespace JAH.Api.UnitTests
         {
             // Arrange
             var email = "user";
-            var model = new CredentialModel { Email = email };
+            var model = new LoginModel { Email = email };
 
             // Act
             Task<IActionResult> result = _authController.Login(model);

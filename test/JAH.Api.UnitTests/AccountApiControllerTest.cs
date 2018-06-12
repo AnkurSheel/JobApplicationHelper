@@ -61,7 +61,7 @@ namespace JAH.Api.UnitTests
         public void Register_Succeeds_Ok()
         {
             // Arrange
-            var model = new CredentialModel();
+            var model = new RegisterModel();
             _userManager.CreateAsync(Arg.Any<JobApplicationUser>(), string.Empty).ReturnsForAnyArgs(IdentityResult.Success);
 
             // Act
@@ -75,7 +75,7 @@ namespace JAH.Api.UnitTests
         public void Register_Fails_BadRequestObjectResult()
         {
             // Arrange
-            var model = new CredentialModel();
+            var model = new RegisterModel();
             _userManager.CreateAsync(Arg.Any<JobApplicationUser>(), string.Empty).ReturnsForAnyArgs(IdentityResult.Failed(null));
 
             // Act
