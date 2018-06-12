@@ -36,7 +36,7 @@ namespace JAH.Web.IntegrationTests
         public async Task Register_Succeeds_RedirectsToLogin()
         {
             // Arrange
-            var credentials = new RegisterModel { Email = "user@test.com", Password = "password" };
+            var credentials = new RegisterModel { Email = "user@test.com", Password = "password", ConfirmPassword = "password" };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             // Act
@@ -48,11 +48,11 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task Register_WithExistingAccount_ShowsError()
+        public async Task Register_DuplicateAccount_ShowsError()
         {
             // Arrange
             var userManager = _fixture.Services.GetRequiredService<UserManager<JobApplicationUser>>();
-            var credentials = new RegisterModel { Email = "username@test.com", Password = "password" };
+            var credentials = new RegisterModel { Email = "username@test.com", Password = "password", ConfirmPassword = "password" };
             var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
 
             var user = new JobApplicationUser(credentials.Email);
@@ -64,6 +64,25 @@ namespace JAH.Web.IntegrationTests
             // Assert
             var responseData = response.Content.ReadAsStringAsync().Result;
             Assert.Contains("Email 'username@test.com' is already taken.", responseData);
+        }
+
+        [Fact]
+        public async Task Register_PasswordAndConfirmationDoesNotMatch_ShowsError()
+        {
+            // Arrange
+            var userManager = _fixture.Services.GetRequiredService<UserManager<JobApplicationUser>>();
+            var credentials = new RegisterModel { Email = "username@test.com", Password = "password", ConfirmPassword = "failure" };
+            var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            var user = new JobApplicationUser(credentials.Email);
+            await userManager.CreateAsync(user, credentials.Password).ConfigureAwait(false);
+
+            // Act
+            var response = await _fixture.WebClient.PostAsync(_baseUri, stringContent).ConfigureAwait(false);
+
+            // Assert
+            var responseData = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("The password and confirmation password do not match.", responseData);
         }
 
         protected virtual void Dispose(bool disposing)
