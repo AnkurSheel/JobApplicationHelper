@@ -41,13 +41,13 @@ namespace JAH.Web.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(CredentialModel credentials)
+        public async Task<IActionResult> Login(LoginModel model)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var json = JsonConvert.SerializeObject(credentials);
+                    var json = JsonConvert.SerializeObject(model);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
                     var responseMessage = await Client.PostAsync(new Uri(ApiUri, "login"), stringContent).ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace JAH.Web.Controllers
                     ModelState.AddModelError(string.Empty, "UserName/Password Not found");
                 }
 
-                return View(credentials);
+                return View(model);
             }
             catch (HttpRequestException)
             {

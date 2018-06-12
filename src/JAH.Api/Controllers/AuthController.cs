@@ -53,17 +53,17 @@ namespace JAH.Api.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] CredentialModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             try
             {
-                var user = await _userManager.FindByNameAsync(model.UserName).ConfigureAwait(false);
+                var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
                 if (user != null)
                 {
                     var checkPasswordAsync = await _userManager.CheckPasswordAsync(user, model.Password).ConfigureAwait(false);
                     if (checkPasswordAsync)
                     {
-                        var claims = await AddDefaultClaims(user).ConfigureAwait(false);
+                        IEnumerable<Claim> claims = await AddDefaultClaims(user).ConfigureAwait(false);
                         var tokenWithClaimsPrincipal = _tokenGenerator.GenerateAccessTokenWithClaimsPrincipal(user.UserName, claims);
 
                         await HttpContext.SignInAsync(tokenWithClaimsPrincipal.ClaimsPrincipal, tokenWithClaimsPrincipal.AuthenticationProperties)
@@ -100,17 +100,17 @@ namespace JAH.Api.Controllers
 
         [HttpPost("token")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetToken([FromBody] CredentialModel model)
+        public async Task<IActionResult> GetToken([FromBody] LoginModel model)
         {
             try
             {
-                var user = await _userManager.FindByNameAsync(model.UserName).ConfigureAwait(false);
+                var user = await _userManager.FindByNameAsync(model.Email).ConfigureAwait(false);
                 if (user != null)
                 {
                     var checkPasswordAsync = await _userManager.CheckPasswordAsync(user, model.Password).ConfigureAwait(false);
                     if (checkPasswordAsync)
                     {
-                        var claims = await AddDefaultClaims(user).ConfigureAwait(false);
+                        IEnumerable<Claim> claims = await AddDefaultClaims(user).ConfigureAwait(false);
                         var jwtResponse = _tokenGenerator.GetJwtToken(user.UserName, claims);
 
                         return Ok(jwtResponse);
@@ -128,9 +128,9 @@ namespace JAH.Api.Controllers
 
         private async Task<IEnumerable<Claim>> AddDefaultClaims(JobApplicationUser user)
         {
-            var claims = new List<Claim>() { new Claim(JwtClaimIdentifiers.Id, user.Id) };
+            var claims = new List<Claim> { new Claim(JwtClaimIdentifiers.Id, user.Id) };
 
-            var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+            IList<string> roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
             claims.AddRange(roles.Select(role => new Claim(JwtClaimIdentifiers.Role, role)));
 
             return claims;

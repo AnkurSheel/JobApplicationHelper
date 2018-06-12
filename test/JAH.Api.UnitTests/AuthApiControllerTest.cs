@@ -67,13 +67,11 @@ namespace JAH.Api.UnitTests
             _httpContext.RequestServices.Returns(serviceProviderMock);
 
             var logger = Substitute.For<ILogger<AuthController>>();
-            _authController = new AuthController(_userManager, _tokenGenerator, logger)
-            {
-                ControllerContext = new ControllerContext
+            _authController =
+                new AuthController(_userManager, _tokenGenerator, logger)
                 {
-                    HttpContext = _httpContext
-                }
-            };
+                    ControllerContext = new ControllerContext { HttpContext = _httpContext }
+                };
         }
 
         /// <inheritdoc />
@@ -87,10 +85,12 @@ namespace JAH.Api.UnitTests
         public void Login_Succeeds_OkObjectResult()
         {
             // Arrange
-            var model = new CredentialModel();
-            var user = new JobApplicationUser();
-            _userManager.FindByNameAsync(string.Empty).ReturnsForAnyArgs(user);
-            _userManager.CheckPasswordAsync(user, string.Empty).ReturnsForAnyArgs(true);
+            var email = "user@test.com";
+            var password = "password";
+            var model = new LoginModel { Email = email, Password = password };
+            var user = new JobApplicationUser(email);
+            _userManager.FindByEmailAsync(email).Returns(user);
+            _userManager.CheckPasswordAsync(user, password).Returns(true);
             _tokenGenerator.GenerateAccessTokenWithClaimsPrincipal(string.Empty, null).ReturnsForAnyArgs(new TokenWithClaimsPrincipal());
 
             // Act
@@ -101,10 +101,11 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public void Login_Fails_BadRequestObjectResult()
+        public void Login_InvalidModel_BadRequestObjectResult()
         {
             // Arrange
-            var model = new CredentialModel();
+            var email = "user";
+            var model = new LoginModel { Email = email };
 
             // Act
             Task<IActionResult> result = _authController.Login(model);

@@ -27,13 +27,13 @@ namespace JAH.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(CredentialModel credentials)
+        public async Task<IActionResult> Register(RegisterModel model)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    string json = JsonConvert.SerializeObject(credentials);
+                    string json = JsonConvert.SerializeObject(model);
                     var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
                     HttpResponseMessage responseMessage = await Client.PostAsync(ApiUri, stringContent).ConfigureAwait(false);
                     if (responseMessage.IsSuccessStatusCode)
@@ -45,7 +45,7 @@ namespace JAH.Web.Controllers
                     ModelState.AddModelError(string.Empty, "Could not register user");
                 }
 
-                return View(credentials);
+                return View(model);
             }
             catch (HttpRequestException)
             {

@@ -55,9 +55,9 @@ namespace JAH.Api
             {
                 var context = serviceScope.ServiceProvider.GetService<JobApplicationDbContext>();
                 var dbSeeder = serviceScope.ServiceProvider.GetService<DbSeeder>();
-
+                var env = serviceScope.ServiceProvider.GetRequiredService<IHostingEnvironment>();
                 context.UpdateDB();
-                dbSeeder.SeedData();
+                dbSeeder.SeedData(env.IsDevelopment());
             }
         }
     }

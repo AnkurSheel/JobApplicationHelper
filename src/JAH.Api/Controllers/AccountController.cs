@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using JAH.Api.Filters;
@@ -28,25 +30,28 @@ namespace JAH.Api.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] CredentialModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
+            IdentityResult result;
             try
             {
-                var jobApplicationUser = new JobApplicationUser { UserName = model.UserName };
-                IdentityResult result = await _userManager.CreateAsync(jobApplicationUser, model.Password).ConfigureAwait(false);
+                var jobApplicationUser = new JobApplicationUser(model.Email);
+                result = await _userManager.CreateAsync(jobApplicationUser, model.Password).ConfigureAwait(false);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(3, "User created a new account with password.");
                     return Ok();
                 }
+
+                var errors = result.Errors.Select(error => error.Description).ToList();
+
+                return BadRequest(errors);
             }
             catch (Exception e)
             {
                 _logger.LogError(LoggingEvents.Auth, e, $"Exception when trying to register");
                 return BadRequest(e);
             }
-
-            return BadRequest("Failed to Register");
         }
     }
 }
