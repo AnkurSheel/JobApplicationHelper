@@ -63,7 +63,7 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             var responseData = response.Content.ReadAsStringAsync().Result;
-            Assert.Contains("DuplicateEmail", responseData);
+            Assert.Contains("Email 'username@test.com' is already taken.", responseData);
         }
 
         protected virtual void Dispose(bool disposing)

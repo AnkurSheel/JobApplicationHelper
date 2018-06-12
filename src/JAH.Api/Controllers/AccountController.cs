@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using JAH.Api.Filters;
@@ -41,7 +43,9 @@ namespace JAH.Api.Controllers
                     return Ok();
                 }
 
-                return BadRequest(result.Errors);
+                var errors = result.Errors.Select(error => error.Description).ToList();
+
+                return BadRequest(errors);
             }
             catch (Exception e)
             {
