@@ -63,7 +63,7 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             var responseData = response.Content.ReadAsStringAsync().Result;
-            Assert.Contains("Email 'username@test.com' is already taken.", responseData);
+            Assert.Contains("Email &#x27;username@test.com&#x27; is already taken.", responseData);
         }
 
         [Fact]
