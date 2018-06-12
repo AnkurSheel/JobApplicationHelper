@@ -33,7 +33,7 @@ namespace JAH.Web.IntegrationTests
         }
 
         [Fact]
-        public async Task Login_Fails_RedirectsToJobApplications()
+        public async Task Login_Fails_ShowsError()
         {
             // Arrange
             var credentials = new CredentialModel { Email = "username@test.com", Password = "password" };

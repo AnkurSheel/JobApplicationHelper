@@ -4,7 +4,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
+using JAH.Data.Entities;
 using JAH.DomainModels;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
 
@@ -41,6 +45,25 @@ namespace JAH.Web.IntegrationTests
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
             Assert.Equal("/Auth/Login", response.Headers.Location.OriginalString);
+        }
+
+        [Fact]
+        public async Task Register_WithExistingAccount_ShowsError()
+        {
+            // Arrange
+            var userManager = _fixture.Services.GetRequiredService<UserManager<JobApplicationUser>>();
+            var credentials = new CredentialModel { Email = "username@test.com", Password = "password" };
+            var stringContent = new StringContent(credentials.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            var user = new JobApplicationUser(credentials.Email);
+            await userManager.CreateAsync(user, credentials.Password).ConfigureAwait(false);
+
+            // Act
+            var response = await _fixture.WebClient.PostAsync(_baseUri, stringContent).ConfigureAwait(false);
+
+            // Assert
+            var responseData = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("DuplicateEmail", responseData);
         }
 
         protected virtual void Dispose(bool disposing)

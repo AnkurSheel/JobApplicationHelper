@@ -75,7 +75,8 @@ namespace JAH.Api
             // api user claim policy
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(Policies.Administrator, policy => policy.RequireClaim(JwtClaimIdentifiers.Role, Roles.AdministratorRole));
+                options.AddPolicy(Policies.Administrator,
+                                  policy => policy.RequireClaim(JwtClaimIdentifiers.Role, Roles.AdministratorRole));
             });
 
             services.AddScoped<ITokenGenerator, TokenGenerator>(serviceProvider =>
@@ -94,6 +95,8 @@ namespace JAH.Api
                 options.Password.RequiredLength = 5;
                 options.Password.RequiredUniqueChars = 0;
                 options.Password.RequireDigit = false;
+
+                options.User.RequireUniqueEmail = true;
             });
             builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), builder.Services);
             builder.AddEntityFrameworkStores<JobApplicationDbContext>().AddDefaultTokenProviders();
