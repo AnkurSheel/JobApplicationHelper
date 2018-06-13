@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 using JAH.Api.Controllers;
-using JAH.Data.Entities;
 using JAH.DomainModels;
 using JAH.Helper;
+using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using NSubstitute;
 
@@ -25,35 +22,13 @@ namespace JAH.Api.UnitTests
     {
         private readonly AuthController _authController;
 
-        private readonly UserManager<JobApplicationUser> _userManager;
-
-        private readonly ITokenGenerator _tokenGenerator;
-
         private readonly HttpContext _httpContext;
+
+        private readonly IAccountManagerService _accountManagerService;
 
         public AuthApiControllerTest()
         {
-            var store = Substitute.For<IUserStore<JobApplicationUser>>();
-            var optionsAccessor = Substitute.For<IOptions<IdentityOptions>>();
-            var passwordHasher = Substitute.For<IPasswordHasher<JobApplicationUser>>();
-            var userValidators = Substitute.For<IEnumerable<IUserValidator<JobApplicationUser>>>();
-            var passwordValidators = Substitute.For<IEnumerable<IPasswordValidator<JobApplicationUser>>>();
-            var keyNormalizer = Substitute.For<ILookupNormalizer>();
-            var errors = Substitute.For<IdentityErrorDescriber>();
-            var services = Substitute.For<IServiceProvider>();
-            var userManagerLogger = Substitute.For<ILogger<UserManager<JobApplicationUser>>>();
-
-            _userManager = Substitute.For<UserManager<JobApplicationUser>>(store,
-                                                                           optionsAccessor,
-                                                                           passwordHasher,
-                                                                           userValidators,
-                                                                           passwordValidators,
-                                                                           keyNormalizer,
-                                                                           errors,
-                                                                           services,
-                                                                           userManagerLogger);
-
-            _tokenGenerator = Substitute.For<ITokenGenerator>();
+            _accountManagerService = Substitute.For<IAccountManagerService>();
 
             _httpContext = Substitute.For<HttpContext>();
 
@@ -68,10 +43,7 @@ namespace JAH.Api.UnitTests
 
             var logger = Substitute.For<ILogger<AuthController>>();
             _authController =
-                new AuthController(_userManager, _tokenGenerator, logger)
-                {
-                    ControllerContext = new ControllerContext { HttpContext = _httpContext }
-                };
+                new AuthController(_accountManagerService, logger) { ControllerContext = new ControllerContext { HttpContext = _httpContext } };
         }
 
         /// <inheritdoc />
@@ -85,13 +57,8 @@ namespace JAH.Api.UnitTests
         public void Login_Succeeds_OkObjectResult()
         {
             // Arrange
-            var email = "user@test.com";
-            var password = "password";
-            var model = new LoginModel { Email = email, Password = password };
-            var user = new JobApplicationUser(email);
-            _userManager.FindByEmailAsync(email).Returns(user);
-            _userManager.CheckPasswordAsync(user, password).Returns(true);
-            _tokenGenerator.GenerateAccessTokenWithClaimsPrincipal(string.Empty, null).ReturnsForAnyArgs(new TokenWithClaimsPrincipal());
+            var model = new LoginModel { Email = "user@test.com", Password = "password" };
+            _accountManagerService.GetTokenWithClaimsPrincipal(model).ReturnsForAnyArgs(new TokenWithClaimsPrincipal());
 
             // Act
             Task<IActionResult> result = _authController.Login(model);
@@ -104,8 +71,8 @@ namespace JAH.Api.UnitTests
         public void Login_InvalidModel_BadRequestObjectResult()
         {
             // Arrange
-            var email = "user";
-            var model = new LoginModel { Email = email };
+            var model = new LoginModel { Email = "user@test.com", Password = "password" };
+            _accountManagerService.GetTokenWithClaimsPrincipal(model).ReturnsForAnyArgs(null as TokenWithClaimsPrincipal);
 
             // Act
             Task<IActionResult> result = _authController.Login(model);

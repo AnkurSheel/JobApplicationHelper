@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using JAH.Api.Controllers;
-using JAH.Data.Entities;
 using JAH.DomainModels;
+using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using NSubstitute;
 
@@ -21,33 +19,14 @@ namespace JAH.Api.UnitTests
     {
         private readonly AccountController _accountController;
 
-        private readonly UserManager<JobApplicationUser> _userManager;
+        private readonly IAccountManagerService _accountManagerService;
 
         public AccountApiControllerTest()
         {
-            var store = Substitute.For<IUserStore<JobApplicationUser>>();
-            var optionsAccessor = Substitute.For<IOptions<IdentityOptions>>();
-            var passwordHasher = Substitute.For<IPasswordHasher<JobApplicationUser>>();
-            var userValidators = Substitute.For<IEnumerable<IUserValidator<JobApplicationUser>>>();
-            var passwordValidators = Substitute.For<IEnumerable<IPasswordValidator<JobApplicationUser>>>();
-            var keyNormalizer = Substitute.For<ILookupNormalizer>();
-            var errors = Substitute.For<IdentityErrorDescriber>();
-            var services = Substitute.For<IServiceProvider>();
-            var userManagerLogger = Substitute.For<ILogger<UserManager<JobApplicationUser>>>();
-
-            _userManager = Substitute.ForPartsOf<UserManager<JobApplicationUser>>(store,
-                                                                                  optionsAccessor,
-                                                                                  passwordHasher,
-                                                                                  userValidators,
-                                                                                  passwordValidators,
-                                                                                  keyNormalizer,
-                                                                                  errors,
-                                                                                  services,
-                                                                                  userManagerLogger);
-
+            _accountManagerService = Substitute.For<IAccountManagerService>();
             var logger = Substitute.For<ILogger<AccountController>>();
 
-            _accountController = new AccountController(_userManager, logger);
+            _accountController = new AccountController(_accountManagerService, logger);
         }
 
         /// <inheritdoc />
@@ -61,8 +40,8 @@ namespace JAH.Api.UnitTests
         public void Register_Succeeds_Ok()
         {
             // Arrange
-            var model = new RegisterModel();
-            _userManager.CreateAsync(Arg.Any<JobApplicationUser>(), string.Empty).ReturnsForAnyArgs(IdentityResult.Success);
+            var model = new RegisterModel { Email = "user@test.com", Password = "password" };
+            _accountManagerService.RegisterUser(model).Returns(IdentityResult.Success);
 
             // Act
             Task<IActionResult> result = _accountController.Register(model);
@@ -75,8 +54,8 @@ namespace JAH.Api.UnitTests
         public void Register_Fails_BadRequestObjectResult()
         {
             // Arrange
-            var model = new RegisterModel();
-            _userManager.CreateAsync(Arg.Any<JobApplicationUser>(), string.Empty).ReturnsForAnyArgs(IdentityResult.Failed(null));
+            var model = new RegisterModel { Email = "user@test.com", Password = "password" };
+            _accountManagerService.RegisterUser(model).Returns(IdentityResult.Failed(null));
 
             // Act
             Task<IActionResult> result = _accountController.Register(model);
@@ -90,7 +69,7 @@ namespace JAH.Api.UnitTests
             if (disposing)
             {
                 _accountController?.Dispose();
-                _userManager?.Dispose();
+                _accountManagerService?.Dispose();
             }
         }
     }

@@ -4,11 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using JAH.Api.Filters;
-using JAH.Data.Entities;
 using JAH.DomainModels;
+using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -18,13 +17,13 @@ namespace JAH.Api.Controllers
     [Route("api/[controller]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<JobApplicationUser> _userManager;
+        private readonly IAccountManagerService _accountManagerService;
 
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<JobApplicationUser> userManager, ILogger<AccountController> logger)
+        public AccountController(IAccountManagerService accountManagerService, ILogger<AccountController> logger)
         {
-            _userManager = userManager;
+            _accountManagerService = accountManagerService;
             _logger = logger;
         }
 
@@ -32,18 +31,17 @@ namespace JAH.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            IdentityResult result;
             try
             {
-                var jobApplicationUser = new JobApplicationUser(model.Email);
-                result = await _userManager.CreateAsync(jobApplicationUser, model.Password).ConfigureAwait(false);
+                var result = await _accountManagerService.RegisterUser(model).ConfigureAwait(false);
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(3, "User created a new account with password.");
                     return Ok();
                 }
 
-                var errors = result.Errors.Select(error => error.Description).ToList();
+                List<string> errors = result.Errors.Select(error => error.Description).ToList();
 
                 return BadRequest(errors);
             }

@@ -21,7 +21,7 @@ namespace JAH.Helper
             _jwtOptions = jwtOptions;
         }
 
-        public TokenWithClaimsPrincipal GenerateAccessTokenWithClaimsPrincipal(string userName, IEnumerable<Claim> claims)
+        public TokenWithClaimsPrincipal GetAccessTokenWithClaimsPrincipal(string userName, IEnumerable<Claim> claims)
         {
             List<Claim> userClaimList = claims.ToList();
             var accessToken = GenerateAccessToken(userName, userClaimList);
@@ -59,14 +59,7 @@ namespace JAH.Helper
         private static AuthenticationProperties CreateAuthenticationProperties(string accessToken)
         {
             var authProps = new AuthenticationProperties();
-            authProps.StoreTokens(new[]
-            {
-                new AuthenticationToken
-                {
-                    Name = "Token",
-                    Value = accessToken
-                }
-            });
+            authProps.StoreTokens(new[] { new AuthenticationToken { Name = "Token", Value = accessToken } });
             return authProps;
         }
 
@@ -84,11 +77,7 @@ namespace JAH.Helper
 
         private string GetJwtResponse(string accessToken)
         {
-            var jwt = new
-            {
-                auth_token = accessToken,
-                expires_in = _jwtOptions.Expiration
-            };
+            var jwt = new { auth_token = accessToken, expires_in = _jwtOptions.Expiration };
             return JsonConvert.SerializeObject(jwt);
         }
     }

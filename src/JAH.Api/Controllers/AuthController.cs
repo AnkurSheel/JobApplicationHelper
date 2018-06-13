@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 using JAH.Api.Filters;
-using JAH.Data.Entities;
 using JAH.DomainModels;
-using JAH.Helper;
-using JAH.Helper.Constants;
+using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -22,17 +16,14 @@ namespace JAH.Api.Controllers
     [Route("api/[controller]")]
     public class AuthController : Controller
     {
-        private readonly UserManager<JobApplicationUser> _userManager;
+        private readonly IAccountManagerService _accountManagerService;
 
         private readonly ILogger<AuthController> _logger;
 
-        private readonly ITokenGenerator _tokenGenerator;
-
-        public AuthController(UserManager<JobApplicationUser> userManager, ITokenGenerator tokenGenerator, ILogger<AuthController> logger)
+        public AuthController(IAccountManagerService accountManagerService, ILogger<AuthController> logger)
         {
-            _userManager = userManager;
+            _accountManagerService = accountManagerService;
             _logger = logger;
-            _tokenGenerator = tokenGenerator;
         }
 
         [HttpGet("signedIn")]
@@ -57,29 +48,22 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
-                if (user != null)
+                var tokenWithClaimsPrincipal = await _accountManagerService.GetTokenWithClaimsPrincipal(model).ConfigureAwait(false);
+                if (tokenWithClaimsPrincipal == null)
                 {
-                    var checkPasswordAsync = await _userManager.CheckPasswordAsync(user, model.Password).ConfigureAwait(false);
-                    if (checkPasswordAsync)
-                    {
-                        IEnumerable<Claim> claims = await AddDefaultClaims(user).ConfigureAwait(false);
-                        var tokenWithClaimsPrincipal = _tokenGenerator.GenerateAccessTokenWithClaimsPrincipal(user.UserName, claims);
-
-                        await HttpContext.SignInAsync(tokenWithClaimsPrincipal.ClaimsPrincipal, tokenWithClaimsPrincipal.AuthenticationProperties)
-                                         .ConfigureAwait(false);
-
-                        return Ok(tokenWithClaimsPrincipal.JwtResponse);
-                    }
+                    return BadRequest("Failed to Login");
                 }
+
+                await HttpContext.SignInAsync(tokenWithClaimsPrincipal.ClaimsPrincipal, tokenWithClaimsPrincipal.AuthenticationProperties)
+                                 .ConfigureAwait(false);
+
+                return Ok(tokenWithClaimsPrincipal.JwtResponse);
             }
             catch (Exception e)
             {
                 _logger.LogError(LoggingEvents.Auth, e, $"Exception when trying to login");
                 return BadRequest(e);
             }
-
-            return BadRequest("Failed to Login");
         }
 
         [HttpPost("logout")]
@@ -104,36 +88,19 @@ namespace JAH.Api.Controllers
         {
             try
             {
-                var user = await _userManager.FindByNameAsync(model.Email).ConfigureAwait(false);
-                if (user != null)
+                var jwtResponse = await _accountManagerService.GetJwtToken(model).ConfigureAwait(false);
+                if (string.IsNullOrEmpty(jwtResponse))
                 {
-                    var checkPasswordAsync = await _userManager.CheckPasswordAsync(user, model.Password).ConfigureAwait(false);
-                    if (checkPasswordAsync)
-                    {
-                        IEnumerable<Claim> claims = await AddDefaultClaims(user).ConfigureAwait(false);
-                        var jwtResponse = _tokenGenerator.GetJwtToken(user.UserName, claims);
-
-                        return Ok(jwtResponse);
-                    }
+                    return BadRequest("Failed to Login");
                 }
+
+                return Ok(jwtResponse);
             }
             catch (Exception e)
             {
                 _logger.LogError(LoggingEvents.Auth, e, $"Exception when trying to login");
                 return BadRequest(e);
             }
-
-            return BadRequest("Failed to Login");
-        }
-
-        private async Task<IEnumerable<Claim>> AddDefaultClaims(JobApplicationUser user)
-        {
-            var claims = new List<Claim> { new Claim(JwtClaimIdentifiers.Id, user.Id) };
-
-            IList<string> roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-            claims.AddRange(roles.Select(role => new Claim(JwtClaimIdentifiers.Role, role)));
-
-            return claims;
         }
     }
 }
