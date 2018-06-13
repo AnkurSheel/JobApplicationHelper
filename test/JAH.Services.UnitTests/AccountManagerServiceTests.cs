@@ -31,29 +31,25 @@ namespace JAH.Services.UnitTests
 
         public AccountManagerServiceTests()
         {
-            var store = Substitute.For<IUserStore<JobApplicationUser>>();
-            var optionsAccessor = Substitute.For<IOptions<IdentityOptions>>();
-            var passwordHasher = Substitute.For<IPasswordHasher<JobApplicationUser>>();
-            var userValidators = Substitute.For<IEnumerable<IUserValidator<JobApplicationUser>>>();
-            var passwordValidators = Substitute.For<IEnumerable<IPasswordValidator<JobApplicationUser>>>();
-            var keyNormalizer = Substitute.For<ILookupNormalizer>();
-            var errors = Substitute.For<IdentityErrorDescriber>();
-            var services = Substitute.For<IServiceProvider>();
-            var userManagerLogger = Substitute.For<ILogger<UserManager<JobApplicationUser>>>();
-
-            _userManager = Substitute.For<UserManager<JobApplicationUser>>(store,
-                                                                           optionsAccessor,
-                                                                           passwordHasher,
-                                                                           userValidators,
-                                                                           passwordValidators,
-                                                                           keyNormalizer,
-                                                                           errors,
-                                                                           services,
-                                                                           userManagerLogger);
+            _userManager = Substitute.For<UserManager<JobApplicationUser>>(Substitute.For<IUserStore<JobApplicationUser>>(),
+                                                                           Substitute.For<IOptions<IdentityOptions>>(),
+                                                                           Substitute.For<IPasswordHasher<JobApplicationUser>>(),
+                                                                           Substitute.For<IEnumerable<IUserValidator<JobApplicationUser>>>(),
+                                                                           Substitute.For<IEnumerable<IPasswordValidator<JobApplicationUser>>>(),
+                                                                           Substitute.For<ILookupNormalizer>(),
+                                                                           Substitute.For<IdentityErrorDescriber>(),
+                                                                           Substitute.For<IServiceProvider>(),
+                                                                           Substitute.For<ILogger<UserManager<JobApplicationUser>>>());
 
             _tokenGenerator = Substitute.For<ITokenGenerator>();
 
             _accountManagerService = new AccountManagerService(_userManager, _tokenGenerator);
+        }
+
+        public static IEnumerable<object[]> GetRoles()
+        {
+            yield return new object[] { new List<string>() };
+            yield return new object[] { new List<string> { "role1", "role2" } };
         }
 
         public void Dispose()
@@ -133,35 +129,17 @@ namespace JAH.Services.UnitTests
             Assert.Equal(tokenWithClaimsPrincipal, result);
         }
 
-        [Fact]
-        public async Task GetTokenWithClaimsPrincipal_ValidUser_AddsIdClaim()
+        [Theory]
+        [MemberData(nameof(GetRoles))]
+        public async Task GetTokenWithClaimsPrincipal_ValidUser_AddsDefaultClaims(List<string> roles)
         {
             // Arrange
             var model = new LoginModel { Email = "user@test.com", Password = "password" };
             var user = new JobApplicationUser(model.Email);
             _userManager.FindByEmailAsync(model.Email).Returns(Task.FromResult(user));
             _userManager.CheckPasswordAsync(user, model.Password).Returns(Task.FromResult(true));
-            var claims = new List<Claim> { new Claim(JwtClaimIdentifiers.Id, user.Id) };
-
-            // Act
-            await _accountManagerService.GetTokenWithClaimsPrincipal(model).ConfigureAwait(false);
-
-            // Assert
-            _tokenGenerator.Received(1)
-                           .GetAccessTokenWithClaimsPrincipal(user.UserName,
-                                                              Arg.Is<IEnumerable<Claim>>(c => claims.SequenceEqual(c, new ClaimEqualityComparer())));
-        }
-
-        [Fact]
-        public async Task GetTokenWithClaimsPrincipal_ValidUser_AddsRolesClaim()
-        {
-            // Arrange
-            var model = new LoginModel { Email = "user@test.com", Password = "password" };
-            var user = new JobApplicationUser(model.Email);
-            _userManager.FindByEmailAsync(model.Email).Returns(Task.FromResult(user));
-            _userManager.CheckPasswordAsync(user, model.Password).Returns(Task.FromResult(true));
-            IList<string> roles = new List<string> { "testRole1", "testRole2" };
             _userManager.GetRolesAsync(user).Returns(roles);
+
             var claims = new List<Claim> { new Claim(JwtClaimIdentifiers.Id, user.Id) };
             claims.AddRange(roles.Select(role => new Claim(JwtClaimIdentifiers.Role, role)));
 
@@ -232,34 +210,17 @@ namespace JAH.Services.UnitTests
             Assert.Equal("response", result);
         }
 
-        [Fact]
-        public async Task GetJwtToken_ValidUser_AddsIdClaim()
+        [Theory]
+        [MemberData(nameof(GetRoles))]
+        public async Task GetJwtToken_ValidUser_AddsRolesClaim(List<string> roles)
         {
             // Arrange
             var model = new LoginModel { Email = "user@test.com", Password = "password" };
             var user = new JobApplicationUser(model.Email);
             _userManager.FindByEmailAsync(model.Email).Returns(Task.FromResult(user));
             _userManager.CheckPasswordAsync(user, model.Password).Returns(Task.FromResult(true));
-            var claims = new List<Claim> { new Claim(JwtClaimIdentifiers.Id, user.Id) };
-
-            // Act
-            await _accountManagerService.GetJwtToken(model).ConfigureAwait(false);
-
-            // Assert
-            _tokenGenerator.Received(1)
-                           .GetJwtToken(user.UserName, Arg.Is<IEnumerable<Claim>>(c => claims.SequenceEqual(c, new ClaimEqualityComparer())));
-        }
-
-        [Fact]
-        public async Task GetJwtToken_ValidUser_AddsRolesClaim()
-        {
-            // Arrange
-            var model = new LoginModel { Email = "user@test.com", Password = "password" };
-            var user = new JobApplicationUser(model.Email);
-            _userManager.FindByEmailAsync(model.Email).Returns(Task.FromResult(user));
-            _userManager.CheckPasswordAsync(user, model.Password).Returns(Task.FromResult(true));
-            IList<string> roles = new List<string> { "testRole1", "testRole2" };
             _userManager.GetRolesAsync(user).Returns(roles);
+
             var claims = new List<Claim> { new Claim(JwtClaimIdentifiers.Id, user.Id) };
             claims.AddRange(roles.Select(role => new Claim(JwtClaimIdentifiers.Role, role)));
 
