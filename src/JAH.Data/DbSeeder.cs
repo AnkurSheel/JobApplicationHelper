@@ -48,7 +48,7 @@ namespace JAH.Data
 
             if (isDevelopmentEnvironment)
             {
-                await CreateUserAndRole(Roles.AdministratorRole, "admin", "admin").ConfigureAwait(false);
+                await CreateUserAndRole(Roles.AdministratorRole, "admin@test.com", "admin").ConfigureAwait(false);
             }
 
             for (var i = 0; i < NumberOfTestUsersToAdd; i++)
