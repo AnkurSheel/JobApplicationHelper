@@ -20,7 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
-namespace JAH.Api
+namespace JAH.Api.Extensions
 {
     public static class ServicesExtension
     {

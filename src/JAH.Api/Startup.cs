@@ -5,6 +5,7 @@ using Autofac.Extensions.DependencyInjection;
 
 using AutoMapper;
 
+using JAH.Api.Extensions;
 using JAH.Data;
 using JAH.Helper;
 using JAH.Services.Interfaces;
