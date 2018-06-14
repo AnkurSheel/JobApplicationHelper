@@ -3,6 +3,8 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
+using JAH.Logger;
+
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,8 +33,11 @@ namespace JAH.Web
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddSingleton<IJahLogger, JahLogger>(s => new JahLogger(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddScoped<UserHelper, UserHelper>();
+
+            services.AddMvc();
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
 
             return new AutofacServiceProvider(_aspNetScope);
@@ -40,7 +45,7 @@ namespace JAH.Web
 
         public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
+          if (env.IsDevelopment())
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();

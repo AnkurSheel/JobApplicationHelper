@@ -8,6 +8,7 @@ using AutoMapper;
 using JAH.Api.Extensions;
 using JAH.Data;
 using JAH.Helper;
+using JAH.Logger;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 
@@ -64,8 +65,11 @@ namespace JAH.Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IJahLogger, JahLogger>(s => new JahLogger(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddScoped<IUserResolverService, UserResolverService>();
             services.AddScoped<IAccountManagerService, AccountManagerService>();
+
             services.AddTransient<DbSeeder, DbSeeder>();
 
             services.AddAutoMapper();

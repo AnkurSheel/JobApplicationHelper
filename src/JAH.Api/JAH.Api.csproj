@@ -41,6 +41,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JAH.Helper\JAH.Helper.csproj" />
+    <ProjectReference Include="..\JAH.Logger\JAH.Logger.csproj" />
     <ProjectReference Include="..\JAH.Services\JAH.Services.csproj" />
   </ItemGroup>
 

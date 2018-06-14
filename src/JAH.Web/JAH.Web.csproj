@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JAH.DomainModels\JAH.DomainModels.csproj" />
+    <ProjectReference Include="..\JAH.Logger\JAH.Logger.csproj" />
   </ItemGroup>
 
   <ItemGroup>
