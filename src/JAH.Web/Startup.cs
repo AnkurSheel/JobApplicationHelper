@@ -33,9 +33,9 @@ namespace JAH.Web
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IJahLogger, JahLogger>(s => new JahLogger(Configuration.GetConnectionString("DefaultConnection")));
-
             services.AddScoped<UserHelper, UserHelper>();
+
+            ConfigureLogger(services);
 
             services.AddMvc();
             _aspNetScope = _webHostScope.BeginLifetimeScope(builder => builder.Populate(services));
@@ -45,7 +45,7 @@ namespace JAH.Web
 
         public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
         {
-          if (env.IsDevelopment())
+            if (env.IsDevelopment())
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
                 app.UseDeveloperExceptionPage();
@@ -64,6 +64,11 @@ namespace JAH.Web
 
             app.Run(async context => { await context.Response.WriteAsync("Hello World").ConfigureAwait(false); });
             appLifetime.ApplicationStopped.Register(() => _aspNetScope.Dispose());
+        }
+
+        protected virtual void ConfigureLogger(IServiceCollection services)
+        {
+            services.AddSingleton<IJahLogger, JahLogger>(s => new JahLogger(Configuration.GetConnectionString("DefaultConnection")));
         }
     }
 }

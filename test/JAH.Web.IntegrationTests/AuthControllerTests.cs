@@ -77,7 +77,7 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
-            Assert.Equal("/Auth/Login", response.Headers.Location.OriginalString);
+            Assert.Contains("/Auth/Login", response.Headers.Location.OriginalString, StringComparison.OrdinalIgnoreCase);
         }
 
         protected virtual void Dispose(bool disposing)

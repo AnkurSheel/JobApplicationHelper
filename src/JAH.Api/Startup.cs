@@ -65,7 +65,6 @@ namespace JAH.Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<IJahLogger, JahLogger>(s => new JahLogger(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IUserResolverService, UserResolverService>();
             services.AddScoped<IAccountManagerService, AccountManagerService>();
@@ -75,6 +74,7 @@ namespace JAH.Api
             services.AddAutoMapper();
 
             ConfigureDatabase(services);
+            ConfigureLogger(services);
 
             services.AddSecurity(_env, Configuration.GetSection(nameof(TokenOptions)));
             services.AddCustomizedMvc(_env);
@@ -93,6 +93,11 @@ namespace JAH.Api
             services.AddDbContext<JobApplicationDbContext>(options => options
                                                                       .UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
                                                                       .UseLoggerFactory(MyLoggerFactory));
+        }
+
+        protected virtual void ConfigureLogger(IServiceCollection services)
+        {
+            services.AddSingleton<IJahLogger, JahLogger>(s => new JahLogger(Configuration.GetConnectionString("DefaultConnection")));
         }
     }
 }

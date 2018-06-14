@@ -138,7 +138,7 @@ namespace JAH.Web.IntegrationTests
             }
         }
 
-        private static Startup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, Startup> factory)
+        private static TestWebServerStartup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, TestWebServerStartup> factory)
         {
             var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
             var config = provider.GetRequiredService<IConfiguration>();
@@ -185,7 +185,7 @@ namespace JAH.Web.IntegrationTests
                 _apiClient = _testServer.CreateClient();
             }
 
-            using (var webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<Startup>().AsSelf()))
+            using (var webHostScope = _container.BeginLifetimeScope(builder => builder.RegisterType<TestWebServerStartup>().AsSelf()))
             {
                 var fullPath = Path.GetFullPath(Path.Combine(PlatformServices.Default.Application.ApplicationBasePath,
                                                              "..",
@@ -196,11 +196,11 @@ namespace JAH.Web.IntegrationTests
                                                              "src",
                                                              "JAH.Web"));
 
-                var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, Startup>>();
+                var factory = webHostScope.Resolve<Func<IHostingEnvironment, IConfiguration, TestWebServerStartup>>();
                 var builder = new WebHostBuilder().UseKestrel()
                                                   .UseContentRoot(fullPath)
                                                   .UseEnvironment(Environment)
-                                                  .UseStartup<Startup>()
+                                                  .UseStartup<TestWebServerStartup>()
                                                   .ConfigureServices(services => services.AddTransient(provider => SetupStartup(provider, factory)))
                                                   .ConfigureServices(services => services.TryAddSingleton(_apiClient));
 

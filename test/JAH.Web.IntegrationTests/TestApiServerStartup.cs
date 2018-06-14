@@ -3,6 +3,7 @@
 using Autofac;
 
 using JAH.Data;
+using JAH.Logger;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,7 +20,6 @@ namespace JAH.Web.IntegrationTests
         private static readonly LoggerFactory MyLoggerFactory =
             new LoggerFactory(new[] { new DebugLoggerProvider((_, level) => level >= LogLevel.Information) });
 
-        /// <inheritdoc />
         public TestApiServerStartup(ILifetimeScope webHostScope, IHostingEnvironment env, IConfiguration configuration)
             : base(webHostScope, env, configuration)
         {
@@ -40,6 +40,11 @@ namespace JAH.Web.IntegrationTests
                                                                       .EnableSensitiveDataLogging()
                                                                       .UseLoggerFactory(MyLoggerFactory),
                                                            ServiceLifetime.Singleton);
+        }
+
+        protected override void ConfigureLogger(IServiceCollection services)
+        {
+            services.AddSingleton<IJahLogger, FakeJahLogger>();
         }
     }
 }
