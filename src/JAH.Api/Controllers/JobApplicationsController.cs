@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using JAH.Api.Filters;
 using JAH.DomainModels;
+using JAH.Logger;
 using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace JAH.Api.Controllers
         }
 
         [HttpGet("")]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "JobApplications", "Api", "GetApplications" })]
         public async Task<IActionResult> Get()
         {
             IEnumerable<JobApplication> jobApplications = await _service.GetAllApplications().ConfigureAwait(false);
@@ -39,11 +41,12 @@ namespace JAH.Api.Controllers
         }
 
         [HttpGet("{companyName}", Name = "GetJobApplication")]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "JobApplications", "Api", "GetApplication" })]
         public IActionResult Get(string companyName)
         {
             try
             {
-                JobApplication jobApplication = _service.GetApplication(companyName);
+                var jobApplication = _service.GetApplication(companyName);
                 if (jobApplication == null)
                 {
                     return NotFound($"Company with Name \"{companyName}\" was not found");
@@ -61,11 +64,12 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPost]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "JobApplications", "Api", "CreateApplication" })]
         public async Task<IActionResult> Post([FromBody] JobApplication jobApplication)
         {
             try
             {
-                JobApplication createdJobApplication = await _service.AddNewApplication(jobApplication).ConfigureAwait(false);
+                var createdJobApplication = await _service.AddNewApplication(jobApplication).ConfigureAwait(false);
                 return CreatedAtRoute("GetJobApplication", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
             }
             catch (Exception e)
@@ -78,11 +82,12 @@ namespace JAH.Api.Controllers
         }
 
         [HttpPut("{companyName}")]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "JobApplications", "Api", "UpdateApplication" })]
         public async Task<IActionResult> Put(string companyName, [FromBody] JobApplication jobApplication)
         {
             try
             {
-                JobApplication oldApplication = await _service.UpdateApplication(companyName, jobApplication).ConfigureAwait(false);
+                var oldApplication = await _service.UpdateApplication(companyName, jobApplication).ConfigureAwait(false);
                 if (oldApplication == null)
                 {
                     return NotFound($"Company with Name \"{companyName}\" was not found");

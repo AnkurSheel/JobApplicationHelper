@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using JAH.Api.Filters;
 using JAH.DomainModels;
+using JAH.Logger;
 using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;
@@ -29,6 +30,7 @@ namespace JAH.Api.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Account", "Api", "Register" })]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             try

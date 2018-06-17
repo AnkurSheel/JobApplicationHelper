@@ -27,6 +27,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.IdentityModel.Tokens;
 
+using Xunit.Abstractions;
+
 namespace JAH.Web.IntegrationTests
 {
     public class ClientFixture : IDisposable
@@ -42,8 +44,7 @@ namespace JAH.Web.IntegrationTests
             var builder = new ContainerBuilder();
             builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
             builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
-            builder.RegisterType<FakeJahLogger>().As<IJahLogger>().SingleInstance();
-
+            builder.RegisterType<FakeJahLogger>().As<IJahLogger>().AsSelf().SingleInstance();
             _container = builder.Build();
 
             SetupClients();
@@ -127,6 +128,15 @@ namespace JAH.Web.IntegrationTests
 
             _apiClient.DefaultRequestHeaders.Add("my-name", "abcde");
             _apiClient.DefaultRequestHeaders.Add("my-id", "12345");
+        }
+
+        public void SetupLogger(ITestOutputHelper output)
+        {
+            using (var webHostScope = _container.BeginLifetimeScope())
+            {
+                var logger = webHostScope.Resolve<FakeJahLogger>();
+                logger.OutputHelper = output;
+            }
         }
 
         protected virtual void Dispose(bool disposing)

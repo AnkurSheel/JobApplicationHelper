@@ -11,16 +11,14 @@ namespace JAH.Web.IntegrationTests
     {
         private readonly Uri _baseUri;
 
-        private readonly ITestOutputHelper _output;
-
         private readonly ClientFixture _fixture;
 
-        public HelloControllerTest(ITestOutputHelper output, ClientFixture fixture)
+        public HelloControllerTest(ClientFixture fixture, ITestOutputHelper output)
         {
-            _output = output;
             _fixture = fixture;
             _baseUri = new Uri(_fixture.WebClient.BaseAddress, "hello/");
             _fixture.ClearAuthentication();
+            _fixture.SetupLogger(output);
         }
 
         [Theory]
@@ -37,7 +35,6 @@ namespace JAH.Web.IntegrationTests
             // Assert
             response.EnsureSuccessStatusCode();
             var actual = response.Content.ReadAsStringAsync().Result;
-            LogMessageHelper.WriteOutput(_output);
             Assert.Equal(expected, actual);
         }
 
@@ -50,7 +47,6 @@ namespace JAH.Web.IntegrationTests
             var response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"name")).ConfigureAwait(false);
 
             // Assert
-            LogMessageHelper.WriteOutput(_output);
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }

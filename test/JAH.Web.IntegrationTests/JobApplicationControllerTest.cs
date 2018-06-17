@@ -18,56 +18,53 @@ namespace JAH.Web.IntegrationTests
 
         private readonly JobApplicationEntity[] _jobApplicationEntities;
 
-        private readonly ITestOutputHelper _output;
-
         private readonly Uri _baseUri;
 
-        public JobApplicationControllerTest(ITestOutputHelper output, ClientFixture fixture)
+        public JobApplicationControllerTest(ClientFixture fixture, ITestOutputHelper output)
         {
-            _output = output;
             _fixture = fixture;
+            _fixture.SetupLogger(output);
             _baseUri = new Uri(_fixture.WebClient.BaseAddress, "jobApplications/");
             _fixture.SetupJwtAuthentication();
 
             _jobApplicationEntities = new[]
-                                      {
-                                          new JobApplicationEntity
-                                          {
-                                              Id = 1,
-                                              CompanyName = "Company 1",
-                                              ApplicationDate = new DateTime(2017, 11, 13),
-                                              CurrentStatus = Status.Interview
-                                          },
-                                          new JobApplicationEntity
-                                          {
-                                              Id = 2,
-                                              CompanyName = "Company 2",
-                                              ApplicationDate = new DateTime(2017, 11, 14),
-                                              CurrentStatus = Status.Applied
-                                          },
-                                          new JobApplicationEntity
-                                          {
-                                              Id = 3,
-                                              CompanyName = "Company 3",
-                                              ApplicationDate = new DateTime(2017, 11, 14),
-                                              CurrentStatus = Status.Interview
-                                          },
-                                          new JobApplicationEntity
-                                          {
-                                              Id = 4,
-                                              CompanyName = "Company 4",
-                                              ApplicationDate = new DateTime(2017, 10, 9),
-                                              CurrentStatus = Status.Offer
-                                          },
-                                          new JobApplicationEntity
-                                          {
-                                              Id = 5,
-                                              CompanyName = "Company 5",
-                                              ApplicationDate = new DateTime(2017, 09, 18),
-                                              CurrentStatus = Status.Rejected
-                                          }
-                                      };
-
+            {
+                new JobApplicationEntity
+                {
+                    Id = 1,
+                    CompanyName = "Company 1",
+                    ApplicationDate = new DateTime(2017, 11, 13),
+                    CurrentStatus = Status.Interview
+                },
+                new JobApplicationEntity
+                {
+                    Id = 2,
+                    CompanyName = "Company 2",
+                    ApplicationDate = new DateTime(2017, 11, 14),
+                    CurrentStatus = Status.Applied
+                },
+                new JobApplicationEntity
+                {
+                    Id = 3,
+                    CompanyName = "Company 3",
+                    ApplicationDate = new DateTime(2017, 11, 14),
+                    CurrentStatus = Status.Interview
+                },
+                new JobApplicationEntity
+                {
+                    Id = 4,
+                    CompanyName = "Company 4",
+                    ApplicationDate = new DateTime(2017, 10, 9),
+                    CurrentStatus = Status.Offer
+                },
+                new JobApplicationEntity
+                {
+                    Id = 5,
+                    CompanyName = "Company 5",
+                    ApplicationDate = new DateTime(2017, 09, 18),
+                    CurrentStatus = Status.Rejected
+                }
+            };
         }
 
         [Fact]
@@ -79,16 +76,15 @@ namespace JAH.Web.IntegrationTests
             _fixture.DetachAllEntities();
 
             var jobApplication = new JobApplication
-                                 {
-                                     CompanyName = "Company 1",
-                                     ApplicationDate = new DateTime(2017, 11, 13),
-                                     Status = Status.Interview
-                                 };
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response =
-                await _fixture.WebClient.PostAsync(new Uri(_baseUri, "addNewApplication"), stringContent).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "addNewApplication"), stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
@@ -100,16 +96,15 @@ namespace JAH.Web.IntegrationTests
         {
             // Arrange
             var jobApplication = new JobApplication
-                                 {
-                                     CompanyName = "Company 1",
-                                     ApplicationDate = new DateTime(2017, 11, 13),
-                                     Status = Status.Interview
-                                 };
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response =
-                await _fixture.WebClient.PostAsync(new Uri(_baseUri, "addNewApplication"), stringContent).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "addNewApplication"), stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);
@@ -125,7 +120,7 @@ namespace JAH.Web.IntegrationTests
         public async Task GetAllApplications_MultipleApplications_HtmlView()
         {
             // Arrange
-            foreach (JobApplicationEntity jobApplicationEntity in _jobApplicationEntities)
+            foreach (var jobApplicationEntity in _jobApplicationEntities)
             {
                 _fixture.Context.JobApplications.Add(jobApplicationEntity);
             }
@@ -133,12 +128,11 @@ namespace JAH.Web.IntegrationTests
             _fixture.Context.SaveChanges();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync(_baseUri).ConfigureAwait(false);
+            var response = await _fixture.WebClient.GetAsync(_baseUri).ConfigureAwait(false);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            _output.WriteLine(responseData);
+            var responseData = response.Content.ReadAsStringAsync().Result;
             Assert.NotEmpty(responseData);
         }
 
@@ -148,11 +142,11 @@ namespace JAH.Web.IntegrationTests
             // Arrange
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync(_baseUri).ConfigureAwait(false);
+            var response = await _fixture.WebClient.GetAsync(_baseUri).ConfigureAwait(false);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            string responseData = response.Content.ReadAsStringAsync().Result;
+            var responseData = response.Content.ReadAsStringAsync().Result;
             Assert.NotEmpty(responseData);
         }
 
@@ -162,8 +156,7 @@ namespace JAH.Web.IntegrationTests
             // Arrange
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{_jobApplicationEntities[0].CompanyName}"))
-                                                         .ConfigureAwait(false);
+            var response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{_jobApplicationEntities[0].CompanyName}")).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -173,7 +166,7 @@ namespace JAH.Web.IntegrationTests
         public async Task GetApplicationByCompanyName_ApplicationExists_HtmlView()
         {
             // Arrange
-            foreach (JobApplicationEntity jobApplicationEntity in _jobApplicationEntities)
+            foreach (var jobApplicationEntity in _jobApplicationEntities)
             {
                 _fixture.Context.JobApplications.Add(jobApplicationEntity);
             }
@@ -181,13 +174,11 @@ namespace JAH.Web.IntegrationTests
             _fixture.Context.SaveChanges();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{_jobApplicationEntities[0].CompanyName}"))
-                                                         .ConfigureAwait(false);
+            var response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{_jobApplicationEntities[0].CompanyName}")).ConfigureAwait(false);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            string responseData = response.Content.ReadAsStringAsync().Result;
-            _output.WriteLine(responseData);
+            var responseData = response.Content.ReadAsStringAsync().Result;
             Assert.NotEmpty(responseData);
         }
 
@@ -196,16 +187,15 @@ namespace JAH.Web.IntegrationTests
         {
             // Arrange
             var jobApplication = new JobApplication
-                                 {
-                                     CompanyName = _jobApplicationEntities[0].CompanyName,
-                                     ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
-                                     Status = Status.Offer
-                                 };
+            {
+                CompanyName = _jobApplicationEntities[0].CompanyName,
+                ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
+                Status = Status.Offer
+            };
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response =
-                await _fixture.WebClient.PostAsync(new Uri(_baseUri, "updateApplication"), stringContent).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "updateApplication"), stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
@@ -216,7 +206,7 @@ namespace JAH.Web.IntegrationTests
         public async void UpdateApplication_ApplicationExists_OkObjectResult()
         {
             // Arrange
-            foreach (JobApplicationEntity jobApplicationEntity in _jobApplicationEntities)
+            foreach (var jobApplicationEntity in _jobApplicationEntities)
             {
                 _fixture.Context.JobApplications.Add(jobApplicationEntity);
             }
@@ -225,16 +215,15 @@ namespace JAH.Web.IntegrationTests
             _fixture.DetachAllEntities();
 
             var jobApplication = new JobApplication
-                                 {
-                                     CompanyName = _jobApplicationEntities[0].CompanyName,
-                                     ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
-                                     Status = Status.Offer
-                                 };
+            {
+                CompanyName = _jobApplicationEntities[0].CompanyName,
+                ApplicationDate = _jobApplicationEntities[0].ApplicationDate,
+                Status = Status.Offer
+            };
 
             // Act
             var stringContent = new StringContent(jobApplication.ToUrl(), Encoding.UTF8, "application/x-www-form-urlencoded");
-            HttpResponseMessage response =
-                await _fixture.WebClient.PostAsync(new Uri(_baseUri, "updateApplication"), stringContent).ConfigureAwait(false);
+            var response = await _fixture.WebClient.PostAsync(new Uri(_baseUri, "updateApplication"), stringContent).ConfigureAwait(false);
 
             // Assert
             Assert.Equal(HttpStatusCode.Found, response.StatusCode);

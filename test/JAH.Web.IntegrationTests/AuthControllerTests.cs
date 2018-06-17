@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace JAH.Web.IntegrationTests
 {
@@ -20,9 +21,10 @@ namespace JAH.Web.IntegrationTests
 
         private readonly ClientFixture _fixture;
 
-        public AuthControllerTests(ClientFixture fixture)
+        public AuthControllerTests(ClientFixture fixture, ITestOutputHelper output)
         {
             _fixture = fixture;
+            _fixture.SetupLogger(output);
             _baseUri = new Uri(_fixture.WebClient.BaseAddress, "auth/");
         }
 

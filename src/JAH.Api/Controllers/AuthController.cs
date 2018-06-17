@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using JAH.Api.Filters;
 using JAH.DomainModels;
+using JAH.Logger;
 using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Authentication;
@@ -44,6 +45,7 @@ namespace JAH.Api.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Auth", "Api", "Login" })]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             try
@@ -68,6 +70,7 @@ namespace JAH.Api.Controllers
 
         [HttpPost("logout")]
         [Authorize]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Auth", "Api", "Logout" })]
         public async Task<IActionResult> Logout()
         {
             try
@@ -84,6 +87,7 @@ namespace JAH.Api.Controllers
 
         [HttpPost("token")]
         [AllowAnonymous]
+        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Auth", "Api", "GetToken" })]
         public async Task<IActionResult> GetToken([FromBody] LoginModel model)
         {
             try

@@ -1,19 +1,33 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 using JAH.Logger;
 
 using Serilog;
 using Serilog.Events;
 
+using Xunit.Abstractions;
+
 namespace JAH.Web.IntegrationTests
 {
-    public class FakeJahLogger : IJahLogger
+    public class FakeJahLogger : IJahLogger, IDisposable
     {
         private readonly StringWriter _stringWriter = new StringWriter();
 
+        private readonly Serilog.Core.Logger _logger;
+
         public FakeJahLogger()
         {
-            Log.Logger = new LoggerConfiguration().WriteTo.TextWriter(_stringWriter).CreateLogger();
+            _logger = new LoggerConfiguration().WriteTo.TextWriter(_stringWriter).CreateLogger();
+        }
+
+        public ITestOutputHelper OutputHelper { private get; set; }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void WritePerf(LogDetail info)
@@ -33,12 +47,21 @@ namespace JAH.Web.IntegrationTests
         {
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _stringWriter?.Dispose();
+            }
+        }
+
         private void Write(LogDetail info)
         {
             var buf = _stringWriter.GetStringBuilder();
             buf.Clear();
-            Log.Write(LogEventLevel.Information, "{@LogDetail}", info);
-            LogMessageHelper.AddMessage(_stringWriter.ToString());
+            _logger.Write(LogEventLevel.Information, "{@LogDetail}", info);
+            OutputHelper.WriteLine(_stringWriter.ToString());
+            //LogMessageHelper.AddMessage(_stringWriter.ToString());
         }
     }
 }
