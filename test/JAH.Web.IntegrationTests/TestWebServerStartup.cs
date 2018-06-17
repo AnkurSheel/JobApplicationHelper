@@ -1,7 +1,5 @@
 ﻿using Autofac;
 
-using JAH.Logger;
-
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +15,6 @@ namespace JAH.Web.IntegrationTests
 
         protected override void ConfigureLogger(IServiceCollection services)
         {
-            services.AddSingleton<IJahLogger, FakeJahLogger>();
         }
     }
 }

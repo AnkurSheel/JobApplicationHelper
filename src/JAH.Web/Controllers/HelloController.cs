@@ -24,10 +24,10 @@ namespace JAH.Web.Controllers
             try
             {
                 var requestUri = new Uri(ApiUri, $"{name}");
-                HttpResponseMessage responseMessage = await Client.GetAsync(requestUri).ConfigureAwait(false);
+                var responseMessage = await Client.GetAsync(requestUri).ConfigureAwait(false);
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    string responseData = responseMessage.Content.ReadAsStringAsync().Result;
+                    var responseData = responseMessage.Content.ReadAsStringAsync().Result;
 
                     return Ok(responseData);
                 }

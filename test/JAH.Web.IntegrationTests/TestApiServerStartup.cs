@@ -3,7 +3,6 @@
 using Autofac;
 
 using JAH.Data;
-using JAH.Logger;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,7 +43,6 @@ namespace JAH.Web.IntegrationTests
 
         protected override void ConfigureLogger(IServiceCollection services)
         {
-            services.AddSingleton<IJahLogger, FakeJahLogger>();
         }
     }
 }

@@ -13,6 +13,7 @@ using JAH.Data.Entities;
 using JAH.Data.Interfaces;
 using JAH.Data.Repositories;
 using JAH.Helper;
+using JAH.Logger;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 
@@ -41,6 +42,7 @@ namespace JAH.Web.IntegrationTests
             var builder = new ContainerBuilder();
             builder.RegisterType<JobApplicationService>().As<IJobApplicationService>();
             builder.RegisterType<JobApplicationRepository>().As<IRepository<JobApplicationEntity>>();
+            builder.RegisterType<FakeJahLogger>().As<IJahLogger>().SingleInstance();
 
             _container = builder.Build();
 
@@ -138,7 +140,8 @@ namespace JAH.Web.IntegrationTests
             }
         }
 
-        private static TestWebServerStartup SetupStartup(IServiceProvider provider, Func<IHostingEnvironment, IConfiguration, TestWebServerStartup> factory)
+        private static TestWebServerStartup SetupStartup(IServiceProvider provider,
+                                                         Func<IHostingEnvironment, IConfiguration, TestWebServerStartup> factory)
         {
             var hostingEnv = provider.GetRequiredService<IHostingEnvironment>();
             var config = provider.GetRequiredService<IConfiguration>();

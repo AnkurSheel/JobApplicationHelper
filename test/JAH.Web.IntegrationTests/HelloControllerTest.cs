@@ -1,9 +1,9 @@
 using System;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace JAH.Web.IntegrationTests
 {
@@ -11,10 +11,13 @@ namespace JAH.Web.IntegrationTests
     {
         private readonly Uri _baseUri;
 
+        private readonly ITestOutputHelper _output;
+
         private readonly ClientFixture _fixture;
 
-        public HelloControllerTest(ClientFixture fixture)
+        public HelloControllerTest(ITestOutputHelper output, ClientFixture fixture)
         {
+            _output = output;
             _fixture = fixture;
             _baseUri = new Uri(_fixture.WebClient.BaseAddress, "hello/");
             _fixture.ClearAuthentication();
@@ -29,11 +32,12 @@ namespace JAH.Web.IntegrationTests
             _fixture.SetupJwtAuthentication();
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{name}")).ConfigureAwait(false);
+            var response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{name}")).ConfigureAwait(false);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            string actual = response.Content.ReadAsStringAsync().Result;
+            var actual = response.Content.ReadAsStringAsync().Result;
+            LogMessageHelper.WriteOutput(_output);
             Assert.Equal(expected, actual);
         }
 
@@ -43,9 +47,10 @@ namespace JAH.Web.IntegrationTests
             // Arrange
 
             // Act
-            HttpResponseMessage response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"name")).ConfigureAwait(false);
+            var response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"name")).ConfigureAwait(false);
 
             // Assert
+            LogMessageHelper.WriteOutput(_output);
             Assert.False(response.IsSuccessStatusCode);
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
