@@ -18,15 +18,23 @@ namespace JAH.Logger
                                        HttpContext context,
                                        Dictionary<string, object> additionalInfo = null)
         {
-            var details = GetWebFlogDetail(product, layer, activityName, context, additionalInfo);
+            var details = GetLogDetails(product, layer, activityName, context, additionalInfo);
             logger.WriteUsage(details);
         }
 
-        private static LogDetail GetWebFlogDetail(string product,
-                                                  string layer,
-                                                  string activityName,
-                                                  HttpContext context,
-                                                  Dictionary<string, object> additionalInfo)
+        public static void LogWebError(this IJahLogger logger, string product, string layer, Exception ex, HttpContext context)
+        {
+            var details = GetLogDetails(product, layer, null, context, null);
+            details.Exception = ex;
+
+            logger.WriteError(details);
+        }
+
+        private static LogDetail GetLogDetails(string product,
+                                               string layer,
+                                               string activityName,
+                                               HttpContext context,
+                                               Dictionary<string, object> additionalInfo)
         {
             var detail = new LogDetail
             {
@@ -34,16 +42,21 @@ namespace JAH.Logger
                 Layer = layer,
                 Message = activityName,
                 Hostname = Environment.MachineName,
-                CorrelationId = Activity.Current?.Id ?? context.TraceIdentifier,
+                CorrelationId = Activity.Current?.Id ?? context.TraceIdentifier
             };
 
-            foreach (var info in additionalInfo)
+            if (additionalInfo == null)
             {
-                detail.AdditionalInfo.Add(info.Key, info.Value);
+                additionalInfo = new Dictionary<string, object>();
             }
 
             GetUserData(detail, context.User);
             GetRequestData(detail, context.Request);
+            foreach (KeyValuePair<string, object> info in additionalInfo)
+            {
+                detail.AdditionalInfo.Add(info.Key, info.Value);
+            }
+
             return detail;
         }
 

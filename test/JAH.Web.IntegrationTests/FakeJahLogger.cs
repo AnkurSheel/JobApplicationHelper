@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace JAH.Web.IntegrationTests
 {
-    public class FakeJahLogger : IJahLogger, IDisposable
+    public class FakeJahLogger : JahLogger, IDisposable
     {
         private readonly StringWriter _stringWriter = new StringWriter();
 
@@ -34,23 +34,6 @@ namespace JAH.Web.IntegrationTests
             _outputHelper = value;
         }
 
-        public void WritePerf(LogDetail info)
-        {
-        }
-
-        public void WriteDiagnostics(LogDetail info)
-        {
-        }
-
-        public void WriteUsage(LogDetail info)
-        {
-            Write(info, "Usage");
-        }
-
-        public void WriteError(LogDetail info)
-        {
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -59,12 +42,12 @@ namespace JAH.Web.IntegrationTests
             }
         }
 
-        private void Write(LogDetail info, string logType)
+        protected override void Write(ILogger logger, LogDetail info, LogEventLevel logEventLevel)
         {
             var buf = _stringWriter.GetStringBuilder();
             buf.Clear();
 
-            _logger.Write(LogEventLevel.Information, "{logType}: {@LogDetail}", logType, info);
+            _logger.Write(logEventLevel, "{@LogDetail}", info);
             _outputHelper.WriteLine(_stringWriter.ToString());
         }
     }

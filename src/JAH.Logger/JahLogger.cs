@@ -76,6 +76,10 @@ namespace JAH.Logger
             }
         }
 
+        protected JahLogger()
+        {
+        }
+
         public void WritePerf(LogDetail info)
         {
             Write(_perfLogger, info, LogEventLevel.Information);
@@ -107,6 +111,12 @@ namespace JAH.Logger
             Write(_errorLogger, info, LogEventLevel.Error);
         }
 
+        protected virtual void Write(ILogger logger, LogDetail info, LogEventLevel logEventLevel)
+        {
+            object[] values = info.GetType().GetProperties().Select(property => property.GetValue(info)).ToArray();
+            logger.Write(logEventLevel, _messagetemplate, values);
+        }
+
         private static string GetMessageFromException(Exception ex)
         {
             while (true)
@@ -118,12 +128,6 @@ namespace JAH.Logger
 
                 ex = ex.InnerException;
             }
-        }
-
-        private void Write(ILogger logger, LogDetail info, LogEventLevel logEventLevel)
-        {
-            object[] values = info.GetType().GetProperties().Select(property => property.GetValue(info)).ToArray();
-            logger.Write(logEventLevel, _messagetemplate, values);
         }
 
         private ColumnOptions GetSqlColumnOptions()

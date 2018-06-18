@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using System.Diagnostics;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace JAH.Web.Controllers
@@ -6,13 +7,9 @@ namespace JAH.Web.Controllers
     [Route("error")]
     public class ErrorController : Controller
     {
-        [Route("{statusCode:int?}")]
-        public IActionResult Index(int? statusCode)
+        public IActionResult Index()
         {
-            var feature = HttpContext.Features.Get<IStatusCodeReExecuteFeature>();
-            ViewBag.StatusCode = statusCode;
-            ViewBag.OriginalPath = feature?.OriginalPath;
-            ViewBag.OriginalQueryString = feature?.OriginalQueryString;
+            ViewBag.RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
 
             return View();
         }

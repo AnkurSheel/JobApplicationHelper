@@ -4,6 +4,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
 using JAH.Logger;
+using JAH.Logger.Middleware;
 
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
@@ -45,17 +46,10 @@ namespace JAH.Web
 
         public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
         {
+            app.UseCustomExceptionHandler("JAH", "Web", "/Error");
             if (env.IsDevelopment())
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
-                app.UseBrowserLink();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
             }
 
             app.UseStaticFiles();
