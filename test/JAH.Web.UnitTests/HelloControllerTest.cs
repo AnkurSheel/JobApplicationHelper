@@ -7,6 +7,8 @@ using JAH.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 
+using Newtonsoft.Json;
+
 using NSubstitute;
 
 using Xunit;
@@ -41,20 +43,76 @@ namespace JAH.Web.UnitTests
         public async Task Greet_Name_Greeting(string name, string expected)
         {
             // Arrange
-            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(expected) };
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonConvert.SerializeObject(expected))
+            };
 
             var httpRequestMessage = new HttpRequestMessage();
             _httpMessageHandler.WhenForAnyArgs(x => x.Send(httpRequestMessage)).DoNotCallBase();
             _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
 
             // Act
-            IActionResult result = await _helloController.Greet(name).ConfigureAwait(false);
+            var result = await _helloController.Greet(name).ConfigureAwait(false);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
             var okResult = (OkObjectResult)result;
             var actual = okResult.Value as string;
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task Greet_Unauthorized_UnauthorizedResult()
+        {
+            // Arrange
+            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.Unauthorized };
+
+            var httpRequestMessage = new HttpRequestMessage();
+            _httpMessageHandler.WhenForAnyArgs(x => x.Send(httpRequestMessage)).DoNotCallBase();
+            _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            var result = await _helloController.Greet("name").ConfigureAwait(false);
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task Greet_Forbidden_ForbidResult()
+        {
+            // Arrange
+            var httpResponseMessage = new HttpResponseMessage { StatusCode = HttpStatusCode.Forbidden };
+
+            var httpRequestMessage = new HttpRequestMessage();
+            _httpMessageHandler.WhenForAnyArgs(x => x.Send(httpRequestMessage)).DoNotCallBase();
+            _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            var result = await _helloController.Greet("name").ConfigureAwait(false);
+
+            // Assert
+            Assert.IsType<ForbidResult>(result);
+        }
+
+        [Theory]
+        [InlineData(HttpStatusCode.BadRequest)]
+        public async Task Greet_FailureStatusCode_Exception(HttpStatusCode statusCode)
+        {
+            // Arrange
+            var httpResponseMessage = new HttpResponseMessage { StatusCode = statusCode };
+
+            var httpRequestMessage = new HttpRequestMessage();
+            _httpMessageHandler.WhenForAnyArgs(x => x.Send(httpRequestMessage)).DoNotCallBase();
+            _httpMessageHandler.Send(httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);
+
+            // Act
+            var ex = await Record.ExceptionAsync(async () => await _helloController.Greet("name").ConfigureAwait(false));
+
+            // Assert
+            Assert.IsType<ApiCallException>(ex);
         }
 
         protected virtual void Dispose(bool disposing)

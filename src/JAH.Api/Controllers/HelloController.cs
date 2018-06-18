@@ -3,6 +3,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Newtonsoft.Json;
+
 namespace JAH.Api.Controllers
 {
     [Route("api/[controller]")]
@@ -14,14 +16,14 @@ namespace JAH.Api.Controllers
         [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Hello", "Api", "Greet" })]
         public IActionResult Greet()
         {
-            return Ok("Hello user");
+            return Ok(JsonConvert.SerializeObject("Hello user"));
         }
 
         [HttpGet("{name}")]
         [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Hello", "Api", "Greet" })]
         public IActionResult Greet(string name)
         {
-            return Ok($"Hello {name}");
+            return Ok(JsonConvert.SerializeObject($"Hello {name}"));
         }
     }
 }

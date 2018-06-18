@@ -18,23 +18,9 @@ namespace JAH.Web.Controllers
         [HttpGet("{name}")]
         public async Task<IActionResult> Greet(string name)
         {
-            try
-            {
-                var requestUri = new Uri(ApiUri, $"{name}");
-                var responseMessage = await Client.GetAsync(requestUri).ConfigureAwait(false);
-                if (responseMessage.IsSuccessStatusCode)
-                {
-                    var responseData = responseMessage.Content.ReadAsStringAsync().Result;
-
-                    return Ok(responseData);
-                }
-
-                return new StatusCodeResult((int)responseMessage.StatusCode);
-            }
-            catch (Exception)
-            {
-                return new StatusCodeResult(501);
-            }
+            var requestUri = new Uri(ApiUri, $"{name}");
+            var result = await Execute<string>(requestUri).ConfigureAwait(false);
+            return result;
         }
     }
 }
