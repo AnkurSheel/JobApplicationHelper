@@ -1,4 +1,4 @@
-﻿using JAH.Logger;
+﻿using JAH.Logger.Attributes;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

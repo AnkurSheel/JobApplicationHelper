@@ -60,7 +60,7 @@ namespace JAH.Logger
                     {
                         userId = claim.Value;
                     }
-                    else if (claim.Type == "name")
+                    else if (claim.Type == ClaimTypes.Name)
                     {
                         userName = claim.Value;
                     }

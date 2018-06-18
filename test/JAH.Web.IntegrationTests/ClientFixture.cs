@@ -135,7 +135,7 @@ namespace JAH.Web.IntegrationTests
             using (var webHostScope = _container.BeginLifetimeScope())
             {
                 var logger = webHostScope.Resolve<FakeJahLogger>();
-                logger.OutputHelper = output;
+                logger.SetOutputHelper(output);
             }
         }
 

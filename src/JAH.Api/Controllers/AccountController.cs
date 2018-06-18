@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using JAH.Api.Filters;
 using JAH.DomainModels;
-using JAH.Logger;
+using JAH.Logger.Attributes;
 using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;

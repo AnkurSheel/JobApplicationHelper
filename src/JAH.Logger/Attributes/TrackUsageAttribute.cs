@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace JAH.Logger
+namespace JAH.Logger.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class TrackUsageAttribute : ActionFilterAttribute

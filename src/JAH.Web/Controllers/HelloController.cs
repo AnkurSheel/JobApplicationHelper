@@ -2,8 +2,6 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-using JAH.Logger;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace JAH.Web.Controllers
@@ -18,7 +16,6 @@ namespace JAH.Web.Controllers
         }
 
         [HttpGet("{name}")]
-        [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Hello", "Web", "Greet" })]
         public async Task<IActionResult> Greet(string name)
         {
             try
