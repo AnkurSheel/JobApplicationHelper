@@ -17,8 +17,6 @@ namespace JAH.Logger.Middleware
 
         private readonly ExceptionHandlerOptions _options;
 
-        private readonly Func<object, Task> _clearCacheHeadersDelegate;
-
         private readonly string _product;
 
         private readonly string _layer;
@@ -35,7 +33,6 @@ namespace JAH.Logger.Middleware
             _next = next;
             _logger = logger;
             _options = options.Value;
-            _clearCacheHeadersDelegate = ClearCacheHeaders;
             if (_options.ExceptionHandler == null)
             {
                 _options.ExceptionHandler = _next;
@@ -64,7 +61,7 @@ namespace JAH.Logger.Middleware
                 context.Features.Set<IExceptionHandlerFeature>(exceptionHandlerFeature);
                 context.Features.Set<IExceptionHandlerPathFeature>(exceptionHandlerFeature);
                 context.Response.StatusCode = 500;
-                context.Response.OnStarting(_clearCacheHeadersDelegate, context.Response);
+                context.Response.OnStarting(ClearCacheHeaders, context.Response);
 
                 await _options.ExceptionHandler(context).ConfigureAwait(false);
             }
