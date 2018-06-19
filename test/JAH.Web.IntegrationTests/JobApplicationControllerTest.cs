@@ -88,7 +88,7 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace JAH.Web.IntegrationTests
             var response = await _fixture.WebClient.GetAsync(new Uri(_baseUri, $"{_jobApplicationEntities[0].CompanyName}")).ConfigureAwait(false);
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
 
         [Fact]
@@ -199,7 +199,7 @@ namespace JAH.Web.IntegrationTests
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
 
         [Fact]

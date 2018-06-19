@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Newtonsoft.Json;
-
 namespace JAH.Web.Controllers
 {
-    public class BaseController : Controller
+    public abstract class BaseController : Controller
     {
-        public BaseController(HttpClient client)
+        protected BaseController(HttpClient client)
         {
             Client = client;
         }
@@ -20,26 +17,19 @@ namespace JAH.Web.Controllers
 
         protected HttpClient Client { get; }
 
-        protected async Task<IActionResult> Execute<T>(Uri requestUri)
+        protected IActionResult HandleFailureResponse(Uri requestUri, HttpStatusCode statusCode)
         {
-            var response = await Client.GetAsync(requestUri).ConfigureAwait(false);
-            if (response.IsSuccessStatusCode)
-            {
-                var responseData = JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result);
-                return Ok(responseData);
-            }
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (statusCode == HttpStatusCode.Unauthorized)
             {
                 return Unauthorized();
             }
 
-            if (response.StatusCode == HttpStatusCode.Forbidden)
+            if (statusCode == HttpStatusCode.Forbidden)
             {
                 return Forbid();
             }
 
-            var ex = new ApiCallException(requestUri, response.StatusCode);
+            var ex = new ApiCallException(requestUri, statusCode);
             throw ex;
         }
     }

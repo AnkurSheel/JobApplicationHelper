@@ -24,45 +24,32 @@ namespace JAH.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> ListAllApplications()
         {
-            try
+            var response = await Client.GetAsync(ApiUri).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
             {
-                HttpResponseMessage responseMessage = await Client.GetAsync(ApiUri).ConfigureAwait(false);
-                if (responseMessage.IsSuccessStatusCode)
-                {
-                    string responseData = responseMessage.Content.ReadAsStringAsync().Result;
-                    IEnumerable<JobApplication> applications =
-                        JsonConvert.DeserializeObject<IEnumerable<JobApplication>>(responseData) ?? new List<JobApplication>();
-                    return View(applications);
-                }
+                var responseData = response.Content.ReadAsStringAsync().Result;
+                IEnumerable<JobApplication> applications =
+                    JsonConvert.DeserializeObject<IEnumerable<JobApplication>>(responseData) ?? new List<JobApplication>();
+                return View(applications);
+            }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
-            }
-            catch (HttpRequestException)
-            {
-                return new StatusCodeResult(501);
-            }
+            return HandleFailureResponse(ApiUri, response.StatusCode);
         }
 
         [HttpGet]
         [Route("{companyName}")]
         public async Task<IActionResult> ShowApplication(string companyName)
         {
-            try
+            var requestUri = new Uri(ApiUri, $"{companyName}");
+            var response = await Client.GetAsync(requestUri).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
             {
-                HttpResponseMessage responseMessage = await Client.GetAsync(new Uri(ApiUri, $"{companyName}")).ConfigureAwait(false);
-                if (responseMessage.IsSuccessStatusCode)
-                {
-                    string responseData = responseMessage.Content.ReadAsStringAsync().Result;
-                    JobApplication application = JsonConvert.DeserializeObject<JobApplication>(responseData) ?? new JobApplication();
-                    return View(application);
-                }
+                var responseData = response.Content.ReadAsStringAsync().Result;
+                var application = JsonConvert.DeserializeObject<JobApplication>(responseData) ?? new JobApplication();
+                return View(application);
+            }
 
-                return new StatusCodeResult((int)responseMessage.StatusCode);
-            }
-            catch (HttpRequestException)
-            {
-                return new StatusCodeResult(501);
-            }
+            return HandleFailureResponse(requestUri, response.StatusCode);
         }
 
         [HttpGet]
@@ -76,27 +63,20 @@ namespace JAH.Web.Controllers
         [Route("addNewApplication")]
         public async Task<IActionResult> AddNewApplication(JobApplication jobApplication)
         {
-            try
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                var json = JsonConvert.SerializeObject(jobApplication);
+                var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await Client.PostAsync(ApiUri, stringContent).ConfigureAwait(false);
+                if (response.IsSuccessStatusCode)
                 {
-                    string json = JsonConvert.SerializeObject(jobApplication);
-                    var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-                    HttpResponseMessage responseMessage = await Client.PostAsync(ApiUri, stringContent).ConfigureAwait(false);
-                    if (responseMessage.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction("ListAllApplications");
-                    }
-
-                    return new StatusCodeResult((int)responseMessage.StatusCode);
+                    return RedirectToAction("ListAllApplications");
                 }
 
-                return View(jobApplication);
+                return HandleFailureResponse(ApiUri, response.StatusCode);
             }
-            catch (HttpRequestException)
-            {
-                return new StatusCodeResult(501);
-            }
+
+            return View(jobApplication);
         }
 
         [HttpPost]
@@ -105,16 +85,16 @@ namespace JAH.Web.Controllers
                                                            [Bind("Id, CompanyName, ApplicationDate, Status")]
                                                            JobApplication application)
         {
-            string json = JsonConvert.SerializeObject(application);
+            var json = JsonConvert.SerializeObject(application);
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage responseMessage =
-                await Client.PutAsync(new Uri(ApiUri, $"{application.CompanyName}"), stringContent).ConfigureAwait(false);
-            if (responseMessage.IsSuccessStatusCode)
+            var requestUri = new Uri(ApiUri, $"{application.CompanyName}");
+            var response = await Client.PutAsync(requestUri, stringContent).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
             {
                 return RedirectToAction("ListAllApplications");
             }
 
-            return new StatusCodeResult((int)responseMessage.StatusCode);
+            return HandleFailureResponse(requestUri, response.StatusCode);
         }
     }
 }
