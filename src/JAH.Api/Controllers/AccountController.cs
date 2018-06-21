@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,7 +9,6 @@ using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace JAH.Api.Controllers
 {
@@ -20,12 +18,9 @@ namespace JAH.Api.Controllers
     {
         private readonly IAccountManagerService _accountManagerService;
 
-        private readonly ILogger<AccountController> _logger;
-
-        public AccountController(IAccountManagerService accountManagerService, ILogger<AccountController> logger)
+        public AccountController(IAccountManagerService accountManagerService)
         {
             _accountManagerService = accountManagerService;
-            _logger = logger;
         }
 
         [HttpPost]
@@ -33,25 +28,16 @@ namespace JAH.Api.Controllers
         [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "Account", "Api", "Register" })]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            try
+            var result = await _accountManagerService.RegisterUser(model).ConfigureAwait(false);
+
+            if (result.Succeeded)
             {
-                var result = await _accountManagerService.RegisterUser(model).ConfigureAwait(false);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation(3, "User created a new account with password.");
-                    return Ok();
-                }
-
-                List<string> errors = result.Errors.Select(error => error.Description).ToList();
-
-                return BadRequest(errors);
+                return Ok();
             }
-            catch (Exception e)
-            {
-                _logger.LogError(LoggingEvents.Auth, e, $"Exception when trying to register");
-                return BadRequest(e);
-            }
+
+            List<string> errors = result.Errors.Select(error => error.Description).ToList();
+
+            return BadRequest(errors);
         }
     }
 }

@@ -10,7 +10,6 @@ using JAH.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 using NSubstitute;
 
@@ -41,12 +40,9 @@ namespace JAH.Api.UnitTests
 
             _httpContext.RequestServices.Returns(serviceProviderMock);
 
-            var logger = Substitute.For<ILogger<AuthController>>();
-            _authController =
-                new AuthController(_accountManagerService, logger) { ControllerContext = new ControllerContext { HttpContext = _httpContext } };
+            _authController = new AuthController(_accountManagerService) { ControllerContext = new ControllerContext { HttpContext = _httpContext } };
         }
 
-        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);

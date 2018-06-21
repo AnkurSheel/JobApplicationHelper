@@ -11,12 +11,17 @@ namespace JAH.Logger.Middleware
                                                                     string layer,
                                                                     string errorHandlingPath)
         {
-            return builder.UseMiddleware<CustomExceptionHandlerMiddleware>(product,
-                                                                           layer,
-                                                                           Options.Create(new ExceptionHandlerOptions
-                                                                           {
-                                                                               ExceptionHandlingPath = new PathString(errorHandlingPath)
-                                                                           }));
+            return builder.UseMiddleware<CustomWebExceptionHandlerMiddleware>(product,
+                                                                              layer,
+                                                                              Options.Create(new ExceptionHandlerOptions
+                                                                              {
+                                                                                  ExceptionHandlingPath = new PathString(errorHandlingPath)
+                                                                              }));
+        }
+
+        public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder builder, string product, string layer)
+        {
+            return builder.UseMiddleware<CustomApiExceptionHandlerMiddleware>(product, layer, Options.Create(new ExceptionHandlerOptions()));
         }
     }
 }

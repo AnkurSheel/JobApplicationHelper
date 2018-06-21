@@ -9,6 +9,7 @@ using JAH.Api.Extensions;
 using JAH.Data;
 using JAH.Helper;
 using JAH.Logger;
+using JAH.Logger.Middleware;
 using JAH.Services.Interfaces;
 using JAH.Services.Services;
 
@@ -46,12 +47,10 @@ namespace JAH.Api
 
         public void Configure(IApplicationBuilder app, IApplicationLifetime appLifetime, IHostingEnvironment env)
         {
+            app.UseCustomExceptionHandler("JAH", "API");
             if (env.IsDevelopment())
             {
                 TelemetryConfiguration.Active.DisableTelemetry = true;
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
-                app.UseBrowserLink();
             }
 
             ConfigureAdditionalMiddleware(app);

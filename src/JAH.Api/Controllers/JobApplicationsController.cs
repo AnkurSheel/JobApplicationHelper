@@ -9,7 +9,6 @@ using JAH.Logger.Attributes;
 using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace JAH.Api.Controllers
 {
@@ -17,13 +16,10 @@ namespace JAH.Api.Controllers
     [ValidateModel]
     public class JobApplicationsController : BaseController
     {
-        private readonly ILogger<JobApplicationsController> _logger;
-
         private readonly IJobApplicationService _service;
 
-        public JobApplicationsController(IJobApplicationService service, ILogger<JobApplicationsController> logger)
+        public JobApplicationsController(IJobApplicationService service)
         {
-            _logger = logger;
             _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
@@ -44,64 +40,34 @@ namespace JAH.Api.Controllers
         [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "JobApplications", "Api", "GetApplication" })]
         public IActionResult Get(string companyName)
         {
-            try
+            var jobApplication = _service.GetApplication(companyName);
+            if (jobApplication == null)
             {
-                var jobApplication = _service.GetApplication(companyName);
-                if (jobApplication == null)
-                {
-                    return NotFound($"Company with Name \"{companyName}\" was not found");
-                }
+                return NotFound($"Company with Name \"{companyName}\" was not found");
+            }
 
-                return Ok(jobApplication);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(LoggingEvents.JobApplications,
-                                 e,
-                                 $"Exception when trying to get application for application with Name \"{companyName}\"");
-                return BadRequest(e);
-            }
+            return Ok(jobApplication);
         }
 
         [HttpPost]
         [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "JobApplications", "Api", "CreateApplication" })]
         public async Task<IActionResult> Post([FromBody] JobApplication jobApplication)
         {
-            try
-            {
-                var createdJobApplication = await _service.AddNewApplication(jobApplication).ConfigureAwait(false);
-                return CreatedAtRoute("GetJobApplication", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(LoggingEvents.JobApplications,
-                                 e,
-                                 $"Exception when trying to create application for application with Name \"{jobApplication.CompanyName}\"");
-                return BadRequest(e);
-            }
+            var createdJobApplication = await _service.AddNewApplication(jobApplication).ConfigureAwait(false);
+            return CreatedAtRoute("GetJobApplication", new { companyName = createdJobApplication.CompanyName }, createdJobApplication);
         }
 
         [HttpPut("{companyName}")]
         [TypeFilter(typeof(TrackUsageAttribute), Arguments = new object[] { "JobApplications", "Api", "UpdateApplication" })]
         public async Task<IActionResult> Put(string companyName, [FromBody] JobApplication jobApplication)
         {
-            try
+            var oldApplication = await _service.UpdateApplication(companyName, jobApplication).ConfigureAwait(false);
+            if (oldApplication == null)
             {
-                var oldApplication = await _service.UpdateApplication(companyName, jobApplication).ConfigureAwait(false);
-                if (oldApplication == null)
-                {
-                    return NotFound($"Company with Name \"{companyName}\" was not found");
-                }
+                return NotFound($"Company with Name \"{companyName}\" was not found");
+            }
 
-                return Ok(oldApplication);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(LoggingEvents.JobApplications,
-                                 e,
-                                 $"Exception when trying to create application for application with Name \"{jobApplication.CompanyName}\"");
-                return BadRequest(e);
-            }
+            return Ok(oldApplication);
         }
     }
 }

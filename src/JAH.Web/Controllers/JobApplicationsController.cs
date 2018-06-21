@@ -33,7 +33,7 @@ namespace JAH.Web.Controllers
                 return View(applications);
             }
 
-            return HandleFailureResponse(ApiUri, response.StatusCode);
+            return await HandleFailureResponse(ApiUri, response.StatusCode, response.Content).ConfigureAwait(false);
         }
 
         [HttpGet]
@@ -49,7 +49,7 @@ namespace JAH.Web.Controllers
                 return View(application);
             }
 
-            return HandleFailureResponse(requestUri, response.StatusCode);
+            return await HandleFailureResponse(ApiUri, response.StatusCode, response.Content).ConfigureAwait(false);
         }
 
         [HttpGet]
@@ -73,7 +73,7 @@ namespace JAH.Web.Controllers
                     return RedirectToAction("ListAllApplications");
                 }
 
-                return HandleFailureResponse(ApiUri, response.StatusCode);
+                return await HandleFailureResponse(ApiUri, response.StatusCode, response.Content).ConfigureAwait(false);
             }
 
             return View(jobApplication);
@@ -94,7 +94,7 @@ namespace JAH.Web.Controllers
                 return RedirectToAction("ListAllApplications");
             }
 
-            return HandleFailureResponse(requestUri, response.StatusCode);
+            return await HandleFailureResponse(ApiUri, response.StatusCode, response.Content).ConfigureAwait(false);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 
 using JAH.DomainModels;
+using JAH.Logger;
 using JAH.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
@@ -106,7 +107,7 @@ namespace JAH.Web.UnitTests
             var httpResponseMessage = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.BadRequest,
-                Content = new StringContent(JsonConvert.SerializeObject("{Duplicate Name\": [\"Name Company 1 already exists.\"]}"))
+                Content = new StringContent(JsonConvert.SerializeObject(new CustomErrorResponse()))
             };
 
             _httpMessageHandler.Send(_httpRequestMessage).ReturnsForAnyArgs(httpResponseMessage);

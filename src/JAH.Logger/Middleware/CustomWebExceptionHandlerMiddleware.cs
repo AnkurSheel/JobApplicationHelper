@@ -9,7 +9,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace JAH.Logger.Middleware
 {
-    public sealed class CustomExceptionHandlerMiddleware
+    public sealed class CustomWebExceptionHandlerMiddleware
     {
         private readonly RequestDelegate _next;
 
@@ -21,11 +21,11 @@ namespace JAH.Logger.Middleware
 
         private readonly string _layer;
 
-        public CustomExceptionHandlerMiddleware(string product,
-                                                string layer,
-                                                RequestDelegate next,
-                                                IJahLogger logger,
-                                                IOptions<ExceptionHandlerOptions> options)
+        public CustomWebExceptionHandlerMiddleware(string product,
+                                                   string layer,
+                                                   RequestDelegate next,
+                                                   IJahLogger logger,
+                                                   IOptions<ExceptionHandlerOptions> options)
         {
             _product = product;
             _layer = layer;

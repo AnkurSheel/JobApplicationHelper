@@ -7,7 +7,6 @@ using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 using NSubstitute;
 
@@ -24,9 +23,8 @@ namespace JAH.Api.UnitTests
         public AccountApiControllerTest()
         {
             _accountManagerService = Substitute.For<IAccountManagerService>();
-            var logger = Substitute.For<ILogger<AccountController>>();
 
-            _accountController = new AccountController(_accountManagerService, logger);
+            _accountController = new AccountController(_accountManagerService);
         }
 
         /// <inheritdoc />

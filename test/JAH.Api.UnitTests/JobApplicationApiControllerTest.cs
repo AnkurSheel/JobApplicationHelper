@@ -8,7 +8,6 @@ using JAH.DomainModels;
 using JAH.Services.Interfaces;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -27,35 +26,16 @@ namespace JAH.Api.UnitTests
 
         public JobApplicationApiControllerTest()
         {
-            var logger = Substitute.For<ILogger<JobApplicationsController>>();
-
             _jobApplicationService = Substitute.For<IJobApplicationService>();
-            _jobApplicationsController = new JobApplicationsController(_jobApplicationService, logger);
+
+            _jobApplicationsController = new JobApplicationsController(_jobApplicationService);
 
             _expectedjobApplications = new EnumerableQuery<JobApplication>(new[]
-                                                                           {
-                                                                               new JobApplication
-                                                                               {
-                                                                                   CompanyName = "Company 1",
-                                                                                   ApplicationDate =
-                                                                                       new DateTime(2017, 11, 13),
-                                                                                   Status = Status.Interview
-                                                                               },
-                                                                               new JobApplication
-                                                                               {
-                                                                                   CompanyName = "Company 2",
-                                                                                   ApplicationDate =
-                                                                                       new DateTime(2017, 11, 14),
-                                                                                   Status = Status.Applied
-                                                                               },
-                                                                               new JobApplication
-                                                                               {
-                                                                                   CompanyName = "Company 3",
-                                                                                   ApplicationDate =
-                                                                                       new DateTime(2017, 11, 14),
-                                                                                   Status = Status.Offer
-                                                                               }
-                                                                           });
+            {
+                new JobApplication { CompanyName = "Company 1", ApplicationDate = new DateTime(2017, 11, 13), Status = Status.Interview },
+                new JobApplication { CompanyName = "Company 2", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Applied },
+                new JobApplication { CompanyName = "Company 3", ApplicationDate = new DateTime(2017, 11, 14), Status = Status.Offer }
+            });
         }
 
         /// <inheritdoc />
@@ -72,7 +52,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetAllApplications().Returns(_expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationsController.Get().ConfigureAwait(false);
+            var result = await _jobApplicationsController.Get().ConfigureAwait(false);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -89,7 +69,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetAllApplications().Returns(expectedjobApplications);
 
             // Act
-            IActionResult result = await _jobApplicationsController.Get().ConfigureAwait(false);
+            var result = await _jobApplicationsController.Get().ConfigureAwait(false);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -100,15 +80,15 @@ namespace JAH.Api.UnitTests
         {
             // Arrange
             var jobApplication = new JobApplication
-                                 {
-                                     CompanyName = "Company 1",
-                                     ApplicationDate = new DateTime(2017, 11, 13),
-                                     Status = Status.Interview
-                                 };
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
             _jobApplicationService.AddNewApplication(jobApplication).Returns(jobApplication);
 
             // Act
-            IActionResult result = await _jobApplicationsController.Post(jobApplication).ConfigureAwait(false);
+            var result = await _jobApplicationsController.Post(jobApplication).ConfigureAwait(false);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication).ConfigureAwait(false);
@@ -119,35 +99,36 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public async Task Post_ApplicationExists_BadRequestResult()
+        public async Task Post_ApplicationExists_Exception()
         {
             // Arrange
             var jobApplication = new JobApplication
-                                 {
-                                     CompanyName = "Company 1",
-                                     ApplicationDate = new DateTime(2017, 11, 13),
-                                     Status = Status.Interview
-                                 };
+            {
+                CompanyName = "Company 1",
+                ApplicationDate = new DateTime(2017, 11, 13),
+                Status = Status.Interview
+            };
 
             _jobApplicationService.AddNewApplication(jobApplication).Throws<ArgumentException>();
 
             // Act
-            IActionResult result = await _jobApplicationsController.Post(jobApplication).ConfigureAwait(false);
+            var ex = await Record.ExceptionAsync(async () => await _jobApplicationsController.Post(jobApplication).ConfigureAwait(false))
+                                 .ConfigureAwait(false);
 
             // Assert
             await _jobApplicationService.Received().AddNewApplication(jobApplication).ConfigureAwait(false);
-            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<ArgumentException>(ex);
         }
 
         [Fact]
         public void Get_ApplicationExists_OkObjectResultWithJobApplications()
         {
             // Arrange
-            JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
+            var expectedjobApplication = _expectedjobApplications.ToArray()[0];
             _jobApplicationService.GetApplication("Company 1").Returns(expectedjobApplication);
 
             // Act
-            IActionResult result = _jobApplicationsController.Get("Company 1");
+            var result = _jobApplicationsController.Get("Company 1");
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -163,7 +144,7 @@ namespace JAH.Api.UnitTests
             _jobApplicationService.GetApplication(companyName).Returns((JobApplication)null);
 
             // Act
-            IActionResult result = _jobApplicationsController.Get(companyName);
+            var result = _jobApplicationsController.Get(companyName);
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
@@ -172,28 +153,30 @@ namespace JAH.Api.UnitTests
         }
 
         [Fact]
-        public void Get_ServiceThrowsException_BadRequestResult()
+        public void Get_ServiceThrowsException_Exception()
         {
             // Arrange
-            _jobApplicationService.GetApplication("Company 1").Throws(new InvalidOperationException());
+            const string CompanyName = "Company 1";
+            _jobApplicationService.GetApplication(CompanyName).Throws(new InvalidOperationException());
 
             // Act
-            IActionResult result = _jobApplicationsController.Get("Company 1");
+            var ex = Record.Exception(() => _jobApplicationsController.Get(CompanyName));
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
+            _jobApplicationService.Received().GetApplication(CompanyName);
+            Assert.IsType<InvalidOperationException>(ex);
         }
 
         [Fact]
         public async Task Put_ApplicationExists_OkObjectResultWithJobApplication()
         {
             // Arrange
-            JobApplication expectedjobApplication = _expectedjobApplications.ToArray()[0];
-            string companyName = expectedjobApplication.CompanyName;
+            var expectedjobApplication = _expectedjobApplications.ToArray()[0];
+            var companyName = expectedjobApplication.CompanyName;
             _jobApplicationService.UpdateApplication(companyName, expectedjobApplication).Returns(expectedjobApplication);
 
             // Act
-            IActionResult result = await _jobApplicationsController.Put(companyName, expectedjobApplication).ConfigureAwait(false);
+            var result = await _jobApplicationsController.Put(companyName, expectedjobApplication).ConfigureAwait(false);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -205,11 +188,11 @@ namespace JAH.Api.UnitTests
         public async Task Put_ApplicationDoesNotExist_NotFoundObjectResult()
         {
             // Arrange
-            JobApplication jobApplication = _expectedjobApplications.First();
-            string companyName = jobApplication.CompanyName;
+            var jobApplication = _expectedjobApplications.First();
+            var companyName = jobApplication.CompanyName;
 
             // Act
-            IActionResult result = await _jobApplicationsController.Put(companyName, jobApplication).ConfigureAwait(false);
+            var result = await _jobApplicationsController.Put(companyName, jobApplication).ConfigureAwait(false);
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);

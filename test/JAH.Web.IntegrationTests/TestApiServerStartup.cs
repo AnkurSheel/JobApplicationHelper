@@ -9,16 +9,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Debug;
 
 namespace JAH.Web.IntegrationTests
 {
     internal class TestApiServerStartup : Api.Startup
     {
-        private static readonly LoggerFactory MyLoggerFactory =
-            new LoggerFactory(new[] { new DebugLoggerProvider((_, level) => level >= LogLevel.Information) });
-
         public TestApiServerStartup(ILifetimeScope webHostScope, IHostingEnvironment env, IConfiguration configuration)
             : base(webHostScope, env, configuration)
         {
@@ -34,10 +29,7 @@ namespace JAH.Web.IntegrationTests
         protected override void ConfigureDatabase(IServiceCollection services)
         {
             services.AddEntityFrameworkInMemoryDatabase()
-                    .AddDbContext<JobApplicationDbContext>(options => options
-                                                                      .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                                                                      .EnableSensitiveDataLogging()
-                                                                      .UseLoggerFactory(MyLoggerFactory),
+                    .AddDbContext<JobApplicationDbContext>(options => options.UseInMemoryDatabase(Guid.NewGuid().ToString()),
                                                            ServiceLifetime.Singleton);
         }
 

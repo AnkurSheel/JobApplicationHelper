@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
+using JAH.Logger;
 using JAH.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
@@ -97,12 +98,15 @@ namespace JAH.Web.UnitTests
             Assert.IsType<ForbidResult>(result);
         }
 
-        [Theory]
-        [InlineData(HttpStatusCode.BadRequest)]
-        public async Task Greet_FailureStatusCode_Exception(HttpStatusCode statusCode)
+        [Fact]
+        public async Task Greet_FailureStatusCode_Exception()
         {
             // Arrange
-            var httpResponseMessage = new HttpResponseMessage { StatusCode = statusCode };
+            var httpResponseMessage = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                Content = new StringContent(JsonConvert.SerializeObject(new CustomErrorResponse()))
+            };
 
             var httpRequestMessage = new HttpRequestMessage();
             _httpMessageHandler.WhenForAnyArgs(x => x.Send(httpRequestMessage)).DoNotCallBase();
