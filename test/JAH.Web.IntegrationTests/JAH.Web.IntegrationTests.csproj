@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.8.0" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="Serilog.Sinks.TextWriter" Version="2.1.0" />
@@ -17,6 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\JAH.Api\JAH.Api.csproj" />
+    <ProjectReference Include="..\..\src\JAH.Data\JAH.Data.csproj" />
+    <ProjectReference Include="..\..\src\JAH.Logger\JAH.Logger.csproj" />
     <ProjectReference Include="..\..\src\JAH.Web\JAH.Web.csproj" />
   </ItemGroup>
     <!--
