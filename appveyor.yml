@@ -1,13 +1,15 @@
 # common configuration for ALL branches
-version: 0.0.{build}
+version: 0.0.10.{build}
 image: Visual Studio 2017
-branches:
-  only:
-    - master
-    - develop
+# branches:
+  # only:
+    # - master
+    # - develop
 environment:
     DOTNET_CLI_TELEMETRY_OPTOUT: true
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    encrypt_secret:
+        secure: cY4C4HL7z+bxYZYTWrFvWQ==
 skip_branch_with_pr: false
 configuration:
 - Debug
@@ -17,23 +19,39 @@ clone_depth: 1
 
 init:
   - git config --global core.autocrlf input
+  - cmd : echo "APPVEYOR_BUILD_VERSION" %APPVEYOR_BUILD_VERSION%
+
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj;**\*.props'
+  version: '{APPVEYOR_BUILD_VERSION}'
+  package_version: '{APPVEYOR_BUILD_VERSION}'
+  assembly_version: '{APPVEYOR_BUILD_VERSION}'
+  file_version: '{APPVEYOR_BUILD_VERSION}'
+  informational_version: '{APPVEYOR_BUILD_VERSION}'
 
 install:
-  - cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
-  
+  - cmd: >- 
+        appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
+
+        "External Tools\secure-file" -decrypt src\JAH.Api\appsettings.Production.json.enc -secret %encrypt_secret%
+        
+  # - ps : .\resetbuildnumber.ps1  
 before_build:
-# Display .NET Core version
-  - cmd: dotnet --version
-# Display minimal restore text
-  - cmd: dotnet restore --verbosity m
-#restore nuget packages
-  - cmd: nuget restore
+- cmd: >-
+    dotnet --version
+
+    dotnet restore --verbosity m
+
+    nuget restore
 
 build:
   verbosity: minimal
   parallel: true
 
- 
+test_script:
+- cmd: dotnet vstest .\test\JAH.Data.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Data.UnitTests.dll .\test\\JAH.Services.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Services.UnitTests.dll .\test\JAH.Api.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Api.UnitTests.dll .\test\JAH.Web.UnitTests\bin\%configuration%\netcoreapp2.0\JAH.Web.UnitTests.dll .\test\JAH.Web.IntegrationTests\bin\%configuration%\netcoreapp2.0\JAH.Web.IntegrationTests.dll
+
 # here we are going to override common configuration
 for:
 
@@ -42,11 +60,33 @@ for:
   branches:
     only:
       - master
-
+      - develop
+      
+  configuration:
+    - Release
+    
+  environment:
+    ASPNETCORE_ENVIRONMENT: Production
+    
   after_build:
-    - cmd: dotnet publish JobApplicationHelper.Web\JobApplicationHelper.Web.csproj
-
+    - cmd: dotnet publish src\JAH.Web\JAH.Web.csproj -c %configuration%
+    - cmd: dotnet publish src\JAH.Api\JAH.Api.csproj -c %configuration%
+    
   artifacts:
-    - path: 'JobApplicationHelper.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+    - path: 'src\JAH.Web\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
       name: WebSite
       type: WebDeployPackage
+    - path: 'src\JAH.Api\bin\Any CPU\%configuration%\netcoreapp2.0\publish'
+      name: Api
+      type: WebDeployPackage
+  
+  deploy:
+    - provider: Environment
+      name: JAH_API_Production
+    - provider: Environment
+      name: JAH_Web_Production
+# "fall back" configuration for all other branches
+-
+  configuration:
+  - Debug
+  - Release

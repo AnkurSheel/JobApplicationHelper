@@ -1,0 +1,31 @@
+﻿@model JobApplication
+
+<form asp-action="updateApplication" class="form-horizontal">
+    <input type="hidden" asp-for="Url" />
+    <input type="hidden" asp-for="CompanyName" />
+    <input type="hidden" asp-for="ApplicationDate" />
+    <div class="form-group">
+        <label asp-for="CompanyName" class="col-md-2 control-label"></label>
+        <div class="col-md-5">
+            <input asp-for="CompanyName" class="form-control" value="@Model.CompanyName" disabled />
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="ApplicationDate" class="col-md-2 control-label"></label>
+        <div class="col-md-5">
+            <input asp-for="ApplicationDate" class="form-control" value="@Model.ApplicationDate.ToString("yyyy-MM-dd")" disabled />
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="Status" class="col-md-2 control-label"></label>
+        <div class="col-md-5">
+            <select asp-for="Status" asp-items="Html.GetEnumSelectList<Status>()" class="form-control"></select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-5">
+            <input type="submit" class="btn btn-primary" value="Update Status" />
+        </div>
+    </div>
+</form>

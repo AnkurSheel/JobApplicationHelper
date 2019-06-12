@@ -1,0 +1,182 @@
+{
+	"info": {
+		"_postman_id": "0dd33711-0ee0-d98e-47e2-c9e62f9e5275",
+		"name": "JAH",
+		"description": "This is a collection to test JAH\n\nThe following environment variables need to be set\n\nurl\nUsername\nPassword",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GetToken",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a9f86a8c-8284-4c70-a9de-198d191f7936",
+						"type": "text/javascript",
+						"exec": [
+							"var data = JSON.parse(responseBody)",
+							"postman.setEnvironmentVariable(\"token\", data.auth_token)",
+							"",
+							"tests[\"Successful request\"] = responseCode.code === 200;",
+							"tests[\"Token is Set\"] = _.has(data, \"auth_token\")",
+							"tests[\"Expiration is set\"] = _.has(data, \"expires_in\")"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"UserName\": \"{{Username}}\",\n\t\"Password\": \"{{Password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/auth/token",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetJobApplications",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "charset",
+						"value": "utf-8"
+					},
+					{
+						"key": "Authorization",
+						"value": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Name\":\"Company 6\",\"StartDate\":\"2017-11-13T00:00:00\",\"Status\":1}"
+				},
+				"url": {
+					"raw": "{{url}}JobApplications",
+					"host": [
+						"{{url}}JobApplications"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{currentAccessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "49a232e9-4e2e-40cb-a23e-8cf024f682af",
+				"type": "text/javascript",
+				"exec": [
+					"const echoPostRequest = {",
+					"    url: pm.environment.get(\"url\") + 'auth/token',",
+					"    method: 'POST',",
+					"    header: {",
+					"        'content-type': 'application/json',",
+					"    },",
+					"    body: {",
+					"        mode: 'raw',",
+					"        raw: JSON.stringify({ UserName: pm.environment.get(\"Username\"), Password: pm.environment.get(\"Password\") })",
+					"    }",
+					"};",
+					"",
+					"var getToken = true;",
+					"",
+					"if (!pm.variables.get('accessTokenExpiry') || ",
+					"    !pm.variables.get('currentAccessToken')) {",
+					"    console.log('Token or expiry date are missing')",
+					"} else if (pm.variables.get('accessTokenExpiry') <= (new Date()).getTime()) {",
+					"    console.log('Token is expired')",
+					"} else {",
+					"    getToken = false;",
+					"    console.log('Token and expiry date are all good');",
+					"}",
+					"",
+					"if (getToken === true) {",
+					"    pm.sendRequest(echoPostRequest, function (err, res) {",
+					"    console.log(err ? err : res.json());",
+					"        if (err === null) {",
+					"            console.log('Saving the token and expiry date')",
+					"            var responseJson = res.json();",
+					"            pm.variables.set('currentAccessToken', responseJson.auth_token)",
+					"            ",
+					"            var expiryDate = new Date(responseJson.expires_in);",
+					"            pm.variables.set('accessTokenExpiry', expiryDate.getTime());",
+					"            ",
+					"            console.log(responseJson.auth_token)",
+					"            console.log(expiryDate)",
+					"        }",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "1cd3eec4-9753-4985-964a-65f2e7ff173c",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "24fe6dde-481d-499f-b794-2150d8aa6afd",
+			"key": "currentAccessToken",
+			"value": "",
+			"type": "string",
+			"description": ""
+		},
+		{
+			"id": "bd763cdb-c046-48a4-8988-0fac401deb23",
+			"key": "accessTokenExpiry",
+			"value": "",
+			"type": "string",
+			"description": ""
+		}
+	]
+}
